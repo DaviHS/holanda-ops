@@ -22,6 +22,7 @@ import {
   AlertCircle,
   BarChart3,
   Building2,
+  CalendarClock,
   CalendarDays,
   ChevronsUpDown,
   ClipboardCheck,
@@ -39,26 +40,27 @@ import { NavMain, type NavItem } from "./nav-main";
 
 export const navData: NavItem[] = [
   { label: "Visão Geral", isSection: true },
-  { title: "Dashboard", icon: BarChart3, href: "dashboard" },
-  { title: "Visão Operacional", icon: Zap, href: "visao" },
+  { title: "Dashboard", icon: BarChart3, href: "/dashboard" },
+  { title: "Visão Operacional", icon: Zap, href: "/visao" },
 
   { label: "Gestão de Pessoal", isSection: true },
   {
     title: "Equipe e RH",
     icon: Users,
     children: [
-      { title: "Setores", href: "setores", icon: Building2 },
-      { title: "Funcionários", href: "employees", icon: Users },
-      { title: "Cargos", href: "cargos", icon: UserRound },
+      { title: "Setores", href: "/sectors", icon: Building2 },
+      { title: "Funcionários", href: "/employees", icon: Users },
+      { title: "Cargos", href: "/roles", icon: UserRound },
+      { title: "Turnos", href: "/shifts", icon: CalendarClock },
     ],
   },
   {
     title: "Controle de Ponto",
     icon: ClipboardCheck,
     children: [
-      { title: "Escalas", href: "escalas", icon: CalendarDays },
-      { title: "Frequência", href: "frequencia", icon: ClipboardCheck },
-      { title: "Atestados", href: "atestados", icon: FileCheck2 },
+      { title: "Escalas", href: "/escalas", icon: CalendarDays },
+      { title: "Frequência", href: "/frequencia", icon: ClipboardCheck },
+      { title: "Atestados", href: "/atestados", icon: FileCheck2 },
     ],
   },
 
@@ -67,21 +69,21 @@ export const navData: NavItem[] = [
     title: "Logística",
     icon: Package,
     children: [
-      { title: "Uniformes", href: "uniformes", icon: Shirt },
-      { title: "Estoque", href: "estoque", icon: Package },
-      { title: "Contratos", href: "contratos", icon: FileText },
+      { title: "Uniformes", href: "/uniformes", icon: Shirt },
+      { title: "Estoque", href: "/estoque", icon: Package },
+      { title: "Contratos", href: "/contratos", icon: FileText },
     ],
   },
 
   { label: "Operacional & Sistema", isSection: true },
-  { title: "Ocorrências", icon: AlertCircle, href: "ocorrencias" },
-  { title: "Relatórios", icon: BarChart3, href: "relatorios" },
+  { title: "Ocorrências", icon: AlertCircle, href: "/ocorrencias" },
+  { title: "Relatórios", icon: BarChart3, href: "/relatorios" },
   {
     title: "Configurações",
     icon: Settings2,
     children: [
-      { title: "Usuários", href: "usuarios", icon: Users },
-      { title: "Sistema", href: "configuracoes", icon: Settings2 },
+      { title: "Usuários", href: "/usuarios", icon: Users },
+      { title: "Sistema", href: "/configuracoes", icon: Settings2 },
     ],
   },
 ];
