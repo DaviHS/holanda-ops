@@ -19,6 +19,7 @@ export * from "./__metadata";
 
 // @ts-expect-error CSS side-effect import
 import '../styles/globals.css'
+import { Toaster } from '@/components/ui/toast';
 
 export default function RootLayout({
   children,
@@ -32,6 +33,8 @@ export default function RootLayout({
           <TRPCReactProvider>
             <Providers>
               {children}
+              
+              <Toaster className="z-[100]!" />
             </Providers>
           </TRPCReactProvider>
         </SessionProvider>

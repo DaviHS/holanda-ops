@@ -96,7 +96,7 @@ export default function EmployeesPage() {
       <EmployeeFormDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        employeeToEdit={selectedEmployee}
+        employee={selectedEmployee}
         sectorsList={sectors}
         onSubmit={handleSubmitForm}
       />

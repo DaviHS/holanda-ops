@@ -22,7 +22,7 @@ interface EmployeeTableProps {
 
 export function EmployeeTable({ employees, onSelectEmployee }: EmployeeTableProps) {
   return (
-    <Card>
+    <Card className="rounded-md overflow-hidden">
       <ScrollArea className="w-full">
         <CardContent className="p-0">
           <Table>

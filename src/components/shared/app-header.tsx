@@ -26,7 +26,7 @@ export function AppHeader({
   pageTitle,
 }: AppHeaderProps) {
   return (
-    <header className="z-10 my-2 mx-4 flex h-14 shrink-0 items-center gap-2 rounded-2xl border border-border/80 bg-card/95 px-4 shadow-sm backdrop-blur-md transition-all">
+    <header className="z-10 my-2 mx-4 flex h-14 shrink-0 items-center gap-2 rounded-md border border-border/80 bg-card/95 px-4 shadow-sm backdrop-blur-md transition-all">
       <SidebarTrigger className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-border bg-background text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/10 hover:text-primary [&_svg]:size-4" />
 
       <Breadcrumb>

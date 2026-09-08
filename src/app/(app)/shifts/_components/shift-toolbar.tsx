@@ -2,17 +2,17 @@ import { Plus, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-type EmployeeToolbarProps = {
+type ShiftToolbarProps = {
   search: string;
   onSearchChange: (value: string) => void;
   onNewClick: () => void;
 };
 
-export function EmployeeToolbar({
+export function ShiftToolbar({
   search,
   onSearchChange,
   onNewClick,
-}: EmployeeToolbarProps) {
+}: ShiftToolbarProps) {
   return (
     <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
       <div className="relative flex-1">
@@ -20,7 +20,7 @@ export function EmployeeToolbar({
         <Input
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Buscar por nome, CPF, setor..."
+          placeholder="Buscar turno..."
           className="pl-10 rounded-md !h-10"
         />
       </div>
