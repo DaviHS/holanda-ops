@@ -48,7 +48,7 @@ export const navData: NavItem[] = [
     icon: Users,
     children: [
       { title: "Setores", href: "setores", icon: Building2 },
-      { title: "Funcionários", href: "funcionarios", icon: Users },
+      { title: "Funcionários", href: "employees", icon: Users },
       { title: "Cargos", href: "cargos", icon: UserRound },
     ],
   },

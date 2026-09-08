@@ -7,9 +7,12 @@ import {
   jsonb,
   timestamp,
   pgEnum,
+  primaryKey,
   index,
 } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
+import { users } from './users';
+import { sectors } from './sectors';
 
 export const employeeStatusEnum = pgEnum('employee_status', ['active', 'inactive']);
 export const employeeShiftEnum = pgEnum('employee_shift', ['day', 'night']);
@@ -22,16 +25,19 @@ export type UniformStatus = {
   jacket?: boolean;
 };
 
+// 1. Tabela Principal de Funcionários
 export const employees = pgTable(
   'employees',
   {
     id: uuid('id').defaultRandom().primaryKey(),
+    userId: uuid('user_id')
+      .unique()
+      .references(() => users.id, { onDelete: 'set null' }),
     name: varchar('name', { length: 255 }).notNull(),
     cpf: varchar('cpf', { length: 14 }).notNull().unique(),
     rg: varchar('rg', { length: 20 }),
     pixKey: varchar('pix_key', { length: 255 }),
     address: text('address'),
-    sector: varchar('sector', { length: 100 }).notNull(),
     status: employeeStatusEnum('status').default('active').notNull(),
     shift: employeeShiftEnum('shift').default('day').notNull(),
     entryTime: varchar('entry_time', { length: 5 }).default('08:00').notNull(),
@@ -49,11 +55,31 @@ export const employees = pgTable(
   (table) => [
     index('idx_employees_cpf').on(table.cpf),
     index('idx_employees_name').on(table.name),
-    index('idx_employees_sector').on(table.sector),
     index('idx_employees_status').on(table.status),
+    index('idx_employees_user_id').on(table.userId),
   ]
 );
 
+// 2. Tabela Intermediária (Muitos-para-Muitos: Funcionários <-> Setores)
+export const employeeSectors = pgTable(
+  'employee_sectors',
+  {
+    employeeId: uuid('employee_id')
+      .notNull()
+      .references(() => employees.id, { onDelete: 'cascade' }),
+    sectorId: uuid('sector_id')
+      .notNull()
+      .references(() => sectors.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.employeeId, table.sectorId] }),
+    index('idx_employee_sectors_employee_id').on(table.employeeId),
+    index('idx_employee_sectors_sector_id').on(table.sectorId),
+  ]
+);
+
+// 3. Schemas de Validação Zod
 const uniformSchema = z.object({
   shirt: z.boolean(),
   pants: z.boolean(),
@@ -62,12 +88,13 @@ const uniformSchema = z.object({
 });
 
 export const insertEmployeeSchema = z.object({
+  userId: z.string().uuid().optional().nullable(),
   name: z.string().min(2, 'Nome é obrigatório'),
   cpf: z.string().min(11, 'CPF inválido'),
   rg: z.string().optional().nullable(),
   pixKey: z.string().optional().nullable(),
   address: z.string().optional().nullable(),
-  sector: z.string().min(1, 'Setor é obrigatório'),
+  sectorIds: z.array(z.string().uuid()).min(1, 'Selecione ao menos um setor'),
   status: z.enum(['active', 'inactive']).default('active'),
   shift: z.enum(['day', 'night']).default('day'),
   entryTime: z.string().default('08:00'),
