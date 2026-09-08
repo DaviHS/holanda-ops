@@ -5,8 +5,7 @@ import { api, type RouterOutputs } from '@/trpc/react';
 import { EmployeeCard } from './_components/employee-card';
 import { EmployeeTable } from './_components/employee-table';
 import { EmployeeToolbar } from './_components/employee-toolbar';
-import { EmployeeFormDialog } from './_components/employee-form-dialog';
-import { type EmployeeFormValues } from '@/validations/employee-schema';
+import { EmployeeFormDialog, type EmployeeFormValues } from './_components/employee-form-dialog';
 
 type Employee = RouterOutputs['employees']['getAll'][number];
 
@@ -16,7 +15,8 @@ export default function EmployeesPage() {
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
 
   const utils = api.useUtils();
-  const { data: employees = [], isLoading, error } = api.employees.getAll.useQuery();
+  const { data: employees = [], isLoading } = api.employees.getAll.useQuery();
+  const { data: sectors = [] } = api.sectors.getAll.useQuery();
 
   const createMutation = api.employees.create.useMutation({
     onSuccess: () => {
@@ -32,8 +32,10 @@ export default function EmployeesPage() {
     },
   });
 
-// Substitua o seu filter atual por este:
-const filtered = employees;
+  const filtered = employees.filter((emp) =>
+    emp.name.toLowerCase().includes(search.toLowerCase()) ||
+    emp.cpf.includes(search)
+  );
 
   const handleOpenCreate = () => {
     setSelectedEmployee(null);
@@ -45,18 +47,16 @@ const filtered = employees;
     setDialogOpen(true);
   };
 
-  const handleSubmitForm = (data: EmployeeFormValues) => {
+  const handleSubmitForm = async (data: EmployeeFormValues) => {
     if (selectedEmployee) {
-      updateMutation.mutate({
+      await updateMutation.mutateAsync({
         id: selectedEmployee.id,
         ...data,
       });
     } else {
-      createMutation.mutate(data);
+      await createMutation.mutateAsync(data);
     }
   };
-
-  const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
   return (
     <div className="space-y-6">
@@ -96,9 +96,9 @@ const filtered = employees;
       <EmployeeFormDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        employee={selectedEmployee}
+        employeeToEdit={selectedEmployee}
+        sectorsList={sectors}
         onSubmit={handleSubmitForm}
-        isSubmitting={isSubmitting}
       />
     </div>
   );

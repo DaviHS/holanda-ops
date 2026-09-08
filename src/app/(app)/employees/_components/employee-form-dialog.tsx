@@ -27,7 +27,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Usa z.input para lidar corretamente com campos que possuem .default() no schema Zod
 export type EmployeeFormValues = z.input<typeof insertEmployeeSchema>;
 
 interface EmployeeFormDialogProps {
@@ -35,7 +34,7 @@ interface EmployeeFormDialogProps {
   onOpenChange: (open: boolean) => void;
   employeeToEdit?: (Employee & { sectorIds?: string[] }) | null;
   sectorsList?: { id: string; name: string }[];
-  onSubmit: (data: EmployeeFormValues) => Promise<void>;
+  onSubmit: (data: EmployeeFormValues) => Promise<void> | void;
 }
 
 export function EmployeeFormDialog({
@@ -167,7 +166,6 @@ export function EmployeeFormDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4 py-2">
-          {/* Nome & CPF */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="name">Nome completo *</Label>
@@ -186,7 +184,6 @@ export function EmployeeFormDialog({
             </div>
           </div>
 
-          {/* RG & Chave Pix */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="rg">RG</Label>
@@ -199,13 +196,11 @@ export function EmployeeFormDialog({
             </div>
           </div>
 
-          {/* Endereço */}
           <div className="space-y-2">
             <Label htmlFor="address">Endereço completo</Label>
             <Input id="address" {...register("address")} placeholder="Rua, número, bairro..." />
           </div>
 
-          {/* Setores (Seleção Múltipla via Checkbox) */}
           <div className="space-y-2">
             <Label>Setores *</Label>
             <div className="grid grid-cols-2 gap-2 rounded-md border p-3">
@@ -227,7 +222,6 @@ export function EmployeeFormDialog({
             )}
           </div>
 
-          {/* Status, Turno & Tamanho da Camisa */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div className="space-y-2">
               <Label>Status</Label>
@@ -287,7 +281,6 @@ export function EmployeeFormDialog({
             </div>
           </div>
 
-          {/* Horários */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="entryTime">Entrada</Label>
@@ -300,7 +293,6 @@ export function EmployeeFormDialog({
             </div>
           </div>
 
-          {/* Calça e Sapato */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="pantsSize">Tamanho Calça</Label>
@@ -320,7 +312,6 @@ export function EmployeeFormDialog({
             </div>
           </div>
 
-          {/* Uniforme Entregue */}
           <div className="space-y-2">
             <Label>Uniforme Entregue</Label>
             <div className="grid grid-cols-2 gap-2 rounded-md border p-3">

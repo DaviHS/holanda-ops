@@ -5,6 +5,14 @@ type StatusBadgeProps = {
 };
 
 export function EmployeeStatusBadge({ status }: StatusBadgeProps) {
-  const variant = status === 'active' ? 'success' : 'destructive';
-  return <Badge variant={variant}>{status === 'active' ? 'Ativo' : 'Inativo'}</Badge>;
+  const isChecked = status === 'active';
+
+  return (
+    <Badge
+      variant={isChecked ? 'default' : 'destructive'}
+      className={isChecked ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : ''}
+    >
+      {isChecked ? 'Ativo' : 'Inativo'}
+    </Badge>
+  );
 }

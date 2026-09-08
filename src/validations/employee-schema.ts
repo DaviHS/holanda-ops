@@ -6,7 +6,7 @@ export const employeeFormSchema = z.object({
   rg: z.string().optional().nullable(),
   pixKey: z.string().optional().nullable(),
   address: z.string().optional().nullable(),
-  sector: z.string().min(1, 'Setor é obrigatório'),
+  sectorIds: z.array(z.string()).min(1, 'Selecione ao menos um setor'),
   status: z.enum(['active', 'inactive']),
   shift: z.enum(['day', 'night']),
   entryTime: z.string().min(1, 'Horário de entrada é obrigatório'),
