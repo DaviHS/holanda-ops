@@ -1,10 +1,12 @@
-import NextAuth from "next-auth";
-import { authConfig } from "@/server/auth/config";
+import { getToken } from "next-auth/jwt";
+import { NextRequest, NextResponse } from "next/server";
 
-const { auth } = NextAuth(authConfig);
-
-export default auth((req) => {
-  const isLoggedIn = !!req.auth;
+export default async function middleware(req: NextRequest) {
+  const token = await getToken({
+    req,
+    secret: process.env.AUTH_SECRET,
+  });
+  const isLoggedIn = !!token;
   const nextUrl = req.nextUrl;
 
   const isAuthRoute = nextUrl.pathname.startsWith("/sign-in") || 
@@ -17,7 +19,7 @@ export default auth((req) => {
 
   if (isAuthRoute) {
     if (isLoggedIn) {
-      return Response.redirect(new URL("/", nextUrl));
+      return NextResponse.redirect(new URL("/", nextUrl));
     }
     return;
   }
@@ -29,13 +31,13 @@ export default auth((req) => {
     }
 
     const encodedCallbackUrl = encodeURIComponent(callbackUrl);
-    return Response.redirect(
+    return NextResponse.redirect(
       new URL(`/sign-in?callbackUrl=${encodedCallbackUrl}`, nextUrl)
     );
   }
 
   return;
-});
+}
 
 export const config = {
   matcher: [

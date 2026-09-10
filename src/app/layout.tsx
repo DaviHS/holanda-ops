@@ -1,8 +1,6 @@
 import { Geist, Geist_Mono, Inter } from 'next/font/google'
 import type { Viewport } from 'next'
 import { cn } from "@/lib/utils";
-import { SessionProvider } from 'next-auth/react';
-import { TRPCReactProvider } from '@/trpc/react';
 import { Providers } from '@/components/provider/providers';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
@@ -28,15 +26,10 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className={cn("bg-background", "font-sans", inter.variable)}>
       <body className={`${geist.variable} ${geistMono.variable}`}>
-        <SessionProvider>
-          <TRPCReactProvider>
-            <Providers>
-              {children}
-              
-              <Toaster className="z-[100]!" />
-            </Providers>
-          </TRPCReactProvider>
-        </SessionProvider>
+        <Providers>
+          {children}
+          <Toaster className="z-[100]!" />
+        </Providers>
       </body>
     </html>
   );

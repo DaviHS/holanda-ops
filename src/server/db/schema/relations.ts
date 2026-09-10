@@ -1,5 +1,7 @@
 import { relations } from "drizzle-orm";
-import { employees, employeeSectors, sectors, shifts } from "./index";
+import { employees, employeeSectors } from "./employees";
+import { sectors } from "./sectors";
+import { shifts } from "./shifts";
 
 export const employeesRelations = relations(employees, ({ one, many }) => ({
   shift: one(shifts, {

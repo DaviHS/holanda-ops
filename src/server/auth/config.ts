@@ -1,4 +1,4 @@
-import type { NextAuthConfig } from "next-auth";
+import type { AuthOptions } from "next-auth";
 import "next-auth/jwt";
 
 type UserStatus = "active" | "inactive" | "suspended";
@@ -68,4 +68,4 @@ export const authConfig = {
       return session;
     },
   },
-} satisfies NextAuthConfig; 
+} satisfies AuthOptions;

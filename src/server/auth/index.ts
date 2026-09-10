@@ -1,4 +1,4 @@
-import NextAuth from "next-auth";
+import NextAuth, { getServerSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 import { z } from "zod";
@@ -13,7 +13,7 @@ const credentialsSchema = z.object({
   password: z.string().min(1),
 });
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+const authOptions = {
   ...authConfig,
   providers: [
     CredentialsProvider({
@@ -63,4 +63,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
-});
+};
+
+const nextAuthHandler = NextAuth(authOptions);
+
+export const handlers = {
+  GET: nextAuthHandler,
+  POST: nextAuthHandler,
+};
+
+export const auth = () => getServerSession(authOptions);
