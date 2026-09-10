@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 const CACHE_NAME = "holanda-ops-v1";
 
 self.addEventListener("install", (event) => {

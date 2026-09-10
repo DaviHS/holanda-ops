@@ -2,6 +2,7 @@ import { Geist, Geist_Mono, Inter } from 'next/font/google'
 import type { Viewport } from 'next'
 import { cn } from "@/lib/utils";
 import { Toaster } from '@/components/ui/toast';
+import { PwaInstallPrompt } from '@/components/pwa-install-prompt';
 import { PwaRegister } from '@/components/pwa-register';
 import { Providers } from '@/components/provider/providers';
 
@@ -31,6 +32,7 @@ export default function RootLayout({
         <Providers>
           {children}
           <Toaster className="z-[100]!" />
+          <PwaInstallPrompt />
         </Providers>
       </body>
     </html>
