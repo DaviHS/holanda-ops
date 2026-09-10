@@ -1,6 +1,8 @@
 import { Geist, Geist_Mono, Inter } from 'next/font/google'
 import type { Viewport } from 'next'
 import { cn } from "@/lib/utils";
+import { Toaster } from '@/components/ui/toast';
+import { PwaRegister } from '@/components/pwa-register';
 import { Providers } from '@/components/provider/providers';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
@@ -16,7 +18,6 @@ export const viewport: Viewport = {
 export * from "./__metadata";
 
 import '../styles/globals.css'
-import { Toaster } from '@/components/ui/toast';
 
 export default function RootLayout({
   children,
@@ -26,6 +27,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className={cn("bg-background", "font-sans", inter.variable)}>
       <body className={`${geist.variable} ${geistMono.variable}`}>
+        <PwaRegister />
         <Providers>
           {children}
           <Toaster className="z-[100]!" />
