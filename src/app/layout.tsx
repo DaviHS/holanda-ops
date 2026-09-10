@@ -17,7 +17,6 @@ export const viewport: Viewport = {
 
 export * from "./__metadata";
 
-// @ts-expect-error CSS side-effect import
 import '../styles/globals.css'
 import { Toaster } from '@/components/ui/toast';
 
