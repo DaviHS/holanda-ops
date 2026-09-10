@@ -1,6 +1,9 @@
 import { eq } from "drizzle-orm";
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
+import { 
+  createTRPCRouter,   
+  protectedProcedure,
+} from "@/server/api/trpc";
 import {
   employees,
   employeeSectors,
@@ -9,9 +12,10 @@ import {
 } from "@/server/db/schema";
 
 export const employeesRouter = createTRPCRouter({
-  getAll: publicProcedure.query(async ({ ctx }) => {
+  getAll: protectedProcedure.query(async ({ ctx }) => {
     const result = await ctx.db.query.employees.findMany({
       with: {
+        shift: true,
         sectors: {
           with: {
             sector: true,
@@ -20,19 +24,21 @@ export const employeesRouter = createTRPCRouter({
       },
     });
 
-    return result.map(({ sectors, ...emp }) => ({
+    return result.map(({ sectors, shift, ...emp }) => ({
       ...emp,
+      shift,
       sectorIds: sectors.map((s) => s.sectorId),
       sector: sectors.map((s) => s.sector.name).join(", "),
     }));
   }),
 
-  getById: publicProcedure
+  getById: protectedProcedure
     .input(z.object({ id: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
       const employee = await ctx.db.query.employees.findFirst({
         where: eq(employees.id, input.id),
         with: {
+          shift: true,
           sectors: {
             with: {
               sector: true,
@@ -43,16 +49,17 @@ export const employeesRouter = createTRPCRouter({
 
       if (!employee) return null;
 
-      const { sectors, ...emp } = employee;
+      const { sectors, shift, ...emp } = employee;
 
       return {
         ...emp,
+        shift,
         sectorIds: sectors.map((s) => s.sectorId),
         sector: sectors.map((s) => s.sector.name).join(", "),
       };
     }),
 
-  create: publicProcedure
+  create: protectedProcedure
     .input(insertEmployeeSchema)
     .mutation(async ({ ctx, input }) => {
       const { sectorIds, ...employeeData } = input;
@@ -80,7 +87,7 @@ export const employeesRouter = createTRPCRouter({
       });
     }),
 
-  update: publicProcedure
+  update: protectedProcedure
     .input(updateEmployeeSchema)
     .mutation(async ({ ctx, input }) => {
       const { id, sectorIds, ...employeeData } = input;
@@ -115,7 +122,7 @@ export const employeesRouter = createTRPCRouter({
       });
     }),
 
-  delete: publicProcedure
+  delete: protectedProcedure
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
       const [deletedEmployee] = await ctx.db

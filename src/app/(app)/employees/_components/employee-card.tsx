@@ -1,7 +1,7 @@
 import { type RouterOutputs } from '@/trpc/react';
 import { ChevronRight, User } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+import { cn, formatShiftTime } from '@/lib/utils';
 import { EmployeeStatusBadge } from './employee-status-badge';
 
 type Employee = RouterOutputs['employees']['getAll'][number];
@@ -12,6 +12,8 @@ interface EmployeeCardProps {
 }
 
 export function EmployeeCard({ employee, onSelectEmployee }: EmployeeCardProps) {
+  const shiftTimeDisplay = formatShiftTime(employee.shift);
+
   return (
     <Card 
       className="mb-3 cursor-pointer hover:bg-muted/10 transition-colors"
@@ -25,7 +27,7 @@ export function EmployeeCard({ employee, onSelectEmployee }: EmployeeCardProps) 
             </div>
             <div>
               <p className="font-semibold">{employee.name}</p>
-              <p className="text-xs text-muted-foreground">{employee.sector}</p>
+              <p className="text-xs text-muted-foreground">{employee.sector || '—'}</p>
             </div>
           </div>
           <EmployeeStatusBadge status={employee.status} />
@@ -38,19 +40,19 @@ export function EmployeeCard({ employee, onSelectEmployee }: EmployeeCardProps) 
           </div>
           <div>
             <span className="text-muted-foreground">Turno</span>
-            <p>{employee.shift === 'night' ? 'Noturno' : 'Diurno'}</p>
+            <p>{employee.shift?.name ?? '—'}</p>
           </div>
           <div>
             <span className="text-muted-foreground">Horário</span>
-            <p>{employee.entryTime} – {employee.exitTime}</p>
+            <p className="font-mono">{shiftTimeDisplay}</p>
           </div>
           <div>
             <span className="text-muted-foreground">Uniforme</span>
             <div className="mt-1 flex gap-1">
-              <span className={cn('size-2.5 rounded-full', employee.uniform.shirt ? 'bg-emerald-500' : 'bg-rose-400')} title="Camisa" />
-              <span className={cn('size-2.5 rounded-full', employee.uniform.pants ? 'bg-emerald-500' : 'bg-rose-400')} title="Calça" />
-              <span className={cn('size-2.5 rounded-full', employee.uniform.shoes ? 'bg-emerald-500' : 'bg-rose-400')} title="Calçado" />
-              {employee.uniform.jacket !== undefined && (
+              <span className={cn('size-2.5 rounded-full', employee.uniform?.shirt ? 'bg-emerald-500' : 'bg-rose-400')} title="Camisa" />
+              <span className={cn('size-2.5 rounded-full', employee.uniform?.pants ? 'bg-emerald-500' : 'bg-rose-400')} title="Calça" />
+              <span className={cn('size-2.5 rounded-full', employee.uniform?.shoes ? 'bg-emerald-500' : 'bg-rose-400')} title="Calçado" />
+              {employee.uniform?.jacket !== undefined && (
                 <span className={cn('size-2.5 rounded-full', employee.uniform.jacket ? 'bg-emerald-500' : 'bg-rose-400')} title="Jaqueta" />
               )}
             </div>

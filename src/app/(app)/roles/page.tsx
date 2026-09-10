@@ -6,12 +6,14 @@ import { RoleCard } from './_components/role-card';
 import { RoleTable } from './_components/role-table';
 import { RoleToolbar } from './_components/role-toolbar';
 import { RoleFormDialog, type RoleFormValues } from './_components/role-form-dialog';
+import { useSearchParams } from 'next/navigation';
 
 type Role = RouterOutputs['roles']['getAll'][number];
 
 export default function RolesPage() {
+  const searchParams = useSearchParams()
+  const [dialogOpen, setDialogOpen] = useState(searchParams.get('action') === 'new')
   const [search, setSearch] = useState('');
-  const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
 
   const utils = api.useUtils();

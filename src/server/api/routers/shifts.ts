@@ -1,10 +1,10 @@
 import { z } from 'zod';
-import { createTRPCRouter, protectedProcedure, publicProcedure } from '@/server/api/trpc';
+import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
 import { shifts, insertShiftSchema } from '@/server/db/schema';
 import { eq } from 'drizzle-orm';
 
 export const shiftsRouter = createTRPCRouter({
-  getAll: publicProcedure.query(async ({ ctx }) => {
+  getAll: protectedProcedure.query(async ({ ctx }) => {
     return ctx.db.query.shifts.findMany({
       orderBy: (shifts, { asc }) => [asc(shifts.name)],
     });

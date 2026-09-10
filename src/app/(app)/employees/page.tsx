@@ -6,17 +6,20 @@ import { EmployeeCard } from './_components/employee-card';
 import { EmployeeTable } from './_components/employee-table';
 import { EmployeeToolbar } from './_components/employee-toolbar';
 import { EmployeeFormDialog, type EmployeeFormValues } from './_components/employee-form-dialog';
+import { useSearchParams } from 'next/navigation';
 
 type Employee = RouterOutputs['employees']['getAll'][number];
 
 export default function EmployeesPage() {
+  const searchParams = useSearchParams();
+  const [dialogOpen, setDialogOpen] = useState(searchParams.get('action') === 'new');
   const [search, setSearch] = useState('');
-  const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
 
   const utils = api.useUtils();
   const { data: employees = [], isLoading } = api.employees.getAll.useQuery();
   const { data: sectors = [] } = api.sectors.getAll.useQuery();
+  const { data: shifts = [] } = api.shifts.getAll.useQuery();
 
   const createMutation = api.employees.create.useMutation({
     onSuccess: () => {
@@ -98,6 +101,7 @@ export default function EmployeesPage() {
         onOpenChange={setDialogOpen}
         employee={selectedEmployee}
         sectorsList={sectors}
+        shiftsList={shifts} // 2. Repasse para o diálogo
         onSubmit={handleSubmitForm}
       />
     </div>

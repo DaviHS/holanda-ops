@@ -13,9 +13,9 @@ import {
 import { z } from 'zod';
 import { users } from './users';
 import { sectors } from './sectors';
+import { shifts } from './shifts';
 
 export const employeeStatusEnum = pgEnum('employee_status', ['active', 'inactive']);
-export const employeeShiftEnum = pgEnum('employee_shift', ['day', 'night']);
 export const shirtSizeEnum = pgEnum('shirt_size', ['XS', 'S', 'M', 'L', 'XL', 'XXL']);
 
 export type UniformStatus = {
@@ -25,7 +25,6 @@ export type UniformStatus = {
   jacket?: boolean;
 };
 
-// 1. Tabela Principal de Funcionários
 export const employees = pgTable(
   'employees',
   {
@@ -33,15 +32,13 @@ export const employees = pgTable(
     userId: uuid('user_id')
       .unique()
       .references(() => users.id, { onDelete: 'set null' }),
+    shiftId: uuid('shift_id').references(() => shifts.id, { onDelete: 'set null' }),
     name: varchar('name', { length: 255 }).notNull(),
     cpf: varchar('cpf', { length: 14 }).notNull().unique(),
     rg: varchar('rg', { length: 20 }),
     pixKey: varchar('pix_key', { length: 255 }),
     address: text('address'),
     status: employeeStatusEnum('status').default('active').notNull(),
-    shift: employeeShiftEnum('shift').default('day').notNull(),
-    entryTime: varchar('entry_time', { length: 5 }).default('08:00').notNull(),
-    exitTime: varchar('exit_time', { length: 5 }).default('17:00').notNull(),
     shirtSize: shirtSizeEnum('shirt_size').default('M').notNull(),
     pantsSize: varchar('pants_size', { length: 10 }),
     shoeSize: integer('shoe_size'),
@@ -57,10 +54,10 @@ export const employees = pgTable(
     index('idx_employees_name').on(table.name),
     index('idx_employees_status').on(table.status),
     index('idx_employees_user_id').on(table.userId),
+    index('idx_employees_shift_id').on(table.shiftId),
   ]
 );
 
-// 2. Tabela Intermediária (Muitos-para-Muitos: Funcionários <-> Setores)
 export const employeeSectors = pgTable(
   'employee_sectors',
   {
@@ -79,7 +76,6 @@ export const employeeSectors = pgTable(
   ]
 );
 
-// 3. Schemas de Validação Zod
 const uniformSchema = z.object({
   shirt: z.boolean(),
   pants: z.boolean(),
@@ -89,6 +85,7 @@ const uniformSchema = z.object({
 
 export const insertEmployeeSchema = z.object({
   userId: z.string().uuid().optional().nullable(),
+  shiftId: z.string().uuid().optional().nullable(),
   name: z.string().min(2, 'Nome é obrigatório'),
   cpf: z.string().min(11, 'CPF inválido'),
   rg: z.string().optional().nullable(),
@@ -96,9 +93,6 @@ export const insertEmployeeSchema = z.object({
   address: z.string().optional().nullable(),
   sectorIds: z.array(z.string().uuid()).min(1, 'Selecione ao menos um setor'),
   status: z.enum(['active', 'inactive']).default('active'),
-  shift: z.enum(['day', 'night']).default('day'),
-  entryTime: z.string().default('08:00'),
-  exitTime: z.string().default('17:00'),
   shirtSize: z.enum(['XS', 'S', 'M', 'L', 'XL', 'XXL']).default('M'),
   pantsSize: z.string().optional().nullable(),
   shoeSize: z.number().optional().nullable(),

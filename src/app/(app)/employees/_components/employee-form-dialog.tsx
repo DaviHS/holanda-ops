@@ -49,8 +49,7 @@ import {
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { type Employee } from '@/server/db/schema/employees';
-import { insertEmployeeSchema } from '@/server/db/schema/employees';
+import { type Employee, insertEmployeeSchema } from '@/server/db/schema/employees';
 import { z } from 'zod';
 
 import { toast } from '@/components/ui/toast';
@@ -58,29 +57,30 @@ import { toast } from '@/components/ui/toast';
 export type EmployeeFormValues = z.infer<typeof insertEmployeeSchema>;
 
 type SectorItem = { id: string; name: string };
+type ShiftItem = {
+  id: string;
+  name: string;
+  startTime?: string | null;
+  endTime?: string | null;
+  description?: string | null;
+};
 
 type EmployeeFormDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  employee?: (Employee & { sectorIds?: string[] }) | null;
+  employee?: (Employee & { sectorIds?: string[]; shiftId?: string | null }) | null;
   sectorsList?: SectorItem[];
+  shiftsList?: ShiftItem[];
   onSubmit: (data: EmployeeFormValues) => void;
   isSubmitting?: boolean;
 };
-
-const WORK_SCHEDULES = [
-  { label: '08:00 - 17:00 (Comercial)', entry: '08:00', exit: '17:00' },
-  { label: '07:00 - 16:00 (Manhã)', entry: '07:00', exit: '16:00' },
-  { label: '12:00 - 21:00 (Tarde)', entry: '12:00', exit: '21:00' },
-  { label: '22:00 - 06:00 (Noturno)', entry: '22:00', exit: '06:00' },
-  { label: '12x36 (Escala)', entry: '07:00', exit: '19:00' },
-];
 
 export function EmployeeFormDialog({
   open,
   onOpenChange,
   employee,
   sectorsList = [],
+  shiftsList = [],
   onSubmit,
   isSubmitting = false,
 }: EmployeeFormDialogProps) {
@@ -103,10 +103,8 @@ export function EmployeeFormDialog({
       pixKey: '',
       address: '',
       sectorIds: [],
-      shift: 'day',
+      shiftId: null,
       status: 'active',
-      entryTime: '08:00',
-      exitTime: '17:00',
       shirtSize: 'M',
       pantsSize: '',
       shoeSize: undefined,
@@ -123,10 +121,8 @@ export function EmployeeFormDialog({
         pixKey: employee.pixKey ?? '',
         address: employee.address ?? '',
         sectorIds: employee.sectorIds ?? [],
-        shift: employee.shift,
+        shiftId: employee.shiftId ?? null,
         status: employee.status,
-        entryTime: employee.entryTime,
-        exitTime: employee.exitTime,
         shirtSize: employee.shirtSize,
         pantsSize: employee.pantsSize ?? '',
         shoeSize: employee.shoeSize ?? undefined,
@@ -145,9 +141,7 @@ export function EmployeeFormDialog({
         pixKey: '',
         address: '',
         sectorIds: [],
-        shift: 'day',
-        entryTime: '08:00',
-        exitTime: '17:00',
+        shiftId: null,
         shirtSize: 'M',
         pantsSize: '',
         shoeSize: undefined,
@@ -189,9 +183,7 @@ export function EmployeeFormDialog({
 
   const selectedSectorIds = watch('sectorIds') ?? [];
   const currentUniforms = watch('uniform');
-  const currentEntry = watch('entryTime');
-  const currentExit = watch('exitTime');
-  const currentShift = watch('shift');
+  const currentShiftId = watch('shiftId');
   const currentStatus = watch('status');
 
   const handleSelectSector = (sectorId: string) => {
@@ -213,17 +205,13 @@ export function EmployeeFormDialog({
     setValue(`uniform.${key}`, !currentUniforms?.[key]);
   };
 
-  const handleScheduleChange = (value: string | null) => {
-    if (!value) return;
-    const selected = WORK_SCHEDULES.find((s) => s.label === value);
+  const handleShiftSelect = (val: unknown) => {
+    if (typeof val !== 'string') return;
+    const selected = shiftsList.find((s) => s.id === val);
     if (selected) {
-      setValue('entryTime', selected.entry);
-      setValue('exitTime', selected.exit);
+      setValue('shiftId', selected.id, { shouldValidate: true });
     }
   };
-
-  const selectedScheduleValue =
-    WORK_SCHEDULES.find((s) => s.entry === currentEntry && s.exit === currentExit)?.label || '';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -235,7 +223,7 @@ export function EmployeeFormDialog({
         </DialogHeader>
 
         <form
-          onSubmit={handleSubmit(handleFormSubmit, (err) => console.log('Validation Errors:', err))}
+          onSubmit={handleSubmit((data) => handleFormSubmit(data as EmployeeFormValues))}
           className="flex flex-col flex-1 overflow-hidden min-h-0"
         >
           <Tabs defaultValue="pessoais" className="flex-1 flex flex-col overflow-hidden min-h-0">
@@ -257,7 +245,6 @@ export function EmployeeFormDialog({
             </div>
 
             <div className="flex-1 overflow-y-auto px-6 py-5 min-h-0">
-              {/* TAB PESSOAIS */}
               <TabsContent value="pessoais" className="mt-0 space-y-4">
                 <div className="grid grid-cols-12 gap-3">
                   <div className="col-span-12">
@@ -289,7 +276,6 @@ export function EmployeeFormDialog({
                 </div>
               </TabsContent>
 
-              {/* TAB ALOCAÇÃO */}
               <TabsContent value="operacional" className="mt-0 space-y-4">
                 <div className="p-4 rounded-md border bg-card/50 space-y-3">
                   <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -302,18 +288,21 @@ export function EmployeeFormDialog({
                       <Label className="text-xs font-medium">Buscar e Adicionar Setores</Label>
                       
                       <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
-                        <PopoverTrigger className="w-full mt-1">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            role="combobox"
-                            aria-expanded={openCombobox}
-                            className="w-full justify-between font-normal text-muted-foreground !h-10 rounded-md text-sm"
-                          >
-                            <span>Pesquisar setor...</span>
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                          </Button>
+                        <PopoverTrigger
+                          render={
+                            <Button
+                              type="button"
+                              variant="outline"
+                              role="combobox"
+                              aria-expanded={openCombobox}
+                              className="w-full justify-between font-normal text-muted-foreground !h-10 rounded-md text-sm"
+                            />
+                          }
+                        >
+                          <span>Pesquisar setor...</span>
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </PopoverTrigger>
+                        
                         <PopoverContent className="w-[340px] p-0 rounded-md" align="start">
                           <Command>
                             <CommandInput placeholder="Digite o nome do setor..." />
@@ -364,7 +353,6 @@ export function EmployeeFormDialog({
                       </Select>
                     </div>
 
-                    {/* LISTA DE SETORES SELECIONADOS */}
                     <div className="col-span-12">
                       <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">
                         Setores Selecionados
@@ -407,37 +395,25 @@ export function EmployeeFormDialog({
                     <span>Jornada de Trabalho</span>
                   </div>
                   <div className="grid grid-cols-12 gap-3">
-                    <div className="col-span-12 sm:col-span-4">
-                      <Label className="text-xs font-medium">Turno</Label>
+                    <div className="col-span-12">
+                      <Label className="text-xs font-medium">Jornada / Turno Cadastrado</Label>
                       <Select
-                        value={currentShift || 'day'}
-                        onValueChange={(val) => val && setValue('shift', val as 'day' | 'night')}
+                        value={currentShiftId ?? ''}
+                        onValueChange={handleShiftSelect}
                       >
                         <SelectTrigger className="mt-1 text-sm !h-10 w-full rounded-md">
-                          <SelectValue placeholder="Selecione">
-                            {currentShift === 'night' ? 'Noturno' : 'Diurno'}
+                          <SelectValue placeholder="Selecione o turno de trabalho">
+                            {(() => {
+                              const selected = shiftsList.find((s) => s.id === currentShiftId);
+                              if (!selected) return null;
+                              return `${selected.name}${selected.startTime && selected.endTime ? ` (${selected.startTime} - ${selected.endTime})` : ''}`;
+                            })()}
                           </SelectValue>
                         </SelectTrigger>
                         <SelectContent className="rounded-md">
-                          <SelectItem value="day" className="text-sm py-2 rounded-none">Diurno</SelectItem>
-                          <SelectItem value="night" className="text-sm py-2 rounded-none">Noturno</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="col-span-12 sm:col-span-8">
-                      <Label className="text-xs font-medium">Horário da Jornada</Label>
-                      <Select
-                        value={selectedScheduleValue}
-                        onValueChange={handleScheduleChange}
-                      >
-                        <SelectTrigger className="mt-1 text-sm !h-10 w-full rounded-md">
-                          <SelectValue placeholder="Selecione o horário da jornada" />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-md">
-                          {WORK_SCHEDULES.map((item) => (
-                            <SelectItem key={item.label} value={item.label} className="text-sm py-2 rounded-none">
-                              {item.label}
+                          {shiftsList.map((item) => (
+                            <SelectItem key={item.id} value={item.id} className="text-sm py-2 rounded-none">
+                              {item.name} {item.startTime && item.endTime ? `(${item.startTime} - ${item.endTime})` : ''}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -447,7 +423,6 @@ export function EmployeeFormDialog({
                 </div>
               </TabsContent>
 
-              {/* TAB UNIFORMES */}
               <TabsContent value="uniformes" className="mt-0 space-y-5">
                 <div>
                   <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-2">

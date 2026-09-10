@@ -6,23 +6,25 @@ import { SectorToolbar } from './_components/sector-toolbar';
 import { SectorTable } from './_components/sector-table';
 import { SectorCard } from './_components/sector-card';
 import { SectorFormDialog } from './_components/sector-form-dialog';
+import { useSearchParams } from 'next/navigation';
 
 type Sector = RouterOutputs['sectors']['getAll'][number];
 
 export default function SectorsPage() {
+  const searchParams = useSearchParams()
+  const [dialogOpen, setDialogOpen] = useState(searchParams.get('action') === 'new')
   const [searchQuery, setSearchQuery] = useState('');
-  const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedSector, setSelectedSector] = useState<Sector | null>(null);
 
   const { data: sectors = [], isLoading } = api.sectors.getAll.useQuery();
 
   const handleSelectSector = (sector: Sector) => {
     setSelectedSector(sector);
-    setIsFormOpen(true);
+    setDialogOpen(true);
   };
 
   const handleOpenChangeDialog = (open: boolean) => {
-    setIsFormOpen(open);
+    setDialogOpen(open);
     if (!open) {
       setSelectedSector(null);
     }
@@ -48,7 +50,7 @@ export default function SectorsPage() {
         onSearchChange={setSearchQuery}
         onNewSector={() => {
           setSelectedSector(null);
-          setIsFormOpen(true);
+          setDialogOpen(true);
         }}
       />
 
@@ -80,7 +82,7 @@ export default function SectorsPage() {
       )}
 
       <SectorFormDialog
-        open={isFormOpen}
+        open={dialogOpen}
         onOpenChange={handleOpenChangeDialog}
         sectorToEdit={selectedSector}
       />

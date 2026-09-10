@@ -42,52 +42,91 @@ export function EmployeeTable({ employees, onSelectEmployee }: EmployeeTableProp
               </TableRow>
             </TableHeader>
             <TableBody>
-              {employees.map((emp) => (
-                <TableRow
-                  key={emp.id}
-                  onClick={() => onSelectEmployee(emp)}
-                  className="cursor-pointer hover:bg-muted/20 transition-colors"
-                >
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <div className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary">
-                        <User className="size-4" />
+              {employees.map((emp) => {
+                const shiftTimeDisplay =
+                  emp.shift?.startTime && emp.shift?.endTime
+                    ? `${emp.shift.startTime} – ${emp.shift.endTime}`
+                    : '—';
+
+                return (
+                  <TableRow
+                    key={emp.id}
+                    onClick={() => onSelectEmployee(emp)}
+                    className="cursor-pointer hover:bg-muted/20 transition-colors"
+                  >
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+                          <User className="size-4" />
+                        </div>
+                        <div>
+                          <p className="font-semibold">{emp.name}</p>
+                          {emp.pixKey && (
+                            <p className="text-[11px] text-muted-foreground">
+                              Pix: {emp.pixKey}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-semibold">{emp.name}</p>
-                        {emp.pixKey && (
-                          <p className="text-[11px] text-muted-foreground">
-                            Pix: {emp.pixKey}
-                          </p>
+                    </TableCell>
+                    <TableCell className="font-mono text-xs">{emp.cpf}</TableCell>
+                    <TableCell className="hidden font-mono text-xs md:table-cell">
+                      {emp.rg || '—'}
+                    </TableCell>
+                    <TableCell className="max-w-[180px] truncate" title={emp.sector || '—'}>
+                      {emp.sector || '—'}
+                    </TableCell>
+                    <TableCell>{emp.shift?.name ?? '—'}</TableCell>
+                    <TableCell className="text-xs font-mono">{shiftTimeDisplay}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-1">
+                        <span
+                          className={cn(
+                            'size-3 rounded-full',
+                            emp.uniform?.shirt ? 'bg-emerald-500' : 'bg-rose-400'
+                          )}
+                          title="Camisa"
+                        />
+                        <span
+                          className={cn(
+                            'size-3 rounded-full',
+                            emp.uniform?.pants ? 'bg-emerald-500' : 'bg-rose-400'
+                          )}
+                          title="Calça"
+                        />
+                        <span
+                          className={cn(
+                            'size-3 rounded-full',
+                            emp.uniform?.shoes ? 'bg-emerald-500' : 'bg-rose-400'
+                          )}
+                          title="Calçado"
+                        />
+                        {emp.uniform?.jacket !== undefined && (
+                          <span
+                            className={cn(
+                              'size-3 rounded-full',
+                              emp.uniform.jacket ? 'bg-emerald-500' : 'bg-rose-400'
+                            )}
+                            title="Jaqueta"
+                          />
                         )}
                       </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className="font-mono text-xs">{emp.cpf}</TableCell>
-                  <TableCell className="hidden font-mono text-xs md:table-cell">{emp.rg || '—'}</TableCell>
-                  <TableCell>{emp.sector}</TableCell>
-                  <TableCell>{emp.shift === 'night' ? 'Noturno' : 'Diurno'}</TableCell>
-                  <TableCell className="text-xs">
-                    {emp.entryTime} – {emp.exitTime}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-1">
-                      <span className={cn('size-3 rounded-full', emp.uniform.shirt ? 'bg-emerald-500' : 'bg-rose-400')} title="Camisa" />
-                      <span className={cn('size-3 rounded-full', emp.uniform.pants ? 'bg-emerald-500' : 'bg-rose-400')} title="Calça" />
-                      <span className={cn('size-3 rounded-full', emp.uniform.shoes ? 'bg-emerald-500' : 'bg-rose-400')} title="Calçado" />
-                      {emp.uniform.jacket !== undefined && (
-                        <span className={cn('size-3 rounded-full', emp.uniform.jacket ? 'bg-emerald-500' : 'bg-rose-400')} title="Jaqueta" />
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="hidden text-xs lg:table-cell">{emp.shirtSize}</TableCell>
-                  <TableCell className="hidden text-xs lg:table-cell">{emp.pantsSize || '—'}</TableCell>
-                  <TableCell className="hidden text-xs lg:table-cell">{emp.shoeSize || '—'}</TableCell>
-                  <TableCell>
-                    <EmployeeStatusBadge status={emp.status} />
-                  </TableCell>
-                </TableRow>
-              ))}
+                    </TableCell>
+                    <TableCell className="hidden text-xs lg:table-cell">
+                      {emp.shirtSize}
+                    </TableCell>
+                    <TableCell className="hidden text-xs lg:table-cell">
+                      {emp.pantsSize || '—'}
+                    </TableCell>
+                    <TableCell className="hidden text-xs lg:table-cell">
+                      {emp.shoeSize || '—'}
+                    </TableCell>
+                    <TableCell>
+                      <EmployeeStatusBadge status={emp.status} />
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
               {employees.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={11} className="py-10 text-center text-muted-foreground">

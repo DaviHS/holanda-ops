@@ -1,10 +1,10 @@
 import { z } from 'zod';
-import { createTRPCRouter, protectedProcedure, publicProcedure } from '@/server/api/trpc';
+import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
 import { sectors } from '@/server/db/schema';
 import { eq } from 'drizzle-orm';
 
 export const sectorsRouter = createTRPCRouter({
-  getAll: publicProcedure.query(async ({ ctx }) => {
+  getAll: protectedProcedure.query(async ({ ctx }) => {
     return ctx.db.query.sectors.findMany({
       orderBy: (sectors, { asc }) => [asc(sectors.name)],
     });
@@ -18,7 +18,7 @@ export const sectorsRouter = createTRPCRouter({
       });
     }),
 
-  create: publicProcedure
+  create: protectedProcedure
     .input(
       z.object({
         name: z.string().min(1, 'Nome do setor é obrigatório'),
@@ -37,7 +37,7 @@ export const sectorsRouter = createTRPCRouter({
       return newSector;
     }),
 
-  update: publicProcedure
+  update: protectedProcedure
     .input(
       z.object({
         id: z.string().uuid(),

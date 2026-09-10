@@ -1,67 +1,71 @@
-import { DrizzleAdapter } from "@auth/drizzle-adapter";
-import { type DefaultSession, type NextAuthConfig } from "next-auth";
-import DiscordProvider from "next-auth/providers/discord";
+import type { NextAuthConfig } from "next-auth";
+import "next-auth/jwt";
 
-// import { db } from "@/server/db";
-// import {
-//   accounts,
-//   sessions,
-//   users,
-//   verificationTokens,
-// } from "@/server/db/schema";
+type UserStatus = "active" | "inactive" | "suspended";
 
-/**
- * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
- * object and keep type safety.
- *
- * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
- */
 declare module "next-auth" {
-  interface Session extends DefaultSession {
+  interface Session {
     user: {
       id: string;
-      // ...other properties
-      // role: UserRole;
-    } & DefaultSession["user"];
+      name?: string | null;
+      email?: string | null;
+      roleId: string;
+      status: UserStatus;
+      employeeId?: string | null;
+    };
   }
 
-  // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
-  // }
+  interface User {
+    id?: string;
+    name?: string | null;
+    email?: string | null;
+    roleId?: string;
+    status?: UserStatus;
+    employeeId?: string | null;
+  }
 }
 
-/**
- * Options for NextAuth.js used to configure adapters, providers, callbacks, etc.
- *
- * @see https://next-auth.js.org/configuration/options
- */
+declare module "next-auth/jwt" {
+  interface JWT {
+    id?: string;
+    name?: string | null;
+    email?: string | null;
+    roleId?: string;
+    status?: UserStatus;
+    employeeId?: string | null;
+  }
+}
+
 export const authConfig = {
-  providers: [
-    DiscordProvider,
-    /**
-     * ...add more providers here.
-     *
-     * Most other providers require a bit more work than the Discord provider. For example, the
-     * GitHub provider requires you to add the `refresh_token_expires_in` field to the Account
-     * model. Refer to the NextAuth.js docs for the provider you want to use. Example:
-     *
-     * @see https://next-auth.js.org/providers/github
-     */
-  ],
-  // adapter: DrizzleAdapter(db, {
-  //   usersTable: users,
-  //   accountsTable: accounts,
-  //   sessionsTable: sessions,
-  //   verificationTokensTable: verificationTokens,
-  // }),
-  callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
-    }),
+  session: {
+    strategy: "jwt",
   },
-} satisfies NextAuthConfig;
+  pages: {
+    signIn: "/sign-in",
+  },
+  providers: [],
+  callbacks: {
+    jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.name = user.name;
+        token.email = user.email;
+        token.roleId = user.roleId;
+        token.status = user.status;
+        token.employeeId = user.employeeId;
+      }
+      return token;
+    },
+    session({ session, token }) {
+      if (token && session.user) {
+        session.user.id = token.id ?? "";
+        session.user.name = token.name ?? null;
+        session.user.email = token.email ?? "";
+        session.user.roleId = token.roleId ?? "";
+        session.user.status = token.status ?? "active";
+        session.user.employeeId = token.employeeId ?? null;
+      }
+      return session;
+    },
+  },
+} satisfies NextAuthConfig; 

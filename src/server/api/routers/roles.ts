@@ -1,10 +1,10 @@
 import { z } from 'zod';
-import { createTRPCRouter, protectedProcedure, publicProcedure } from '@/server/api/trpc';
+import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
 import { roles, insertRoleSchema, updateRoleSchema } from '@/server/db/schema';
 import { eq } from 'drizzle-orm';
 
 export const rolesRouter = createTRPCRouter({
-  getAll: publicProcedure.query(async ({ ctx }) => {
+  getAll: protectedProcedure.query(async ({ ctx }) => {
     return ctx.db.query.roles.findMany({
       orderBy: (roles, { asc }) => [asc(roles.name)],
     });
