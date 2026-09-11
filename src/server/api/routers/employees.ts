@@ -3,6 +3,7 @@ import { z } from "zod";
 import { 
   createTRPCRouter,   
   protectedProcedure,
+  publicProcedure,
 } from "@/server/api/trpc";
 import {
   employees,
@@ -10,6 +11,8 @@ import {
   insertEmployeeSchema,
   updateEmployeeSchema,
 } from "@/server/db/schema";
+import { TRPCError } from "@trpc/server";
+import { publicEmployeeRegisterSchema } from "@/lib/validations/employee-register";
 
 export const employeesRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async ({ ctx }) => {
@@ -139,5 +142,58 @@ export const employeesRouter = createTRPCRouter({
         .returning();
 
       return softDeletedEmployee ?? null;
+    }),
+
+  publicRegister: publicProcedure
+    .input(publicEmployeeRegisterSchema)
+    .mutation(async ({ ctx, input }) => {
+      // 1. Validar se o CPF já está cadastrado
+      const existingEmployee = await ctx.db.query.employees.findFirst({
+        where: and(
+          eq(employees.cpf, input.cpf),
+          isNull(employees.deletedAt)
+        ),
+      });
+
+      if (existingEmployee) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Já existe um funcionário cadastrado com este CPF.",
+        });
+      }
+
+      // 2. Criar o funcionário no banco com status 'pending'
+      const [newEmployee] = await ctx.db
+        .insert(employees)
+        .values({
+          name: input.name.trim(),
+          cpf: input.cpf,
+          rg: input.rg ? input.rg.trim() : null,
+          pixKey: input.pixKey ? input.pixKey.trim() : null,
+          address: input.address ? input.address.trim() : null,
+          shirtSize: input.shirtSize,
+          pantsSize: input.pantsSize ? input.pantsSize.trim() : null,
+          shoeSize: input.shoeSize ?? null,
+          status: "pending",
+        })
+        .returning({
+          id: employees.id,
+          name: employees.name,
+          cpf: employees.cpf,
+          status: employees.status,
+          createdAt: employees.createdAt,
+        });
+
+      if (!newEmployee) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Falha ao registrar pré-cadastro do funcionário.",
+        });
+      }
+
+      return {
+        success: true,
+        employee: newEmployee,
+      };
     }),
 });
