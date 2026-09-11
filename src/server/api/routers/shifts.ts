@@ -1,11 +1,12 @@
 import { z } from 'zod';
 import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
 import { shifts, insertShiftSchema } from '@/server/db/schema';
-import { eq } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
 
 export const shiftsRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async ({ ctx }) => {
     return ctx.db.query.shifts.findMany({
+      where: isNull(shifts.deletedAt),
       orderBy: (shifts, { asc }) => [asc(shifts.name)],
     });
   }),
@@ -14,7 +15,10 @@ export const shiftsRouter = createTRPCRouter({
     .input(z.object({ id: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
       return ctx.db.query.shifts.findFirst({
-        where: eq(shifts.id, input.id),
+        where: and(
+          eq(shifts.id, input.id),
+          isNull(shifts.deletedAt)
+        ),
       });
     }),
 
@@ -50,8 +54,12 @@ export const shiftsRouter = createTRPCRouter({
           description: input.description ?? null,
           updatedAt: new Date(),
         })
-        .where(eq(shifts.id, input.id))
+        .where(and(eq(shifts.id, input.id), isNull(shifts.deletedAt)))
         .returning();
+
+      if (!updatedShift) {
+        throw new Error("Turno não encontrado ou já removido");
+      }
 
       return updatedShift;
     }),
@@ -59,11 +67,15 @@ export const shiftsRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
-      const [deletedShift] = await ctx.db
-        .delete(shifts)
-        .where(eq(shifts.id, input.id))
+      const [softDeletedShift] = await ctx.db
+        .update(shifts)
+        .set({
+          deletedAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(and(eq(shifts.id, input.id), isNull(shifts.deletedAt)))
         .returning();
 
-      return deletedShift;
+      return softDeletedShift ?? null;
     }),
 });

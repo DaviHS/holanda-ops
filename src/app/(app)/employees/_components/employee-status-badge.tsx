@@ -1,7 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 
 type StatusBadgeProps = {
-  status: 'active' | 'inactive';
+  status: 'active' | 'inactive' | 'suspended' | 'pending';
 };
 
 export function EmployeeStatusBadge({ status }: StatusBadgeProps) {

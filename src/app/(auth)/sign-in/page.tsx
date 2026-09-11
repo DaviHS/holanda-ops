@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
+import { toast } from 'sonner';
 
 const signInSchema = z.object({
   email: z.string().min(1, 'Informe seu e-mail').email('Endereço de e-mail inválido'),
@@ -41,9 +42,9 @@ export default function SignInPage() {
   });
 
   const onSubmit = async (data: SignInValues) => {
-    try {
-      setAuthError(null);
+    setAuthError(null);
 
+    const loginPromise = async () => {
       const result = await signIn('credentials', {
         email: data.email,
         password: data.password,
@@ -51,20 +52,27 @@ export default function SignInPage() {
       });
 
       if (result?.error) {
-        setAuthError('Credenciais inválidas ou conta inativa.');
-        return;
+        throw new Error('Credenciais inválidas ou conta inativa.');
       }
 
       router.push('/');
       router.refresh();
-    } catch (err) {
-      setAuthError('Ocorreu um erro ao tentar realizar o login.');
-    }
+      return result;
+    };
+
+    toast.promise(loginPromise(), {
+      loading: 'Autenticando...',
+      success: 'Login realizado com sucesso!',
+      error: (err) => {
+        const message = err?.message || 'Ocorreu um erro ao tentar realizar o login.';
+        setAuthError(message);
+        return message;
+      },
+    });
   };
 
   return (
     <div className="grid min-h-screen w-full lg:grid-cols-2">
-      {/* Painel Esquerdo (Desktop) */}
       <div className="hidden lg:flex flex-col justify-between p-12 bg-zinc-950 text-white relative overflow-hidden border-r border-zinc-800">
         <div className="absolute inset-0 bg-gradient-to-tr from-primary/15 via-transparent to-transparent opacity-60" />
         <div className="absolute -left-20 -bottom-20 size-96 rounded-full bg-primary/10 blur-3xl" />
@@ -129,7 +137,6 @@ export default function SignInPage() {
         </div>
       </div>
 
-      {/* Form de Login */}
       <div className="flex flex-col justify-between p-6 sm:p-10 lg:p-12 bg-background">
         <div className="flex items-center justify-between lg:justify-end">
           <div className="flex items-center gap-2.5 lg:hidden">

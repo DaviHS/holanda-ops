@@ -1,5 +1,6 @@
 import { pgTable, uuid, varchar, text, timestamp, time } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
+import { softDeleteAndTimestamps } from './helpers';
 
 export const shifts = pgTable('shifts', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -7,8 +8,7 @@ export const shifts = pgTable('shifts', {
   startTime: time('start_time'),
   endTime: time('end_time'),
   description: text('description'),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+  ...softDeleteAndTimestamps,
 });
 
 export const insertShiftSchema = z.object({

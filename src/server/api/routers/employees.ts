@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { 
   createTRPCRouter,   
@@ -14,6 +14,7 @@ import {
 export const employeesRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async ({ ctx }) => {
     const result = await ctx.db.query.employees.findMany({
+      where: isNull(employees.deletedAt),
       with: {
         shift: true,
         sectors: {
@@ -36,7 +37,10 @@ export const employeesRouter = createTRPCRouter({
     .input(z.object({ id: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
       const employee = await ctx.db.query.employees.findFirst({
-        where: eq(employees.id, input.id),
+        where: and(
+          eq(employees.id, input.id),
+          isNull(employees.deletedAt)
+        ),
         with: {
           shift: true,
           sectors: {
@@ -96,11 +100,11 @@ export const employeesRouter = createTRPCRouter({
         const [updatedEmployee] = await tx
           .update(employees)
           .set({ ...employeeData, updatedAt: new Date() })
-          .where(eq(employees.id, id))
+          .where(and(eq(employees.id, id), isNull(employees.deletedAt)))
           .returning();
 
         if (!updatedEmployee) {
-          throw new Error("Funcionário não encontrado para atualização");
+          throw new Error("Funcionário não encontrado ou já removido");
         }
 
         if (sectorIds) {
@@ -125,11 +129,15 @@ export const employeesRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
-      const [deletedEmployee] = await ctx.db
-        .delete(employees)
-        .where(eq(employees.id, input.id))
+      const [softDeletedEmployee] = await ctx.db
+        .update(employees)
+        .set({ 
+          deletedAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(and(eq(employees.id, input.id), isNull(employees.deletedAt)))
         .returning();
 
-      return deletedEmployee ?? null;
+      return softDeletedEmployee ?? null;
     }),
 });

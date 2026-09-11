@@ -1,11 +1,12 @@
 import { z } from 'zod';
 import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
 import { sectors } from '@/server/db/schema';
-import { eq } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
 
 export const sectorsRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async ({ ctx }) => {
     return ctx.db.query.sectors.findMany({
+      where: isNull(sectors.deletedAt),
       orderBy: (sectors, { asc }) => [asc(sectors.name)],
     });
   }),
@@ -14,7 +15,10 @@ export const sectorsRouter = createTRPCRouter({
     .input(z.object({ id: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
       return ctx.db.query.sectors.findFirst({
-        where: eq(sectors.id, input.id),
+        where: and(
+          eq(sectors.id, input.id),
+          isNull(sectors.deletedAt)
+        ),
       });
     }),
 
@@ -51,9 +55,14 @@ export const sectorsRouter = createTRPCRouter({
         .set({
           name: input.name,
           description: input.description ?? null,
+          updatedAt: new Date(),
         })
-        .where(eq(sectors.id, input.id))
+        .where(and(eq(sectors.id, input.id), isNull(sectors.deletedAt)))
         .returning();
+
+      if (!updatedSector) {
+        throw new Error("Setor não encontrado ou já removido");
+      }
 
       return updatedSector;
     }),
@@ -61,11 +70,15 @@ export const sectorsRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
-      const [deletedSector] = await ctx.db
-        .delete(sectors)
-        .where(eq(sectors.id, input.id))
+      const [softDeletedSector] = await ctx.db
+        .update(sectors)
+        .set({
+          deletedAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(and(eq(sectors.id, input.id), isNull(sectors.deletedAt)))
         .returning();
 
-      return deletedSector;
+      return softDeletedSector ?? null;
     }),
 });

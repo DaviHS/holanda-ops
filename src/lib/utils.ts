@@ -10,7 +10,6 @@ export function formatShiftTime(
 ): string {
   if (!shift?.startTime || !shift?.endTime) return '—';
   
-  // Trata casos em que a string venha vazia apenas com espaços
   const start = shift.startTime.trim();
   const end = shift.endTime.trim();
 

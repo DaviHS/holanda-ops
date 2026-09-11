@@ -3,6 +3,7 @@ import { relations } from 'drizzle-orm';
 import { z } from 'zod';
 import { roles } from './roles';
 import { employees } from './employees';
+import { softDeleteAndTimestamps } from './helpers';
 
 export const userStatusEnum = pgEnum('user_status', ['active', 'inactive', 'suspended']);
 
@@ -16,8 +17,7 @@ export const users = pgTable(
     roleId: uuid('role_id')
       .notNull()
       .references(() => roles.id, { onDelete: 'restrict' }),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+    ...softDeleteAndTimestamps,
   },
   (table) => [
     index('idx_users_email').on(table.email),

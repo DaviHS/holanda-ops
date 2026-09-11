@@ -1,12 +1,12 @@
 import { pgTable, uuid, varchar, text, timestamp } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
+import { softDeleteAndTimestamps } from './helpers';
 
 export const roles = pgTable('roles', {
   id: uuid('id').defaultRandom().primaryKey(),
   name: varchar('name', { length: 50 }).notNull().unique(),
   description: text('description'),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+  ...softDeleteAndTimestamps,
 });
 
 export const insertRoleSchema = z.object({

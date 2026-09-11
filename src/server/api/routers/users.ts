@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
-import { eq, and, ne } from 'drizzle-orm';
+import { eq, and, ne, isNull } from 'drizzle-orm';
 import { hash } from 'bcryptjs';
 import {
   createTRPCRouter,
@@ -16,6 +16,7 @@ import { employees } from '@/server/db/schema/employees';
 export const usersRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async ({ ctx }) => {
     return await ctx.db.query.users.findMany({
+      where: isNull(users.deletedAt),
       with: {
         role: true,
         employee: true,
@@ -28,7 +29,10 @@ export const usersRouter = createTRPCRouter({
     .input(z.object({ id: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
       const user = await ctx.db.query.users.findFirst({
-        where: eq(users.id, input.id),
+        where: and(
+          eq(users.id, input.id),
+          isNull(users.deletedAt)
+        ),
         with: {
           role: true,
           employee: true,
@@ -49,7 +53,10 @@ export const usersRouter = createTRPCRouter({
     .input(insertUserSchema)
     .mutation(async ({ ctx, input }) => {
       const existingEmail = await ctx.db.query.users.findFirst({
-        where: eq(users.email, input.email),
+        where: and(
+          eq(users.email, input.email),
+          isNull(users.deletedAt)
+        ),
       });
 
       if (existingEmail) {
@@ -60,7 +67,10 @@ export const usersRouter = createTRPCRouter({
       }
 
       const targetEmployee = await ctx.db.query.employees.findFirst({
-        where: eq(employees.id, input.employeeId),
+        where: and(
+          eq(employees.id, input.employeeId),
+          isNull(employees.deletedAt)
+        ),
       });
 
       if (!targetEmployee) {
@@ -111,7 +121,10 @@ export const usersRouter = createTRPCRouter({
     .input(updateUserSchema)
     .mutation(async ({ ctx, input }) => {
       const existingUser = await ctx.db.query.users.findFirst({
-        where: eq(users.id, input.id),
+        where: and(
+          eq(users.id, input.id),
+          isNull(users.deletedAt)
+        ),
       });
 
       if (!existingUser) {
@@ -123,7 +136,11 @@ export const usersRouter = createTRPCRouter({
 
       if (input.email && input.email !== existingUser.email) {
         const emailInUse = await ctx.db.query.users.findFirst({
-          where: and(eq(users.email, input.email), ne(users.id, input.id)),
+          where: and(
+            eq(users.email, input.email),
+            ne(users.id, input.id),
+            isNull(users.deletedAt)
+          ),
         });
 
         if (emailInUse) {
@@ -135,12 +152,18 @@ export const usersRouter = createTRPCRouter({
       }
 
       const currentEmployee = await ctx.db.query.employees.findFirst({
-        where: eq(employees.userId, input.id),
+        where: and(
+          eq(employees.userId, input.id),
+          isNull(employees.deletedAt)
+        ),
       });
 
       if (input.employeeId && currentEmployee?.id !== input.employeeId) {
         const newEmployee = await ctx.db.query.employees.findFirst({
-          where: eq(employees.id, input.employeeId),
+          where: and(
+            eq(employees.id, input.employeeId),
+            isNull(employees.deletedAt)
+          ),
         });
 
         if (!newEmployee) {
@@ -173,7 +196,7 @@ export const usersRouter = createTRPCRouter({
             roleId: input.roleId,
             updatedAt: new Date(),
           })
-          .where(eq(users.id, input.id))
+          .where(and(eq(users.id, input.id), isNull(users.deletedAt)))
           .returning();
 
         if (input.employeeId && currentEmployee?.id !== input.employeeId) {
@@ -198,7 +221,10 @@ export const usersRouter = createTRPCRouter({
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
       const existingUser = await ctx.db.query.users.findFirst({
-        where: eq(users.id, input.id),
+        where: and(
+          eq(users.id, input.id),
+          isNull(users.deletedAt)
+        ),
       });
 
       if (!existingUser) {
@@ -214,9 +240,16 @@ export const usersRouter = createTRPCRouter({
           .set({ userId: null, updatedAt: new Date() })
           .where(eq(employees.userId, input.id));
 
-        await tx.delete(users).where(eq(users.id, input.id));
+        const [softDeletedUser] = await tx
+          .update(users)
+          .set({
+            deletedAt: new Date(),
+            updatedAt: new Date(),
+          })
+          .where(and(eq(users.id, input.id), isNull(users.deletedAt)))
+          .returning();
 
-        return { success: true };
+        return softDeletedUser ?? null;
       });
     }),
 });

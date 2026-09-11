@@ -3,10 +3,10 @@ import { type Config } from "drizzle-kit";
 import { env } from "@/env";
 
 export default {
-  schema: "./src/server/db/schema.ts",
+  schema: "./src/server/db/schema/*",
+  out: "./drizzle",
   dialect: "postgresql",
   dbCredentials: {
     url: env.DATABASE_URL,
-  },
-  tablesFilter: ["holanda-ops_*"],
+  }
 } satisfies Config;

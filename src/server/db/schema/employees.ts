@@ -14,8 +14,15 @@ import { z } from 'zod';
 import { users } from './users';
 import { sectors } from './sectors';
 import { shifts } from './shifts';
+import { softDeleteAndTimestamps } from './helpers';
 
-export const employeeStatusEnum = pgEnum('employee_status', ['active', 'inactive']);
+export const employeeStatusEnum = pgEnum("employee_status", [
+  "pending",   // Aguardando preenchimento do onboarding/aprovação
+  "active",    // Ativo e apto para escalas
+  "suspended", // Suspenso temporariamente
+  "inactive",  // Inativo, não participa de escalas
+]);
+
 export const shirtSizeEnum = pgEnum('shirt_size', ['XS', 'S', 'M', 'L', 'XL', 'XXL']);
 
 export type UniformStatus = {
@@ -46,9 +53,9 @@ export const employees = pgTable(
       .$type<UniformStatus>()
       .default({ shirt: false, pants: false, shoes: false, jacket: false })
       .notNull(),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+    ...softDeleteAndTimestamps,
   },
+
   (table) => [
     index('idx_employees_cpf').on(table.cpf),
     index('idx_employees_name').on(table.name),
@@ -92,7 +99,7 @@ export const insertEmployeeSchema = z.object({
   pixKey: z.string().optional().nullable(),
   address: z.string().optional().nullable(),
   sectorIds: z.array(z.string().uuid()).min(1, 'Selecione ao menos um setor'),
-  status: z.enum(['active', 'inactive']).default('active'),
+  status: z.enum(['active', 'inactive', 'suspended', 'pending']).default('active'),
   shirtSize: z.enum(['XS', 'S', 'M', 'L', 'XL', 'XXL']).default('M'),
   pantsSize: z.string().optional().nullable(),
   shoeSize: z.number().optional().nullable(),

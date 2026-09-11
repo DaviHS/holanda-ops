@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { type RouterOutputs } from '@/trpc/react';
-import { ChevronRight, User } from 'lucide-react';
+import { User, Trash2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { cn, formatShiftTime } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import { EmployeeStatusBadge } from './employee-status-badge';
+import { DeleteEmployeeDialog } from './employee-delete-dialog';
 
 type Employee = RouterOutputs['employees']['getAll'][number];
 
@@ -12,62 +14,47 @@ interface EmployeeCardProps {
 }
 
 export function EmployeeCard({ employee, onSelectEmployee }: EmployeeCardProps) {
-  const shiftTimeDisplay = formatShiftTime(employee.shift);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   return (
-    <Card 
-      className="mb-3 cursor-pointer hover:bg-muted/10 transition-colors"
-      onClick={() => onSelectEmployee?.(employee)}
-    >
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-2">
-            <div className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <User className="size-4" />
+    <>
+      <Card 
+        className="mb-3 cursor-pointer hover:bg-muted/10 transition-colors relative group"
+        onClick={() => onSelectEmployee?.(employee)}
+      >
+        <CardContent className="p-4">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <div className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <User className="size-4" />
+              </div>
+              <div>
+                <p className="font-semibold">{employee.name}</p>
+                <p className="text-xs text-muted-foreground">{employee.sector || '—'}</p>
+              </div>
             </div>
-            <div>
-              <p className="font-semibold">{employee.name}</p>
-              <p className="text-xs text-muted-foreground">{employee.sector || '—'}</p>
+            
+            <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+              <EmployeeStatusBadge status={employee.status} />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-8 text-muted-foreground hover:text-destructive"
+                onClick={() => setIsDeleting(true)}
+              >
+                <Trash2 className="size-4" />
+              </Button>
             </div>
           </div>
-          <EmployeeStatusBadge status={employee.status} />
-        </div>
+        </CardContent>
+      </Card>
 
-        <div className="mt-3 grid grid-cols-2 gap-1 text-xs">
-          <div>
-            <span className="text-muted-foreground">CPF</span>
-            <p className="font-mono">{employee.cpf}</p>
-          </div>
-          <div>
-            <span className="text-muted-foreground">Turno</span>
-            <p>{employee.shift?.name ?? '—'}</p>
-          </div>
-          <div>
-            <span className="text-muted-foreground">Horário</span>
-            <p className="font-mono">{shiftTimeDisplay}</p>
-          </div>
-          <div>
-            <span className="text-muted-foreground">Uniforme</span>
-            <div className="mt-1 flex gap-1">
-              <span className={cn('size-2.5 rounded-full', employee.uniform?.shirt ? 'bg-emerald-500' : 'bg-rose-400')} title="Camisa" />
-              <span className={cn('size-2.5 rounded-full', employee.uniform?.pants ? 'bg-emerald-500' : 'bg-rose-400')} title="Calça" />
-              <span className={cn('size-2.5 rounded-full', employee.uniform?.shoes ? 'bg-emerald-500' : 'bg-rose-400')} title="Calçado" />
-              {employee.uniform?.jacket !== undefined && (
-                <span className={cn('size-2.5 rounded-full', employee.uniform.jacket ? 'bg-emerald-500' : 'bg-rose-400')} title="Jaqueta" />
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-3 flex items-center justify-between text-xs">
-          <div className="flex gap-3">
-            <span>Camisa: {employee.shirtSize}</span>
-            <span>Calça: {employee.pantsSize || '—'}</span>
-            <span>Calçado: {employee.shoeSize || '—'}</span>
-          </div>
-          <ChevronRight className="size-4 text-muted-foreground" />
-        </div>
-      </CardContent>
-    </Card>
+      <DeleteEmployeeDialog
+        employeeId={isDeleting ? employee.id : null}
+        employeeName={employee.name}
+        open={isDeleting}
+        onOpenChange={setIsDeleting}
+      />
+    </>
   );
 }
