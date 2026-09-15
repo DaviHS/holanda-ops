@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const shirtSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'] as const;
+export const shirtSizes = ['PP', 'P', 'M', 'G', 'GG', 'XGG'] as const;
 
 export const publicEmployeeRegisterSchema = z.object({
   name: z.string().min(3, 'Informe seu nome completo'),

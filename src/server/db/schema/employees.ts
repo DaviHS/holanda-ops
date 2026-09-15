@@ -17,13 +17,13 @@ import { shifts } from './shifts';
 import { softDeleteAndTimestamps } from './helpers';
 
 export const employeeStatusEnum = pgEnum("employee_status", [
-  "pending",   // Aguardando preenchimento do onboarding/aprovação
-  "active",    // Ativo e apto para escalas
-  "suspended", // Suspenso temporariamente
-  "inactive",  // Inativo, não participa de escalas
+  "pending",
+  "active",
+  "suspended",
+  "inactive",
 ]);
 
-export const shirtSizeEnum = pgEnum('shirt_size', ['XS', 'S', 'M', 'L', 'XL', 'XXL']);
+export const shirtSizeEnum = pgEnum('shirt_size', ['PP', 'P', 'M', 'G', 'GG', 'XGG']);
 
 export type UniformStatus = {
   shirt: boolean;
@@ -100,7 +100,7 @@ export const insertEmployeeSchema = z.object({
   address: z.string().optional().nullable(),
   sectorIds: z.array(z.string().uuid()).min(1, 'Selecione ao menos um setor'),
   status: z.enum(['active', 'inactive', 'suspended', 'pending']).default('active'),
-  shirtSize: z.enum(['XS', 'S', 'M', 'L', 'XL', 'XXL']).default('M'),
+  shirtSize: z.enum(['PP', 'P', 'M', 'G', 'GG', 'XGG']).default('M'),
   pantsSize: z.string().optional().nullable(),
   shoeSize: z.number().optional().nullable(),
   uniform: uniformSchema.default({ shirt: false, pants: false, shoes: false, jacket: false }),

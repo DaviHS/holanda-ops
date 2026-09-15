@@ -439,7 +439,7 @@ export function EmployeeFormDialog({
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent className="rounded-md">
-                          {['XS', 'S', 'M', 'L', 'XL', 'XXL'].map((size) => (
+                          {['PP', 'P', 'M', 'G', 'GG', 'XGG'].map((size) => (
                             <SelectItem key={size} value={size} className="text-sm py-1.5 rounded-none">{size}</SelectItem>
                           ))}
                         </SelectContent>
