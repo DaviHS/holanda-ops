@@ -5,6 +5,7 @@ export const AUDIT_AREAS: Record<string, string> = {
   role: 'Cargos',
   user: 'Usuários',
   access: 'Permissões',
+  auth: 'Acesso',
 };
 
 const ACTIONS: Record<string, string> = {
@@ -27,6 +28,9 @@ const ACTIONS: Record<string, string> = {
   'user.create': 'Criou usuário',
   'user.update': 'Editou usuário',
   'user.delete': 'Removeu usuário',
+
+  'auth.requestPasswordReset': 'Pediu redefinição de senha',
+  'auth.confirmPasswordReset': 'Redefiniu a própria senha',
 
   'access.setRolePermissions': 'Alterou as permissões de um cargo',
 };

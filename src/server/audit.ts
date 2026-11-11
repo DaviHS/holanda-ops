@@ -6,6 +6,8 @@ export const AUDIT_RETENTION_MONTHS = 24;
 const PURGE_CHANCE = 0.02;
 
 const SECRET_KEY = /password|senha|token|secret|hash/i;
+/** Dados pessoais: não ficam guardados no histórico. */
+const PERSONAL_KEY = /^(cpf|rg|pixKey|address)$/i;
 const MAX_STRING = 200;
 const MAX_ITEMS = 20;
 const MAX_DEPTH = 3;
@@ -24,9 +26,10 @@ export function sanitizeAuditInput(value: unknown, depth = 0): unknown {
   if (typeof value === 'object') {
     const out: Record<string, unknown> = {};
     for (const [key, item] of Object.entries(value).slice(0, MAX_ITEMS)) {
-      out[key] = SECRET_KEY.test(key)
-        ? '***'
-        : sanitizeAuditInput(item, depth + 1);
+      out[key] =
+        SECRET_KEY.test(key) || PERSONAL_KEY.test(key)
+          ? '***'
+          : sanitizeAuditInput(item, depth + 1);
     }
     return out;
   }
