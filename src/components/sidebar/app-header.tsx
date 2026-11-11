@@ -27,7 +27,7 @@ export function AppHeader({
   return (
     <header className="border-border/80 bg-card/95 z-10 mx-4 my-2 flex h-14 shrink-0 items-center gap-2 rounded-md border px-4 shadow-sm backdrop-blur-md transition-all">
       <SidebarTrigger className="border-border bg-background text-muted-foreground hover:border-primary/50 hover:bg-primary/10 hover:text-primary flex size-9 shrink-0 items-center justify-center rounded-md border transition-colors [&_svg]:size-4" />
-      <Separator orientation="vertical" className="mx-1 h-5! self-center" />
+      <Separator orientation="vertical" className="mx-1 h-5! self-center!" />
 
       <Breadcrumb>
         <BreadcrumbList>
