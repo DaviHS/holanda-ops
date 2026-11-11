@@ -3,8 +3,7 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { api } from '@/trpc/react';
-import { type Sector } from '@/server/db/schema/sectors';
+import { type RouterOutputs } from '@/trpc/react';
 import { sectorSchema, type SectorInput } from '@/validators/sector';
 import {
   Dialog,
@@ -18,24 +17,32 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Loader2, Building2 } from 'lucide-react';
-import { toast } from 'sonner';
+
+type Sector = RouterOutputs['sector']['list'][number];
+
+export type SectorFormValues = SectorInput;
 
 interface SectorFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  sectorToEdit?: Sector | null;
+  editing?: Sector | null;
+  onSubmit: (data: SectorFormValues) => Promise<void>;
 }
 
-export function SectorFormDialog({ open, onOpenChange, sectorToEdit }: SectorFormDialogProps) {
-  const utils = api.useUtils();
-  const isEditing = !!sectorToEdit;
+export function SectorFormDialog({
+  open,
+  onOpenChange,
+  editing,
+  onSubmit,
+}: SectorFormDialogProps) {
+  const isEditing = !!editing;
 
   const {
     register,
     handleSubmit,
     reset,
-    formState: { errors },
-  } = useForm<SectorInput>({
+    formState: { errors, isSubmitting },
+  } = useForm<SectorFormValues>({
     resolver: zodResolver(sectorSchema),
     defaultValues: {
       name: '',
@@ -44,10 +51,10 @@ export function SectorFormDialog({ open, onOpenChange, sectorToEdit }: SectorFor
   });
 
   useEffect(() => {
-    if (sectorToEdit) {
+    if (editing) {
       reset({
-        name: sectorToEdit.name,
-        description: sectorToEdit.description ?? '',
+        name: editing.name,
+        description: editing.description ?? '',
       });
     } else {
       reset({
@@ -55,39 +62,22 @@ export function SectorFormDialog({ open, onOpenChange, sectorToEdit }: SectorFor
         description: '',
       });
     }
-  }, [sectorToEdit, reset, open]);
+  }, [editing, reset, open]);
 
-  const createMutation = api.sector.create.useMutation({
-    onSuccess: () => utils.sector.list.invalidate(),
-  });
-
-  const updateMutation = api.sector.update.useMutation({
-    onSuccess: () => utils.sector.list.invalidate(),
-  });
-
-  const isLoading = createMutation.isPending || updateMutation.isPending;
-
-  const handleFormSubmit = (data: SectorInput) => {
+  const handleFormSubmit = async (data: SectorFormValues) => {
     const payload = {
       ...data,
       description: data.description || null,
     };
 
-    const actionPromise = isEditing
-      ? updateMutation.mutateAsync({ id: sectorToEdit.id, ...payload })
-      : createMutation.mutateAsync(payload);
+    const actionPromise = onSubmit(payload);
 
-    void toast.promise(actionPromise, {
-      loading: isEditing ? 'Atualizando setor...' : 'Criando setor...',
-      success: () => {
-        onOpenChange(false);
-        return isEditing ? 'Setor atualizado com sucesso!' : 'Setor criado com sucesso!';
-      },
-      error: (err: { message?: string }) => {
-        const message = err.message || 'Tente novamente.';
-        return `Erro ao ${isEditing ? 'atualizar' : 'criar'} setor: ${message}`;
-      },
-    });
+    try {
+      await actionPromise;
+      onOpenChange(false);
+    } catch {
+      // o aviso de erro já é exibido pelo toast da mutation
+    }
   };
 
   return (
@@ -138,13 +128,13 @@ export function SectorFormDialog({ open, onOpenChange, sectorToEdit }: SectorFor
               type="button"
               variant="ghost"
               onClick={() => onOpenChange(false)}
-              disabled={isLoading}
+              disabled={isSubmitting}
               className="rounded-md hover:bg-destructive/10 hover:text-destructive transition-colors"
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={isLoading} className="rounded-md">
-              {isLoading && <Loader2 className="mr-2 size-4 animate-spin" />}
+            <Button type="submit" disabled={isSubmitting} className="rounded-md">
+              {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}
               {isEditing ? 'Salvar Alterações' : 'Criar Setor'}
             </Button>
           </DialogFooter>

@@ -57,7 +57,7 @@ export function PwaInstallPrompt() {
   };
 
   return (
-    <aside className="fixed inset-x-4 bottom-4 z-50 flex items-center gap-3 rounded-lg border bg-background p-3 shadow-lg md:left-auto md:max-w-sm">
+    <aside className="fixed inset-x-4 bottom-4 z-50 flex items-center gap-3 rounded-md border bg-background p-3 shadow-lg md:left-auto md:max-w-sm">
       <div className="min-w-0 flex-1">
         <p className="font-medium">Instale o Holanda OPS</p>
         <p className="text-sm text-muted-foreground">Acesse mais rápido pelo seu dispositivo.</p>

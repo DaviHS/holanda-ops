@@ -17,7 +17,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Loader2, Clock } from 'lucide-react';
-import { toast } from 'sonner';
 
 type Shift = RouterOutputs['shift']['list'][number];
 
@@ -26,17 +25,17 @@ export type ShiftFormValues = ShiftInput;
 interface ShiftFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  shift?: Shift | null;
+  editing?: Shift | null;
   onSubmit: (data: ShiftFormValues) => Promise<void>;
 }
 
 export function ShiftFormDialog({
   open,
   onOpenChange,
-  shift,
+  editing,
   onSubmit,
 }: ShiftFormDialogProps) {
-  const isEditing = !!shift;
+  const isEditing = !!editing;
 
   const {
     register,
@@ -54,12 +53,12 @@ export function ShiftFormDialog({
   });
 
   useEffect(() => {
-    if (shift) {
+    if (editing) {
       reset({
-        name: shift.name,
-        startTime: shift.startTime,
-        endTime: shift.endTime,
-        description: shift.description ?? '',
+        name: editing.name,
+        startTime: editing.startTime,
+        endTime: editing.endTime,
+        description: editing.description ?? '',
       });
     } else {
       reset({
@@ -69,9 +68,9 @@ export function ShiftFormDialog({
         description: '',
       });
     }
-  }, [shift, reset, open]);
+  }, [editing, reset, open]);
 
-  const handleFormSubmit = (data: ShiftFormValues) => {
+  const handleFormSubmit = async (data: ShiftFormValues) => {
     const payload = {
       ...data,
       description: data.description || null,
@@ -79,17 +78,12 @@ export function ShiftFormDialog({
 
     const actionPromise = onSubmit(payload);
 
-    void toast.promise(actionPromise, {
-      loading: isEditing ? 'Atualizando turno...' : 'Criando turno...',
-      success: () => {
-        onOpenChange(false);
-        return isEditing ? 'Turno atualizado com sucesso!' : 'Turno criado com sucesso!';
-      },
-      error: (err: { message?: string }) => {
-        const message = err.message || 'Tente novamente.';
-        return `Erro ao ${isEditing ? 'atualizar' : 'criar'} turno: ${message}`;
-      },
-    });
+    try {
+      await actionPromise;
+      onOpenChange(false);
+    } catch {
+      // o aviso de erro já é exibido pelo toast da mutation
+    }
   };
 
   return (

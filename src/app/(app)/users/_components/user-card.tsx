@@ -1,22 +1,20 @@
 'use client';
 
-import { useState } from 'react';
 import { type RouterOutputs } from '@/trpc/react';
 import { ChevronRight, UserCheck, Trash2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { DeleteUserDialog } from './user-delete-dialog';
 
 type User = RouterOutputs['user']['list'][number];
 
 interface UserCardProps {
   user: User;
-  onSelectUser?: (user: User) => void;
+  onEdit?: (user: User) => void;
+  onDelete?: (user: User) => void;
 }
 
-export function UserCard({ user, onSelectUser }: UserCardProps) {
-  const [isDeleting, setIsDeleting] = useState(false);
+export function UserCard({ user, onEdit, onDelete }: UserCardProps) {
 
   const displayName = user.employee?.name ?? user.email.split('@')[0] ?? 'Usuário';
   const roleName = user.role?.name ?? 'Sem Perfil';
@@ -25,7 +23,7 @@ export function UserCard({ user, onSelectUser }: UserCardProps) {
     <>
       <Card 
         className="mb-3 cursor-pointer hover:bg-muted/10 transition-colors relative group"
-        onClick={() => onSelectUser?.(user)}
+        onClick={() => onEdit?.(user)}
       >
         <CardContent className="p-4">
           <div className="flex items-center justify-between gap-3">
@@ -55,27 +53,22 @@ export function UserCard({ user, onSelectUser }: UserCardProps) {
             </div>
             
             <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-              <Button
+              {onDelete && (
+                <Button
                 type="button"
                 variant="ghost"
                 size="icon"
                 className="size-8 text-muted-foreground hover:text-destructive"
-                onClick={() => setIsDeleting(true)}
+                onClick={() => onDelete(user)}
               >
                 <Trash2 className="size-4" />
               </Button>
+              )}
               <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
             </div>
           </div>
         </CardContent>
       </Card>
-
-      <DeleteUserDialog
-        userId={isDeleting ? user.id : null}
-        userName={displayName}
-        open={isDeleting}
-        onOpenChange={setIsDeleting}
-      />
     </>
   );
 }

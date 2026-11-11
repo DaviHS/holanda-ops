@@ -78,7 +78,7 @@ export default function SignInPage() {
         <div className="absolute -left-20 -bottom-20 size-96 rounded-full bg-primary/10 blur-3xl" />
 
         <div className="relative z-10 flex items-center gap-3">
-          <div className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-zinc-800 shadow-lg shadow-primary/10">
+          <div className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-md border border-zinc-800 shadow-lg shadow-primary/10">
             <Image
               src="/android-chrome-192x192.png"
               alt="Logo Holanda Ops"
@@ -140,7 +140,7 @@ export default function SignInPage() {
       <div className="flex flex-col justify-between p-6 sm:p-10 lg:p-12 bg-background">
         <div className="flex items-center justify-between lg:justify-end">
           <div className="flex items-center gap-2.5 lg:hidden">
-            <div className="relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border shadow-xs">
+            <div className="relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border shadow-xs">
               <Image
                 src="/android-chrome-192x192.png"
                 alt="Logo Holanda Ops"

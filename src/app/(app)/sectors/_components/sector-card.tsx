@@ -1,27 +1,25 @@
 'use client';
 
-import { useState } from 'react';
 import { type RouterOutputs } from '@/trpc/react';
 import { Building2, ChevronRight, Trash2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { DeleteSectorDialog } from './sector-delete-dialog';
 
 type Sector = RouterOutputs['sector']['list'][number];
 
 interface SectorCardProps {
   sector: Sector;
-  onSelectSector?: (sector: Sector) => void;
+  onEdit?: (sector: Sector) => void;
+  onDelete?: (sector: Sector) => void;
 }
 
-export function SectorCard({ sector, onSelectSector }: SectorCardProps) {
-  const [isDeleting, setIsDeleting] = useState(false);
+export function SectorCard({ sector, onEdit, onDelete }: SectorCardProps) {
 
   return (
     <>
       <Card 
         className="mb-3 cursor-pointer hover:bg-muted/10 transition-colors relative group"
-        onClick={() => onSelectSector?.(sector)}
+        onClick={() => onEdit?.(sector)}
       >
         <CardContent className="p-4">
           <div className="flex items-center justify-between gap-3">
@@ -40,27 +38,22 @@ export function SectorCard({ sector, onSelectSector }: SectorCardProps) {
             </div>
             
             <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-              <Button
+              {onDelete && (
+                <Button
                 type="button"
                 variant="ghost"
                 size="icon"
                 className="size-8 text-muted-foreground hover:text-destructive"
-                onClick={() => setIsDeleting(true)}
+                onClick={() => onDelete(sector)}
               >
                 <Trash2 className="size-4" />
               </Button>
+              )}
               <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
             </div>
           </div>
         </CardContent>
       </Card>
-
-      <DeleteSectorDialog
-        sectorId={isDeleting ? sector.id : null}
-        sectorName={sector.name}
-        open={isDeleting}
-        onOpenChange={setIsDeleting}
-      />
     </>
   );
 }

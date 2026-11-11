@@ -24,7 +24,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, UserPlus } from 'lucide-react';
-import { toast } from 'sonner';
 
 type User = RouterOutputs['user']['list'][number];
 
@@ -46,17 +45,17 @@ export type UserFormValues = z.input<typeof createUserFormSchema> | z.input<type
 interface UserFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  user?: User | null;
+  editing?: User | null;
   onSubmit: (data: UserFormValues) => Promise<void>;
 }
 
 export function UserFormDialog({
   open,
   onOpenChange,
-  user,
+  editing,
   onSubmit,
 }: UserFormDialogProps) {
-  const isEditing = !!user;
+  const isEditing = !!editing;
 
   const { data: roles = [] } = api.role.list.useQuery();
   const { data: employees = [] } = api.employee.list.useQuery();
@@ -79,13 +78,13 @@ export function UserFormDialog({
   });
 
   useEffect(() => {
-    if (user) {
+    if (editing) {
       reset({
-        email: user.email,
+        email: editing.email,
         password: '',
-        status: user.status,
-        roleId: user.roleId,
-        employeeId: user.employee?.id ?? '',
+        status: editing.status,
+        roleId: editing.roleId,
+        employeeId: editing.employee?.id ?? '',
       });
     } else {
       reset({
@@ -96,22 +95,17 @@ export function UserFormDialog({
         employeeId: '',
       });
     }
-  }, [user, reset, open, roles]);
+  }, [editing, reset, open, roles]);
 
-  const handleFormSubmit = (data: UserFormValues) => {
+  const handleFormSubmit = async (data: UserFormValues) => {
     const actionPromise = onSubmit(data);
 
-    void toast.promise(actionPromise, {
-      loading: isEditing ? 'Atualizando usuário...' : 'Criando usuário...',
-      success: () => {
-        onOpenChange(false);
-        return isEditing ? 'Usuário atualizado com sucesso!' : 'Usuário criado com sucesso!';
-      },
-      error: (err: { message?: string }) => {
-        const message = err.message || 'Tente novamente.';
-        return `Erro ao ${isEditing ? 'atualizar' : 'criar'} usuário: ${message}`;
-      },
-    });
+    try {
+      await actionPromise;
+      onOpenChange(false);
+    } catch {
+      // o aviso de erro já é exibido pelo toast da mutation
+    }
   };
 
   return (

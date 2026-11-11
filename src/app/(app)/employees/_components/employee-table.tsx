@@ -1,6 +1,6 @@
-import { useState } from 'react';
 import { type RouterOutputs } from '@/trpc/react';
 import { User, MoreHorizontal, Trash2, Eye } from 'lucide-react';
+import { orDash } from '@/lib/formatters';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
@@ -18,17 +18,16 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { EmployeeStatusBadge } from './employee-status-badge';
-import { DeleteEmployeeDialog } from './employee-delete-dialog';
 
 type Employee = RouterOutputs['employee']['list'][number];
 
 interface EmployeeTableProps {
   employees: Employee[];
-  onSelectEmployee: (employee: Employee) => void;
+  onEdit?: (employee: Employee) => void;
+  onDelete?: (employee: Employee) => void;
 }
 
-export function EmployeeTable({ employees, onSelectEmployee }: EmployeeTableProps) {
-  const [selectedToDelete, setSelectedToDelete] = useState<Employee | null>(null);
+export function EmployeeTable({ employees, onEdit, onDelete }: EmployeeTableProps) {
 
   return (
     <>
@@ -52,7 +51,7 @@ export function EmployeeTable({ employees, onSelectEmployee }: EmployeeTableProp
                 {employees.map((emp) => (
                   <TableRow
                     key={emp.id}
-                    onClick={() => onSelectEmployee(emp)}
+                    onClick={() => onEdit?.(emp)}
                     className="cursor-pointer hover:bg-muted/20 transition-colors"
                   >
                     <TableCell>
@@ -66,8 +65,8 @@ export function EmployeeTable({ employees, onSelectEmployee }: EmployeeTableProp
                       </div>
                     </TableCell>
                     <TableCell className="font-mono text-xs">{emp.cpf}</TableCell>
-                    <TableCell className="hidden font-mono text-xs md:table-cell">{emp.rg || '—'}</TableCell>
-                    <TableCell>{emp.sector || '—'}</TableCell>
+                    <TableCell className="hidden font-mono text-xs md:table-cell">{orDash(emp.rg)}</TableCell>
+                    <TableCell>{orDash(emp.sector)}</TableCell>
                     <TableCell>{emp.shift?.name ?? '—'}</TableCell>
                     <TableCell className="text-xs font-mono">
                       {emp.shift?.startTime && emp.shift?.endTime ? `${emp.shift.startTime} – ${emp.shift.endTime}` : '—'}
@@ -76,23 +75,25 @@ export function EmployeeTable({ employees, onSelectEmployee }: EmployeeTableProp
                       <EmployeeStatusBadge status={emp.status} />
                     </TableCell>
                     <TableCell onClick={(e) => e.stopPropagation()}>
-                      <DropdownMenu>
+                      {(onEdit ?? onDelete) && (<DropdownMenu>
                         <DropdownMenuTrigger className="inline-flex size-8 items-center justify-center rounded-md hover:bg-accent hover:text-accent-foreground text-muted-foreground transition-colors">
                           <MoreHorizontal className="size-4" />
                           <span className="sr-only">Abrir menu</span>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => onSelectEmployee(emp)}>
+                          {onEdit && (<DropdownMenuItem onClick={() => onEdit(emp)}>
                             <Eye className="mr-2 size-4" /> Visualizar
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => setSelectedToDelete(emp)}
-                            className="text-destructive focus:text-destructive"
-                          >
-                            <Trash2 className="mr-2 size-4" /> Excluir
-                          </DropdownMenuItem>
+                          </DropdownMenuItem>)}
+                          {onDelete && (
+                            <DropdownMenuItem
+                              onClick={() => onDelete(emp)}
+                              className="text-destructive focus:text-destructive"
+                            >
+                              <Trash2 className="mr-2 size-4" /> Excluir
+                            </DropdownMenuItem>
+                          )}
                         </DropdownMenuContent>
-                      </DropdownMenu>
+                      </DropdownMenu>)}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -101,13 +102,6 @@ export function EmployeeTable({ employees, onSelectEmployee }: EmployeeTableProp
           </CardContent>
         </ScrollArea>
       </Card>
-
-      <DeleteEmployeeDialog
-        employeeId={selectedToDelete?.id ?? null}
-        employeeName={selectedToDelete?.name}
-        open={!!selectedToDelete}
-        onOpenChange={(open) => !open && setSelectedToDelete(null)}
-      />
     </>
   );
 }

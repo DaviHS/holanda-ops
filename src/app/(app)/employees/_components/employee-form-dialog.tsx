@@ -53,7 +53,6 @@ import { type Employee } from '@/server/db/schema/employees';
 import { employeeSchema } from '@/validators/employee';
 import { type z } from 'zod';
 
-import { toast } from 'sonner';
 
 export type EmployeeFormValues = z.infer<typeof employeeSchema>;
 
@@ -69,9 +68,9 @@ type ShiftItem = {
 type EmployeeFormDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  employee?: (Employee & { sectorIds?: string[]; shiftId?: string | null }) | null;
-  sectorsList?: SectorItem[];
-  shiftsList?: ShiftItem[];
+  editing?: (Employee & { sectorIds?: string[]; shiftId?: string | null }) | null;
+  sectors?: SectorItem[];
+  shifts?: ShiftItem[];
   onSubmit: (data: EmployeeFormValues) => void;
   isSubmitting?: boolean;
 };
@@ -79,13 +78,13 @@ type EmployeeFormDialogProps = {
 export function EmployeeFormDialog({
   open,
   onOpenChange,
-  employee,
-  sectorsList = [],
-  shiftsList = [],
+  editing,
+  sectors = [],
+  shifts = [],
   onSubmit,
   isSubmitting = false,
 }: EmployeeFormDialogProps) {
-  const isEditing = !!employee;
+  const isEditing = !!editing;
   const [openCombobox, setOpenCombobox] = useState(false);
 
   const {
@@ -114,24 +113,24 @@ export function EmployeeFormDialog({
   });
 
   useEffect(() => {
-    if (employee) {
+    if (editing) {
       reset({
-        name: employee.name,
-        cpf: employee.cpf,
-        rg: employee.rg ?? '',
-        pixKey: employee.pixKey ?? '',
-        address: employee.address ?? '',
-        sectorIds: employee.sectorIds ?? [],
-        shiftId: employee.shiftId ?? null,
-        status: employee.status,
-        shirtSize: employee.shirtSize,
-        pantsSize: employee.pantsSize ?? '',
-        shoeSize: employee.shoeSize ?? undefined,
+        name: editing.name,
+        cpf: editing.cpf,
+        rg: editing.rg ?? '',
+        pixKey: editing.pixKey ?? '',
+        address: editing.address ?? '',
+        sectorIds: editing.sectorIds ?? [],
+        shiftId: editing.shiftId ?? null,
+        status: editing.status,
+        shirtSize: editing.shirtSize,
+        pantsSize: editing.pantsSize ?? '',
+        shoeSize: editing.shoeSize ?? undefined,
         uniform: {
-          shirt: employee.uniform.shirt,
-          pants: employee.uniform.pants,
-          shoes: employee.uniform.shoes,
-          jacket: employee.uniform.jacket ?? false,
+          shirt: editing.uniform.shirt,
+          pants: editing.uniform.pants,
+          shoes: editing.uniform.shoes,
+          jacket: editing.uniform.jacket ?? false,
         },
       });
     } else {
@@ -150,9 +149,9 @@ export function EmployeeFormDialog({
         uniform: { shirt: false, pants: false, shoes: false, jacket: false },
       });
     }
-  }, [employee, reset, open]);
+  }, [editing, reset, open]);
 
-  const handleFormSubmit = (data: EmployeeFormValues) => {
+  const handleFormSubmit = async (data: EmployeeFormValues) => {
     const payload: EmployeeFormValues = {
       ...data,
       rg: data.rg || null,
@@ -162,17 +161,12 @@ export function EmployeeFormDialog({
       shoeSize: data.shoeSize && !isNaN(Number(data.shoeSize)) ? Number(data.shoeSize) : null,
     };
 
-    void toast.promise(
-      Promise.resolve().then(() => onSubmit(payload)),
-      {
-        loading: isEditing ? 'Atualizando colaborador...' : 'Cadastrando colaborador...',
-        success: isEditing ? 'Colaborador atualizado com sucesso!' : 'Colaborador cadastrado com sucesso!',
-        error: (err: { message?: string }) => {
-          const message = err.message || 'tente novamente.';
-          return `Erro ao ${isEditing ? 'atualizar' : 'cadastrar'}: ${message}`;
-        },
-      }
-    );
+    try {
+      await Promise.resolve().then(() => onSubmit(payload));
+      onOpenChange(false);
+    } catch {
+      // o aviso de erro já é exibido pelo toast da mutation
+    }
   };
 
   const selectedSectorIds = watch('sectorIds') ?? [];
@@ -201,7 +195,7 @@ export function EmployeeFormDialog({
 
   const handleShiftSelect = (val: unknown) => {
     if (typeof val !== 'string') return;
-    const selected = shiftsList.find((s) => s.id === val);
+    const selected = shifts.find((s) => s.id === val);
     if (selected) {
       setValue('shiftId', selected.id, { shouldValidate: true });
     }
@@ -303,7 +297,7 @@ export function EmployeeFormDialog({
                             <CommandList>
                               <CommandEmpty>Nenhum setor encontrado.</CommandEmpty>
                               <CommandGroup>
-                                {sectorsList.map((sec) => {
+                                {sectors.map((sec) => {
                                   const isSelected = selectedSectorIds.includes(sec.id);
                                   return (
                                     <CommandItem
@@ -356,7 +350,7 @@ export function EmployeeFormDialog({
                           <span className="text-xs text-muted-foreground">Nenhum setor vinculado.</span>
                         ) : (
                           selectedSectorIds.map((id) => {
-                            const sectorObj = sectorsList.find((s) => s.id === id);
+                            const sectorObj = sectors.find((s) => s.id === id);
                             return (
                               <Badge
                                 key={id}
@@ -398,14 +392,14 @@ export function EmployeeFormDialog({
                         <SelectTrigger className="mt-1 text-sm !h-10 w-full rounded-md">
                           <SelectValue placeholder="Selecione o turno de trabalho">
                             {(() => {
-                              const selected = shiftsList.find((s) => s.id === currentShiftId);
+                              const selected = shifts.find((s) => s.id === currentShiftId);
                               if (!selected) return null;
                               return `${selected.name}${selected.startTime && selected.endTime ? ` (${selected.startTime} - ${selected.endTime})` : ''}`;
                             })()}
                           </SelectValue>
                         </SelectTrigger>
                         <SelectContent className="rounded-md">
-                          {shiftsList.map((item) => (
+                          {shifts.map((item) => (
                             <SelectItem key={item.id} value={item.id} className="text-sm py-2 rounded-none">
                               {item.name} {item.startTime && item.endTime ? `(${item.startTime} - ${item.endTime})` : ''}
                             </SelectItem>

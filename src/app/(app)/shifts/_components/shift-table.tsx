@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
 import { type RouterOutputs } from '@/trpc/react';
 import { Clock, MoreHorizontal, Trash2, Eye } from 'lucide-react';
+import { orDash } from '@/lib/formatters';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
@@ -19,17 +19,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { DeleteShiftDialog } from './shift-delete-dialog';
 
 type Shift = RouterOutputs['shift']['list'][number];
 
 interface ShiftTableProps {
   shifts: Shift[];
-  onSelectShift: (shift: Shift) => void;
+  onEdit?: (shift: Shift) => void;
+  onDelete?: (shift: Shift) => void;
 }
 
-export function ShiftTable({ shifts, onSelectShift }: ShiftTableProps) {
-  const [selectedToDelete, setSelectedToDelete] = useState<Shift | null>(null);
+export function ShiftTable({ shifts, onEdit, onDelete }: ShiftTableProps) {
 
   return (
     <>
@@ -49,7 +48,7 @@ export function ShiftTable({ shifts, onSelectShift }: ShiftTableProps) {
                 {shifts.map((shift) => (
                   <TableRow
                     key={shift.id}
-                    onClick={() => onSelectShift(shift)}
+                    onClick={() => onEdit?.(shift)}
                     className="cursor-pointer hover:bg-muted/20 transition-colors"
                   >
                     <TableCell>
@@ -66,26 +65,28 @@ export function ShiftTable({ shifts, onSelectShift }: ShiftTableProps) {
                       {shift.startTime} – {shift.endTime}
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
-                      {shift.description || '—'}
+                      {orDash(shift.description)}
                     </TableCell>
                     <TableCell onClick={(e) => e.stopPropagation()}>
-                      <DropdownMenu>
+                      {(onEdit ?? onDelete) && (<DropdownMenu>
                         <DropdownMenuTrigger className="inline-flex size-8 items-center justify-center rounded-md hover:bg-accent hover:text-accent-foreground text-muted-foreground transition-colors">
                           <MoreHorizontal className="size-4" />
                           <span className="sr-only">Abrir menu</span>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => onSelectShift(shift)}>
+                          {onEdit && (<DropdownMenuItem onClick={() => onEdit(shift)}>
                             <Eye className="mr-2 size-4" /> Visualizar
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => setSelectedToDelete(shift)}
-                            className="text-destructive focus:text-destructive"
-                          >
-                            <Trash2 className="mr-2 size-4" /> Excluir
-                          </DropdownMenuItem>
+                          </DropdownMenuItem>)}
+                          {onDelete && (
+                            <DropdownMenuItem
+                              onClick={() => onDelete(shift)}
+                              className="text-destructive focus:text-destructive"
+                            >
+                              <Trash2 className="mr-2 size-4" /> Excluir
+                            </DropdownMenuItem>
+                          )}
                         </DropdownMenuContent>
-                      </DropdownMenu>
+                      </DropdownMenu>)}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -101,13 +102,6 @@ export function ShiftTable({ shifts, onSelectShift }: ShiftTableProps) {
           </CardContent>
         </ScrollArea>
       </Card>
-
-      <DeleteShiftDialog
-        shiftId={selectedToDelete?.id ?? null}
-        shiftName={selectedToDelete?.name}
-        open={!!selectedToDelete}
-        onOpenChange={(open) => !open && setSelectedToDelete(null)}
-      />
     </>
   );
 }

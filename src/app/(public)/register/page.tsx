@@ -63,7 +63,7 @@ export default function EmployeeRegisterPage() {
     <div className="min-h-screen w-full flex items-center justify-center p-4 bg-zinc-950/5">
       <Card className="w-full max-w-lg shadow-lg border-border">
         <CardHeader className="space-y-1 text-center">
-          <div className="mx-auto flex size-12 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 mb-2">
+          <div className="mx-auto flex size-12 items-center justify-center rounded-md bg-primary/10 border border-primary/20 mb-2">
             <User className="size-6 text-primary" />
           </div>
           <CardTitle className="text-2xl font-bold tracking-tight">Pré-Cadastro de Funcionário</CardTitle>

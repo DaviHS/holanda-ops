@@ -3,22 +3,27 @@
 import { api } from '@/trpc/react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Users, UserCheck, Building2, Shirt, Clock, ArrowUpRight } from 'lucide-react';
+import { Users, UserCheck, Building2, Shirt, Clock, ArrowUpRight, BarChart3 } from 'lucide-react';
+import { PageContainer, PageHeader } from '@/components/page-header';
+import { EmptyState } from '@/components/ui/empty-state';
+import { LoadingState } from '@/components/ui/loading-state';
 import Link from 'next/link';
 
 export default function DashboardPage() {
-  const { data: stats, isLoading } = api.dashboard.getStats.useQuery();
+  const { data: stats, isLoading, error } = api.dashboard.getStats.useQuery(undefined, { retry: false });
 
-  if (isLoading) {
+  if (isLoading) return <LoadingState />;
+
+  if (error) {
     return (
-      <div className="space-y-6">
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <div className="grid gap-4 md:grid-cols-3">
-          {[1, 2, 3].map((i) => (
-            <Card key={i} className="animate-pulse h-32 bg-muted/50" />
-          ))}
-        </div>
-      </div>
+      <PageContainer>
+        <PageHeader title="Visão Geral" icon={BarChart3} description="Bem-vindo ao Holanda Ops." />
+        <EmptyState
+          icon={BarChart3}
+          title="Sem indicadores para o seu cargo"
+          description="Use o menu para acessar as áreas liberadas para você."
+        />
+      </PageContainer>
     );
   }
 
@@ -30,13 +35,12 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Visão Geral</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Acompanhe indicadores gerais de colaboradores, setores e logística de uniformes.
-        </p>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title="Visão Geral"
+        icon={BarChart3}
+        description="Acompanhe indicadores gerais de colaboradores, setores e logística de uniformes."
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Card>
@@ -86,7 +90,7 @@ export default function DashboardPage() {
           <CardContent>
             <div className="grid grid-cols-3 gap-3">
               {stats?.shirtSizesDistribution.map((item) => (
-                <div key={item.size ?? 'NA'} className="flex flex-col items-center justify-center rounded-lg border p-3 bg-card">
+                <div key={item.size ?? 'NA'} className="flex flex-col items-center justify-center rounded-md border p-3 bg-card">
                   <span className="text-xs text-muted-foreground uppercase font-semibold">
                     Tamanho {item.size ?? 'N/A'}
                   </span>
@@ -150,6 +154,6 @@ export default function DashboardPage() {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </PageContainer>
   );
 }

@@ -1,27 +1,25 @@
 'use client';
 
-import { useState } from 'react';
 import { type RouterOutputs } from '@/trpc/react';
 import { ShieldCheck, ChevronRight, Trash2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { DeleteRoleDialog } from './role-delete-dialog';
 
 type Role = RouterOutputs['role']['list'][number];
 
 interface RoleCardProps {
   role: Role;
-  onSelectRole?: (role: Role) => void;
+  onEdit?: (role: Role) => void;
+  onDelete?: (role: Role) => void;
 }
 
-export function RoleCard({ role, onSelectRole }: RoleCardProps) {
-  const [isDeleting, setIsDeleting] = useState(false);
+export function RoleCard({ role, onEdit, onDelete }: RoleCardProps) {
 
   return (
     <>
       <Card 
         className="mb-3 cursor-pointer hover:bg-muted/10 transition-colors relative group"
-        onClick={() => onSelectRole?.(role)}
+        onClick={() => onEdit?.(role)}
       >
         <CardContent className="p-4">
           <div className="flex items-center justify-between gap-3">
@@ -40,27 +38,22 @@ export function RoleCard({ role, onSelectRole }: RoleCardProps) {
             </div>
             
             <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-              <Button
+              {onDelete && (
+                <Button
                 type="button"
                 variant="ghost"
                 size="icon"
                 className="size-8 text-muted-foreground hover:text-destructive"
-                onClick={() => setIsDeleting(true)}
+                onClick={() => onDelete(role)}
               >
                 <Trash2 className="size-4" />
               </Button>
+              )}
               <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
             </div>
           </div>
         </CardContent>
       </Card>
-
-      <DeleteRoleDialog
-        roleId={isDeleting ? role.id : null}
-        roleName={role.name}
-        open={isDeleting}
-        onOpenChange={setIsDeleting}
-      />
     </>
   );
 }

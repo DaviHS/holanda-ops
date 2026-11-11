@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type RouterOutputs } from '@/trpc/react';
@@ -17,7 +17,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Loader2, ShieldCheck } from 'lucide-react';
-import { toast } from 'sonner';
+import { PermissionChecklist } from '@/components/permission-checklist';
+import type { Permission } from '@/lib/permissions';
 
 type Role = RouterOutputs['role']['list'][number];
 
@@ -26,17 +27,28 @@ export type RoleFormValues = RoleInput;
 interface RoleFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  role?: Role | null;
-  onSubmit: (data: RoleFormValues) => Promise<void>;
+  editing?: Role | null;
+  /** Permissões atuais do cargo em edição. */
+  permissions?: Permission[];
+  onSubmit: (data: RoleFormValues, permissions: Permission[]) => Promise<void>;
 }
 
 export function RoleFormDialog({
   open,
   onOpenChange,
-  role,
+  editing,
+  permissions = [],
   onSubmit,
 }: RoleFormDialogProps) {
-  const isEditing = !!role;
+  const isEditing = !!editing;
+  const [granted, setGranted] = useState<Set<Permission>>(new Set());
+
+  // Recarrega as permissões ao abrir o diálogo ou trocar o cargo (ajuste de estado durante o render)
+  const [lastKey, setLastKey] = useState({ open, editing });
+  if (lastKey.open !== open || lastKey.editing !== editing) {
+    setLastKey({ open, editing });
+    setGranted(new Set(permissions));
+  }
 
   const {
     register,
@@ -52,10 +64,10 @@ export function RoleFormDialog({
   });
 
   useEffect(() => {
-    if (role) {
+    if (editing) {
       reset({
-        name: role.name,
-        description: role.description ?? '',
+        name: editing.name,
+        description: editing.description ?? '',
       });
     } else {
       reset({
@@ -63,27 +75,20 @@ export function RoleFormDialog({
         description: '',
       });
     }
-  }, [role, reset, open]);
+  }, [editing, reset, open]);
 
-  const handleFormSubmit = (data: RoleFormValues) => {
+  const handleFormSubmit = async (data: RoleFormValues) => {
     const payload = {
       ...data,
       description: data.description || null,
     };
 
-    const actionPromise = onSubmit(payload);
-
-    void toast.promise(actionPromise, {
-      loading: isEditing ? 'Atualizando cargo...' : 'Criando cargo...',
-      success: () => {
-        onOpenChange(false);
-        return isEditing ? 'Cargo atualizado com sucesso!' : 'Cargo criado com sucesso!';
-      },
-      error: (err: { message?: string }) => {
-        const message = err.message || 'Tente novamente.';
-        return `Erro ao ${isEditing ? 'atualizar' : 'criar'} cargo: ${message}`;
-      },
-    });
+    try {
+      await onSubmit(payload, [...granted]);
+      onOpenChange(false);
+    } catch {
+      // o aviso de erro já é exibido pelo toast da mutation
+    }
   };
 
   return (
@@ -97,7 +102,7 @@ export function RoleFormDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col">
-          <div className="px-6 py-5 space-y-4">
+          <div className="max-h-[60vh] space-y-4 overflow-y-auto px-6 py-5">
             <div className="space-y-1.5">
               <Label htmlFor="name" className="text-xs font-medium">
                 Nome do Cargo
@@ -126,6 +131,11 @@ export function RoleFormDialog({
               {errors.description && (
                 <p className="text-[11px] text-destructive mt-1">{errors.description.message}</p>
               )}
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">Permissões</Label>
+              <PermissionChecklist value={granted} onChange={setGranted} />
             </div>
           </div>
 

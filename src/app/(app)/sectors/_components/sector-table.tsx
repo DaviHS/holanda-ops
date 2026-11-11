@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
 import { type RouterOutputs } from '@/trpc/react';
 import { Building2, MoreHorizontal, Trash2, Eye } from 'lucide-react';
+import { orDash } from '@/lib/formatters';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
@@ -19,17 +19,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { DeleteSectorDialog } from './sector-delete-dialog';
 
 type Sector = RouterOutputs['sector']['list'][number];
 
 interface SectorTableProps {
   sectors: Sector[];
-  onSelectSector: (sector: Sector) => void;
+  onEdit?: (sector: Sector) => void;
+  onDelete?: (sector: Sector) => void;
 }
 
-export function SectorTable({ sectors, onSelectSector }: SectorTableProps) {
-  const [selectedToDelete, setSelectedToDelete] = useState<Sector | null>(null);
+export function SectorTable({ sectors, onEdit, onDelete }: SectorTableProps) {
 
   return (
     <>
@@ -48,7 +47,7 @@ export function SectorTable({ sectors, onSelectSector }: SectorTableProps) {
                 {sectors.map((sector) => (
                   <TableRow
                     key={sector.id}
-                    onClick={() => onSelectSector(sector)}
+                    onClick={() => onEdit?.(sector)}
                     className="cursor-pointer hover:bg-muted/20 transition-colors"
                   >
                     <TableCell>
@@ -62,26 +61,28 @@ export function SectorTable({ sectors, onSelectSector }: SectorTableProps) {
                       </div>
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
-                      {sector.description || '—'}
+                      {orDash(sector.description)}
                     </TableCell>
                     <TableCell onClick={(e) => e.stopPropagation()}>
-                      <DropdownMenu>
+                      {(onEdit ?? onDelete) && (<DropdownMenu>
                         <DropdownMenuTrigger className="inline-flex size-8 items-center justify-center rounded-md hover:bg-accent hover:text-accent-foreground text-muted-foreground transition-colors">
                           <MoreHorizontal className="size-4" />
                           <span className="sr-only">Abrir menu</span>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => onSelectSector(sector)}>
+                          {onEdit && (<DropdownMenuItem onClick={() => onEdit(sector)}>
                             <Eye className="mr-2 size-4" /> Visualizar
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => setSelectedToDelete(sector)}
-                            className="text-destructive focus:text-destructive"
-                          >
-                            <Trash2 className="mr-2 size-4" /> Excluir
-                          </DropdownMenuItem>
+                          </DropdownMenuItem>)}
+                          {onDelete && (
+                            <DropdownMenuItem
+                              onClick={() => onDelete(sector)}
+                              className="text-destructive focus:text-destructive"
+                            >
+                              <Trash2 className="mr-2 size-4" /> Excluir
+                            </DropdownMenuItem>
+                          )}
                         </DropdownMenuContent>
-                      </DropdownMenu>
+                      </DropdownMenu>)}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -97,13 +98,6 @@ export function SectorTable({ sectors, onSelectSector }: SectorTableProps) {
           </CardContent>
         </ScrollArea>
       </Card>
-
-      <DeleteSectorDialog
-        sectorId={selectedToDelete?.id ?? null}
-        sectorName={selectedToDelete?.name}
-        open={!!selectedToDelete}
-        onOpenChange={(open) => !open && setSelectedToDelete(null)}
-      />
     </>
   );
 }

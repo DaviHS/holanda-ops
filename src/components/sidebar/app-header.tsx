@@ -27,7 +27,7 @@ export function AppHeader({
 }: AppHeaderProps) {
   return (
     <header className="z-10 my-2 mx-4 flex h-14 shrink-0 items-center gap-2 rounded-md border border-border/80 bg-card/95 px-4 shadow-sm backdrop-blur-md transition-all">
-      <SidebarTrigger className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-border bg-background text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/10 hover:text-primary [&_svg]:size-4" />
+      <SidebarTrigger className="flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-background text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/10 hover:text-primary [&_svg]:size-4" />
 
       <Breadcrumb>
         <BreadcrumbList>
@@ -52,12 +52,12 @@ export function AppHeader({
         <ThemeToggle
           theme={theme}
           setTheme={setTheme}
-          className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-border bg-background text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/10 hover:text-primary [&_svg]:size-4"
+          className="flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-background text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/10 hover:text-primary [&_svg]:size-4"
         />
 
         <button
           onClick={onLogout}
-          className="flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:border-destructive/50 hover:bg-destructive/10 hover:text-destructive"
+          className="flex items-center gap-2 rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:border-destructive/50 hover:bg-destructive/10 hover:text-destructive"
         >
           <LogOut className="size-4" />
           Sair

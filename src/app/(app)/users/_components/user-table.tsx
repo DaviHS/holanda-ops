@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { type RouterOutputs } from '@/trpc/react';
 import { UserCheck, MoreHorizontal, Trash2, Eye } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -20,17 +19,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { DeleteUserDialog } from './user-delete-dialog';
 
 type User = RouterOutputs['user']['list'][number];
 
 interface UserTableProps {
   users: User[];
-  onSelectUser: (user: User) => void;
+  onEdit?: (user: User) => void;
+  onDelete?: (user: User) => void;
 }
 
-export function UserTable({ users, onSelectUser }: UserTableProps) {
-  const [selectedToDelete, setSelectedToDelete] = useState<User | null>(null);
+export function UserTable({ users, onEdit, onDelete }: UserTableProps) {
 
   return (
     <>
@@ -55,7 +53,7 @@ export function UserTable({ users, onSelectUser }: UserTableProps) {
                   return (
                     <TableRow
                       key={user.id}
-                      onClick={() => onSelectUser(user)}
+                      onClick={() => onEdit?.(user)}
                       className="cursor-pointer hover:bg-muted/20 transition-colors"
                     >
                       <TableCell>
@@ -88,23 +86,25 @@ export function UserTable({ users, onSelectUser }: UserTableProps) {
                         </Badge>
                       </TableCell>
                       <TableCell onClick={(e) => e.stopPropagation()}>
-                        <DropdownMenu>
+                        {(onEdit ?? onDelete) && (<DropdownMenu>
                           <DropdownMenuTrigger className="inline-flex size-8 items-center justify-center rounded-md hover:bg-accent hover:text-accent-foreground text-muted-foreground transition-colors">
                             <MoreHorizontal className="size-4" />
                             <span className="sr-only">Abrir menu</span>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => onSelectUser(user)}>
+                            {onEdit && (<DropdownMenuItem onClick={() => onEdit(user)}>
                               <Eye className="mr-2 size-4" /> Visualizar
-                            </DropdownMenuItem>
+                            </DropdownMenuItem>)}
+                            {onDelete && (
                             <DropdownMenuItem
-                              onClick={() => setSelectedToDelete(user)}
+                              onClick={() => onDelete(user)}
                               className="text-destructive focus:text-destructive"
                             >
                               <Trash2 className="mr-2 size-4" /> Excluir
                             </DropdownMenuItem>
+                          )}
                           </DropdownMenuContent>
-                        </DropdownMenu>
+                        </DropdownMenu>)}
                       </TableCell>
                     </TableRow>
                   );
@@ -121,13 +121,6 @@ export function UserTable({ users, onSelectUser }: UserTableProps) {
           </CardContent>
         </ScrollArea>
       </Card>
-
-      <DeleteUserDialog
-        userId={selectedToDelete?.id ?? null}
-        userName={selectedToDelete?.employee?.name ?? selectedToDelete?.email}
-        open={!!selectedToDelete}
-        onOpenChange={(open) => !open && setSelectedToDelete(null)}
-      />
     </>
   );
 }

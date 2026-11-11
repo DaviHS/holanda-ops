@@ -6,7 +6,9 @@ import { useTheme } from 'next-themes'
 import { AppHeader } from './app-header'
 import { AppSidebar } from './app-sidebar'
 import { MobileNavigation, type QuickActionKind } from './mobile-nav'
+import { Suspense } from 'react'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
+import { LoadingState } from '@/components/ui/loading-state'
 
 type AppLayoutProps = {
   children: React.ReactNode
@@ -52,7 +54,7 @@ export default function AppLayout({ children, pageTitle }: AppLayoutProps) {
         />
         
         <main className="w-full flex-1 p-4 pb-24 lg:pb-6 md:p-6">
-          {children}
+          <Suspense fallback={<LoadingState />}>{children}</Suspense>
         </main>
 
         <MobileNavigation onTriggerAction={handleTriggerAction} />

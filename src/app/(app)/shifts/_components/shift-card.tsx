@@ -1,27 +1,25 @@
 'use client';
 
-import { useState } from 'react';
 import { type RouterOutputs } from '@/trpc/react';
 import { Clock, ChevronRight, Trash2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { DeleteShiftDialog } from './shift-delete-dialog';
 
 type Shift = RouterOutputs['shift']['list'][number];
 
 interface ShiftCardProps {
   shift: Shift;
-  onSelectShift?: (shift: Shift) => void;
+  onEdit?: (shift: Shift) => void;
+  onDelete?: (shift: Shift) => void;
 }
 
-export function ShiftCard({ shift, onSelectShift }: ShiftCardProps) {
-  const [isDeleting, setIsDeleting] = useState(false);
+export function ShiftCard({ shift, onEdit, onDelete }: ShiftCardProps) {
 
   return (
     <>
       <Card 
         className="mb-3 cursor-pointer hover:bg-muted/10 transition-colors relative group"
-        onClick={() => onSelectShift?.(shift)}
+        onClick={() => onEdit?.(shift)}
       >
         <CardContent className="p-4">
           <div className="flex items-center justify-between gap-3">
@@ -43,27 +41,22 @@ export function ShiftCard({ shift, onSelectShift }: ShiftCardProps) {
             </div>
             
             <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-              <Button
+              {onDelete && (
+                <Button
                 type="button"
                 variant="ghost"
                 size="icon"
                 className="size-8 text-muted-foreground hover:text-destructive"
-                onClick={() => setIsDeleting(true)}
+                onClick={() => onDelete(shift)}
               >
                 <Trash2 className="size-4" />
               </Button>
+              )}
               <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
             </div>
           </div>
         </CardContent>
       </Card>
-
-      <DeleteShiftDialog
-        shiftId={isDeleting ? shift.id : null}
-        shiftName={shift.name}
-        open={isDeleting}
-        onOpenChange={setIsDeleting}
-      />
     </>
   );
 }

@@ -20,41 +20,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  BarChart3,
-  Building2,
-  CalendarClock,
-  ChevronsUpDown,
-  LogOut,
-  Settings2,
-  UserRound,
-  Users,
-} from "lucide-react";
-import { NavMain, type NavItem } from "./nav-main";
+import { ChevronsUpDown, LogOut } from "lucide-react";
+import { NavMain } from "./nav-main";
 import { signOut, useSession } from "next-auth/react";
-
-export const navData: NavItem[] = [
-  { label: "Visão Geral", isSection: true },
-  { title: "Dashboard", icon: BarChart3, href: "/" },
-  { label: "Gestão de Pessoal", isSection: true },
-  {
-    title: "Equipe e RH",
-    icon: Users,
-    children: [
-      { title: "Setores", href: "/sectors", icon: Building2 },
-      { title: "Funcionários", href: "/employees", icon: Users },
-      { title: "Cargos", href: "/roles", icon: UserRound },
-      { title: "Turnos", href: "/shifts", icon: CalendarClock },
-    ],
-  },
-  {
-    title: "Configurações",
-    icon: Settings2,
-    children: [
-      { title: "Usuários", href: "/users", icon: Users },
-    ],
-  },
-];
 
 interface CustomUser {
   id?: string;
@@ -96,7 +64,7 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <div className="flex items-center gap-3 px-2 py-1.5">
-              <div className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border/40 shadow-xs">
+              <div className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border/40 shadow-xs">
                 <Image
                   src="/android-chrome-192x192.png"
                   alt="Logo Holanda Ops"
@@ -120,7 +88,7 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="px-2">
-        <NavMain items={navData} />
+        <NavMain />
       </SidebarContent>
 
       <SidebarFooter className="px-2 pt-2 border-t border-border/60">
@@ -131,12 +99,12 @@ export function AppSidebar() {
                 render={
                   <SidebarMenuButton
                     size="lg"
-                    className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground rounded-xl w-full"
+                    className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground rounded-md w-full"
                   />
                 }
               >
-                <Avatar className="h-8 w-8 rounded-lg border border-border">
-                  <AvatarFallback className="rounded-lg bg-primary/10 text-primary font-semibold">
+                <Avatar className="h-8 w-8 rounded-md border border-border">
+                  <AvatarFallback className="rounded-md bg-primary/10 text-primary font-semibold">
                     {initials}
                   </AvatarFallback>
                 </Avatar>
@@ -150,7 +118,7 @@ export function AppSidebar() {
               </DropdownMenuTrigger>
 
               <DropdownMenuContent
-                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-xl p-1 shadow-md"
+                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-md p-1 shadow-md"
                 side="top"
                 align="end"
                 sideOffset={4}
@@ -158,8 +126,8 @@ export function AppSidebar() {
                 <DropdownMenuGroup>
                   <DropdownMenuLabel className="p-0 font-normal">
                     <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                      <Avatar className="h-8 w-8 rounded-lg border border-border">
-                        <AvatarFallback className="rounded-lg bg-primary/10 text-primary font-semibold">
+                      <Avatar className="h-8 w-8 rounded-md border border-border">
+                        <AvatarFallback className="rounded-md bg-primary/10 text-primary font-semibold">
                           {initials}
                         </AvatarFallback>
                       </Avatar>
@@ -175,7 +143,7 @@ export function AppSidebar() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={handleLogout}
-                  className="cursor-pointer rounded-lg text-destructive focus:bg-destructive/10 focus:text-destructive"
+                  className="cursor-pointer rounded-md text-destructive focus:bg-destructive/10 focus:text-destructive"
                 >
                   <LogOut className="mr-2 size-4" />
                   Sair

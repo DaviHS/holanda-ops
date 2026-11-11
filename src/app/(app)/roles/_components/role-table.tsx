@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
 import { type RouterOutputs } from '@/trpc/react';
 import { ShieldCheck, MoreHorizontal, Trash2, Eye } from 'lucide-react';
+import { orDash } from '@/lib/formatters';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
@@ -19,17 +19,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { DeleteRoleDialog } from './role-delete-dialog';
 
 type Role = RouterOutputs['role']['list'][number];
 
 interface RoleTableProps {
   roles: Role[];
-  onSelectRole: (role: Role) => void;
+  onEdit?: (role: Role) => void;
+  onDelete?: (role: Role) => void;
 }
 
-export function RoleTable({ roles, onSelectRole }: RoleTableProps) {
-  const [selectedToDelete, setSelectedToDelete] = useState<Role | null>(null);
+export function RoleTable({ roles, onEdit, onDelete }: RoleTableProps) {
 
   return (
     <>
@@ -48,7 +47,7 @@ export function RoleTable({ roles, onSelectRole }: RoleTableProps) {
                 {roles.map((role) => (
                   <TableRow
                     key={role.id}
-                    onClick={() => onSelectRole(role)}
+                    onClick={() => onEdit?.(role)}
                     className="cursor-pointer hover:bg-muted/20 transition-colors"
                   >
                     <TableCell>
@@ -62,26 +61,28 @@ export function RoleTable({ roles, onSelectRole }: RoleTableProps) {
                       </div>
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
-                      {role.description || '—'}
+                      {orDash(role.description)}
                     </TableCell>
                     <TableCell onClick={(e) => e.stopPropagation()}>
-                      <DropdownMenu>
+                      {(onEdit ?? onDelete) && (<DropdownMenu>
                         <DropdownMenuTrigger className="inline-flex size-8 items-center justify-center rounded-md hover:bg-accent hover:text-accent-foreground text-muted-foreground transition-colors">
                           <MoreHorizontal className="size-4" />
                           <span className="sr-only">Abrir menu</span>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => onSelectRole(role)}>
+                          {onEdit && (<DropdownMenuItem onClick={() => onEdit(role)}>
                             <Eye className="mr-2 size-4" /> Visualizar
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => setSelectedToDelete(role)}
-                            className="text-destructive focus:text-destructive"
-                          >
-                            <Trash2 className="mr-2 size-4" /> Excluir
-                          </DropdownMenuItem>
+                          </DropdownMenuItem>)}
+                          {onDelete && (
+                            <DropdownMenuItem
+                              onClick={() => onDelete(role)}
+                              className="text-destructive focus:text-destructive"
+                            >
+                              <Trash2 className="mr-2 size-4" /> Excluir
+                            </DropdownMenuItem>
+                          )}
                         </DropdownMenuContent>
-                      </DropdownMenu>
+                      </DropdownMenu>)}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -97,13 +98,6 @@ export function RoleTable({ roles, onSelectRole }: RoleTableProps) {
           </CardContent>
         </ScrollArea>
       </Card>
-
-      <DeleteRoleDialog
-        roleId={selectedToDelete?.id ?? null}
-        roleName={selectedToDelete?.name}
-        open={!!selectedToDelete}
-        onOpenChange={(open) => !open && setSelectedToDelete(null)}
-      />
     </>
   );
 }
