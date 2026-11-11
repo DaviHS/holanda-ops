@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
+import { useSearchParams } from 'next/navigation';
 import { Plus, UserCog } from 'lucide-react';
 import { api, type RouterOutputs } from '@/trpc/react';
 import { Button } from '@/components/ui/button';
@@ -44,7 +45,9 @@ export default function UsersPage() {
   const dialog = useEntityDialog<User>({ fromUrl: true });
   const confirm = useConfirm();
   const [search, setSearch] = useState('');
-  const [roleFilter, setRoleFilter] = useState(ALL);
+  // Atalho da tela de cargos: /users?cargo=<id> já abre filtrada pelo cargo.
+  const params = useSearchParams();
+  const [roleFilter, setRoleFilter] = useState(params.get('cargo') ?? ALL);
   const [statusFilter, setStatusFilter] = useState(ALL);
 
   const utils = api.useUtils();

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Plus, ShieldCheck } from 'lucide-react';
 import { api, type RouterOutputs } from '@/trpc/react';
 import { Button } from '@/components/ui/button';
@@ -12,6 +13,7 @@ import { useConfirm } from '@/components/confirm-dialog';
 import { useEntityDialog } from '@/hooks/use-entity-dialog';
 import { usePermissions } from '@/hooks/use-permissions';
 import { mutationFeedback } from '@/lib/mutation-feedback';
+import { toastError } from '@/lib/toast';
 import type { Permission } from '@/lib/permissions';
 import { RoleCard } from './_components/role-card';
 import {
@@ -33,21 +35,22 @@ export default function RolesPage() {
   const dialog = useEntityDialog<Role>({ fromUrl: true });
   const confirm = useConfirm();
   const [search, setSearch] = useState('');
+  const router = useRouter();
+  const canSeeUsers = can('users.manage');
 
   const utils = api.useUtils();
-  const { data: items = [], isLoading } = api.role.list.useQuery();
+  const { data: items = [], isLoading } = api.role.list.useQuery(undefined, {
+    refetchOnMount: 'always',
+  });
 
   const { data: permissionsByRole = {} } =
     api.access.listRolePermissions.useQuery(undefined, { enabled: canManage });
 
-  const refresh = () => utils.role.list.invalidate();
-  const setPermissionsMutation = api.access.setRolePermissions.useMutation(
-    mutationFeedback({
-      error: 'Erro ao salvar as permissões',
-      onSuccess: () => utils.access.listRolePermissions.invalidate(),
-    }),
-  );
-
+  const refresh = () =>
+    Promise.all([
+      utils.role.list.invalidate(),
+      utils.access.listRolePermissions.invalidate(),
+    ]);
   const createMutation = api.role.create.useMutation(
     mutationFeedback({
       success: 'Cargo criado com sucesso!',
@@ -79,17 +82,24 @@ export default function RolesPage() {
     data: RoleFormValues,
     permissions: Permission[],
   ) => {
-    const saved = dialog.editing
-      ? await updateMutation.mutateAsync({ id: dialog.editing.id, ...data })
-      : await createMutation.mutateAsync(data);
-    if (saved)
-      await setPermissionsMutation.mutateAsync({
-        roleId: saved.id,
+    if (dialog.editing) {
+      await updateMutation.mutateAsync({
+        id: dialog.editing.id,
+        ...data,
         permissions,
       });
+    } else {
+      await createMutation.mutateAsync({ ...data, permissions });
+    }
   };
 
   const handleDelete = async (item: Role) => {
+    if (item.userCount > 0) {
+      toastError(
+        `O cargo "${item.name}" está em uso por ${item.userCount} usuário(s). Troque o cargo deles antes de remover.`,
+      );
+      return;
+    }
     const confirmed = await confirm({
       title: 'Remover cargo',
       description: `Tem certeza de que deseja remover o cargo "${item.name}"? Esta ação não poderá ser desfeita.`,
@@ -136,6 +146,11 @@ export default function RolesPage() {
             <RoleCard
               key={item.id}
               role={item}
+              onViewUsers={
+                canSeeUsers
+                  ? (role) => router.push(`/users?cargo=${role.id}`)
+                  : undefined
+              }
               onEdit={canManage ? dialog.openEdit : undefined}
               onDelete={canManage ? handleDelete : undefined}
             />
