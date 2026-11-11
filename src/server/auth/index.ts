@@ -1,13 +1,13 @@
-import NextAuth from "next-auth";
-import { cache } from "react";
-import CredentialsProvider from "next-auth/providers/credentials";
-import { compare } from "bcryptjs";
-import { z } from "zod";
-import { eq } from "drizzle-orm";
+import NextAuth from 'next-auth';
+import { cache } from 'react';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import { compare } from 'bcryptjs';
+import { z } from 'zod';
+import { eq } from 'drizzle-orm';
 
-import { db } from "@/server/db";
-import { users } from "@/server/db/schema/users";
-import { authConfig } from "./config";
+import { db } from '@/server/db';
+import { users } from '@/server/db/schema/users';
+import { authConfig } from './config';
 
 const credentialsSchema = z.object({
   email: z.string().email(),
@@ -23,10 +23,10 @@ const {
   ...authConfig,
   providers: [
     CredentialsProvider({
-      name: "Credentials",
+      name: 'Credentials',
       credentials: {
-        email: { label: "E-mail", type: "email" },
-        password: { label: "Senha", type: "password" },
+        email: { label: 'E-mail', type: 'email' },
+        password: { label: 'Senha', type: 'password' },
       },
       async authorize(credentials) {
         const parsedCredentials = credentialsSchema.safeParse(credentials);
@@ -48,8 +48,8 @@ const {
           return null;
         }
 
-        if (user.status !== "active") {
-          throw new Error("Sua conta está inativa ou suspensa.");
+        if (user.status !== 'active') {
+          throw new Error('Sua conta está inativa ou suspensa.');
         }
 
         const isValidPassword = await compare(password, user.passwordHash);

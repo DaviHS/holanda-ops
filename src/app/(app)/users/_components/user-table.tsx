@@ -29,10 +29,9 @@ interface UserTableProps {
 }
 
 export function UserTable({ users, onEdit, onDelete }: UserTableProps) {
-
   return (
     <>
-      <Card className="rounded-md overflow-hidden">
+      <Card className="overflow-hidden rounded-md">
         <ScrollArea className="w-full">
           <CardContent className="p-0">
             <Table>
@@ -47,18 +46,21 @@ export function UserTable({ users, onEdit, onDelete }: UserTableProps) {
               </TableHeader>
               <TableBody>
                 {users.map((user) => {
-                  const displayName = user.employee?.name ?? user.email.split('@')[0];
-                  const avatarInitials = displayName.substring(0, 2).toUpperCase();
+                  const displayName =
+                    user.employee?.name ?? user.email.split('@')[0];
+                  const avatarInitials = displayName
+                    .substring(0, 2)
+                    .toUpperCase();
 
                   return (
                     <TableRow
                       key={user.id}
                       onClick={() => onEdit?.(user)}
-                      className="cursor-pointer hover:bg-muted/20 transition-colors"
+                      className="hover:bg-muted/20 cursor-pointer transition-colors"
                     >
                       <TableCell>
                         <div className="flex items-center gap-3">
-                          <div className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-xs">
+                          <div className="bg-primary/10 text-primary flex size-9 items-center justify-center rounded-full text-xs font-bold">
                             {avatarInitials}
                           </div>
                           <div>
@@ -66,52 +68,67 @@ export function UserTable({ users, onEdit, onDelete }: UserTableProps) {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="text-xs font-mono">{user.email}</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">
+                      <TableCell className="font-mono text-xs">
+                        {user.email}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-xs">
                         {user.employee?.name ? (
-                          <span className="flex items-center gap-1.5 font-medium text-foreground">
+                          <span className="text-foreground flex items-center gap-1.5 font-medium">
                             <UserCheck className="size-3.5 text-emerald-500" />
                             {user.employee.name}
                           </span>
                         ) : (
-                          <span className="text-muted-foreground/60">— Sem Vínculo —</span>
+                          <span className="text-muted-foreground/60">
+                            — Sem Vínculo —
+                          </span>
                         )}
                       </TableCell>
                       <TableCell>
                         <Badge
-                          variant={user.role?.name?.toLowerCase() === 'admin' ? 'default' : 'secondary'}
+                          variant={
+                            user.role?.name?.toLowerCase() === 'admin'
+                              ? 'default'
+                              : 'secondary'
+                          }
                           className="rounded-md"
                         >
                           {user.role?.name ?? 'Sem Perfil'}
                         </Badge>
                       </TableCell>
                       <TableCell onClick={(e) => e.stopPropagation()}>
-                        {(onEdit ?? onDelete) && (<DropdownMenu>
-                          <DropdownMenuTrigger className="inline-flex size-8 items-center justify-center rounded-md hover:bg-accent hover:text-accent-foreground text-muted-foreground transition-colors">
-                            <MoreHorizontal className="size-4" />
-                            <span className="sr-only">Abrir menu</span>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            {onEdit && (<DropdownMenuItem onClick={() => onEdit(user)}>
-                              <Eye className="mr-2 size-4" /> Visualizar
-                            </DropdownMenuItem>)}
-                            {onDelete && (
-                            <DropdownMenuItem
-                              onClick={() => onDelete(user)}
-                              className="text-destructive focus:text-destructive"
-                            >
-                              <Trash2 className="mr-2 size-4" /> Excluir
-                            </DropdownMenuItem>
-                          )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>)}
+                        {(onEdit ?? onDelete) && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger className="hover:bg-accent hover:text-accent-foreground text-muted-foreground inline-flex size-8 items-center justify-center rounded-md transition-colors">
+                              <MoreHorizontal className="size-4" />
+                              <span className="sr-only">Abrir menu</span>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              {onEdit && (
+                                <DropdownMenuItem onClick={() => onEdit(user)}>
+                                  <Eye className="mr-2 size-4" /> Visualizar
+                                </DropdownMenuItem>
+                              )}
+                              {onDelete && (
+                                <DropdownMenuItem
+                                  onClick={() => onDelete(user)}
+                                  className="text-destructive focus:text-destructive"
+                                >
+                                  <Trash2 className="mr-2 size-4" /> Excluir
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
                       </TableCell>
                     </TableRow>
                   );
                 })}
                 {users.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={5} className="py-10 text-center text-muted-foreground">
+                    <TableCell
+                      colSpan={5}
+                      className="text-muted-foreground py-10 text-center"
+                    >
                       Nenhum usuário encontrado.
                     </TableCell>
                   </TableRow>

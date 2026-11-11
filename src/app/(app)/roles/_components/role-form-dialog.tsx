@@ -93,15 +93,18 @@ export function RoleFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] flex flex-col gap-0 p-0 overflow-hidden rounded-md">
-        <DialogHeader className="px-6 py-4 border-b bg-background shrink-0">
-          <DialogTitle className="text-lg font-semibold flex items-center gap-2">
-            <ShieldCheck className="size-5 text-muted-foreground" />
+      <DialogContent className="flex flex-col gap-0 overflow-hidden rounded-md p-0 sm:max-w-[500px]">
+        <DialogHeader className="bg-background shrink-0 border-b px-6 py-4">
+          <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
+            <ShieldCheck className="text-muted-foreground size-5" />
             {isEditing ? 'Editar Cargo' : 'Novo Cargo'}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col">
+        <form
+          onSubmit={handleSubmit(handleFormSubmit)}
+          className="flex flex-col"
+        >
           <div className="max-h-[60vh] space-y-4 overflow-y-auto px-6 py-5">
             <div className="space-y-1.5">
               <Label htmlFor="name" className="text-xs font-medium">
@@ -111,10 +114,12 @@ export function RoleFormDialog({
                 id="name"
                 placeholder="Ex: Desenvolvedor, Gerente de Projetos"
                 {...register('name')}
-                className="text-sm !h-10 w-full rounded-md"
+                className="!h-10 w-full rounded-md text-sm"
               />
               {errors.name && (
-                <p className="text-[11px] text-destructive mt-1">{errors.name.message}</p>
+                <p className="text-destructive mt-1 text-[11px]">
+                  {errors.name.message}
+                </p>
               )}
             </div>
 
@@ -126,10 +131,12 @@ export function RoleFormDialog({
                 id="description"
                 placeholder="Descrição opcional das responsabilidades do cargo..."
                 {...register('description')}
-                className="text-sm rounded-md min-h-[90px] resize-none"
+                className="min-h-[90px] resize-none rounded-md text-sm"
               />
               {errors.description && (
-                <p className="text-[11px] text-destructive mt-1">{errors.description.message}</p>
+                <p className="text-destructive mt-1 text-[11px]">
+                  {errors.description.message}
+                </p>
               )}
             </div>
 
@@ -139,17 +146,21 @@ export function RoleFormDialog({
             </div>
           </div>
 
-          <DialogFooter className="px-6 py-3 border-t bg-muted/20 gap-2 sm:gap-0 shrink-0">
+          <DialogFooter className="bg-muted/20 shrink-0 gap-2 border-t px-6 py-3 sm:gap-0">
             <Button
               type="button"
               variant="ghost"
               onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
-              className="rounded-md hover:bg-destructive/10 hover:text-destructive transition-colors"
+              className="hover:bg-destructive/10 hover:text-destructive rounded-md transition-colors"
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={isSubmitting} className="rounded-md">
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="rounded-md"
+            >
               {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}
               {isEditing ? 'Salvar Alterações' : 'Criar Cargo'}
             </Button>

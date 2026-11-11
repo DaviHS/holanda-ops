@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import Image from "next/image";
+import Image from 'next/image';
 import {
   Sidebar,
   SidebarContent,
@@ -9,7 +9,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar";
+} from '@/components/ui/sidebar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,11 +18,11 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ChevronsUpDown, LogOut } from "lucide-react";
-import { NavMain } from "./nav-main";
-import { signOut, useSession } from "next-auth/react";
+} from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { ChevronsUpDown, LogOut } from 'lucide-react';
+import { NavMain } from './nav-main';
+import { signOut, useSession } from 'next-auth/react';
 
 interface CustomUser {
   id?: string;
@@ -38,24 +38,25 @@ export function AppSidebar() {
 
   const user = session?.user as CustomUser | undefined;
 
-  const userName = user?.name || "Usuário";
-  const userEmail = user?.email || "";
+  const userName = user?.name || 'Usuário';
+  const userEmail = user?.email || '';
 
   const getInitials = (name?: string) => {
-    if (!name) return "U";
-    const parts = name.trim().split(" ").filter(Boolean);
-    if (parts.length === 0) return "U";
-    if (parts.length === 1) return (parts[0] ?? "").substring(0, 2).toUpperCase();
+    if (!name) return 'U';
+    const parts = name.trim().split(' ').filter(Boolean);
+    if (parts.length === 0) return 'U';
+    if (parts.length === 1)
+      return (parts[0] ?? '').substring(0, 2).toUpperCase();
 
-    const first = parts[0]?.[0] ?? "";
-    const last = parts[parts.length - 1]?.[0] ?? "";
-    return (first + last).toUpperCase() || "U";
+    const first = parts[0]?.[0] ?? '';
+    const last = parts[parts.length - 1]?.[0] ?? '';
+    return (first + last).toUpperCase() || 'U';
   };
 
   const initials = getInitials(userName);
 
   const handleLogout = async () => {
-    await signOut({ callbackUrl: "/sign-in" });
+    await signOut({ callbackUrl: '/sign-in' });
   };
 
   return (
@@ -64,7 +65,7 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <div className="flex items-center gap-3 px-2 py-1.5">
-              <div className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border/40 shadow-xs">
+              <div className="border-border/40 relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-md border shadow-xs">
                 <Image
                   src="/android-chrome-192x192.png"
                   alt="Logo Holanda Ops"
@@ -75,10 +76,10 @@ export function AppSidebar() {
                 />
               </div>
               <div className="flex flex-col text-left leading-none">
-                <span className="font-extrabold tracking-wider text-base text-sidebar-foreground">
+                <span className="text-sidebar-foreground text-base font-extrabold tracking-wider">
                   HOLANDA
                 </span>
-                <span className="text-[10px] font-bold tracking-[0.25em] text-primary mt-0.5 uppercase">
+                <span className="text-primary mt-0.5 text-[10px] font-bold tracking-[0.25em] uppercase">
                   ops
                 </span>
               </div>
@@ -91,7 +92,7 @@ export function AppSidebar() {
         <NavMain />
       </SidebarContent>
 
-      <SidebarFooter className="px-2 pt-2 border-t border-border/60">
+      <SidebarFooter className="border-border/60 border-t px-2 pt-2">
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
@@ -99,22 +100,22 @@ export function AppSidebar() {
                 render={
                   <SidebarMenuButton
                     size="lg"
-                    className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground rounded-md w-full"
+                    className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground w-full rounded-md"
                   />
                 }
               >
-                <Avatar className="h-8 w-8 rounded-md border border-border">
-                  <AvatarFallback className="rounded-md bg-primary/10 text-primary font-semibold">
+                <Avatar className="border-border h-8 w-8 rounded-md border">
+                  <AvatarFallback className="bg-primary/10 text-primary rounded-md font-semibold">
                     {initials}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">{userName}</span>
-                  <span className="truncate text-xs text-muted-foreground">
+                  <span className="text-muted-foreground truncate text-xs">
                     {userEmail}
                   </span>
                 </div>
-                <ChevronsUpDown className="ml-auto size-4 text-muted-foreground" />
+                <ChevronsUpDown className="text-muted-foreground ml-auto size-4" />
               </DropdownMenuTrigger>
 
               <DropdownMenuContent
@@ -126,14 +127,16 @@ export function AppSidebar() {
                 <DropdownMenuGroup>
                   <DropdownMenuLabel className="p-0 font-normal">
                     <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                      <Avatar className="h-8 w-8 rounded-md border border-border">
-                        <AvatarFallback className="rounded-md bg-primary/10 text-primary font-semibold">
+                      <Avatar className="border-border h-8 w-8 rounded-md border">
+                        <AvatarFallback className="bg-primary/10 text-primary rounded-md font-semibold">
                           {initials}
                         </AvatarFallback>
                       </Avatar>
                       <div className="grid flex-1 text-left text-sm leading-tight">
-                        <span className="truncate font-semibold">{userName}</span>
-                        <span className="truncate text-xs text-muted-foreground">
+                        <span className="truncate font-semibold">
+                          {userName}
+                        </span>
+                        <span className="text-muted-foreground truncate text-xs">
                           {userEmail}
                         </span>
                       </div>
@@ -143,7 +146,7 @@ export function AppSidebar() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={handleLogout}
-                  className="cursor-pointer rounded-md text-destructive focus:bg-destructive/10 focus:text-destructive"
+                  className="text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer rounded-md"
                 >
                   <LogOut className="mr-2 size-4" />
                   Sair

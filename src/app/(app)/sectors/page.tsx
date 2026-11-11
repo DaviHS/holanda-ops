@@ -14,11 +14,18 @@ import { usePermissions } from '@/hooks/use-permissions';
 import { mutationFeedback } from '@/lib/mutation-feedback';
 import { SectorCard } from './_components/sector-card';
 import { SectorTable } from './_components/sector-table';
-import { SectorFormDialog, type SectorFormValues } from './_components/sector-form-dialog';
+import {
+  SectorFormDialog,
+  type SectorFormValues,
+} from './_components/sector-form-dialog';
 
 type Sector = RouterOutputs['sector']['list'][number];
 
-const plain = (value: string) => value.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+const plain = (value: string) =>
+  value
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase();
 
 export default function SectorsPage() {
   const { can } = usePermissions();
@@ -33,17 +40,31 @@ export default function SectorsPage() {
   const refresh = () => utils.sector.list.invalidate();
 
   const createMutation = api.sector.create.useMutation(
-    mutationFeedback({ success: 'Setor criado com sucesso!', error: 'Erro ao criar setor', onSuccess: refresh }),
+    mutationFeedback({
+      success: 'Setor criado com sucesso!',
+      error: 'Erro ao criar setor',
+      onSuccess: refresh,
+    }),
   );
   const updateMutation = api.sector.update.useMutation(
-    mutationFeedback({ success: 'Setor atualizado com sucesso!', error: 'Erro ao atualizar setor', onSuccess: refresh }),
+    mutationFeedback({
+      success: 'Setor atualizado com sucesso!',
+      error: 'Erro ao atualizar setor',
+      onSuccess: refresh,
+    }),
   );
   const deleteMutation = api.sector.delete.useMutation(
-    mutationFeedback({ success: 'Setor removido com sucesso!', error: 'Erro ao remover setor', onSuccess: refresh }),
+    mutationFeedback({
+      success: 'Setor removido com sucesso!',
+      error: 'Erro ao remover setor',
+      onSuccess: refresh,
+    }),
   );
 
   const query = plain(search.trim());
-  const filtered = items.filter((item) => plain(`${item.name} ${item.description ?? ''}`).includes(query));
+  const filtered = items.filter((item) =>
+    plain(`${item.name} ${item.description ?? ''}`).includes(query),
+  );
 
   const handleSubmit = async (data: SectorFormValues) => {
     if (dialog.editing) {
@@ -79,12 +100,21 @@ export default function SectorsPage() {
         }
       />
 
-      <SearchInput value={search} onChange={setSearch} placeholder="Buscar setor..." aria-label="Buscar setor" />
+      <SearchInput
+        value={search}
+        onChange={setSearch}
+        placeholder="Buscar setor..."
+        aria-label="Buscar setor"
+      />
 
       {isLoading ? (
         <LoadingState />
       ) : filtered.length === 0 ? (
-        <EmptyState icon={Building2} title="Nenhum setor encontrado" description="Cadastre o primeiro setor ou ajuste a busca." />
+        <EmptyState
+          icon={Building2}
+          title="Nenhum setor encontrado"
+          description="Cadastre o primeiro setor ou ajuste a busca."
+        />
       ) : (
         <>
           <div className="sm:hidden">

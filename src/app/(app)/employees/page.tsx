@@ -14,11 +14,18 @@ import { usePermissions } from '@/hooks/use-permissions';
 import { mutationFeedback } from '@/lib/mutation-feedback';
 import { EmployeeCard } from './_components/employee-card';
 import { EmployeeTable } from './_components/employee-table';
-import { EmployeeFormDialog, type EmployeeFormValues } from './_components/employee-form-dialog';
+import {
+  EmployeeFormDialog,
+  type EmployeeFormValues,
+} from './_components/employee-form-dialog';
 
 type Employee = RouterOutputs['employee']['list'][number];
 
-const plain = (value: string) => value.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+const plain = (value: string) =>
+  value
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase();
 
 export default function EmployeesPage() {
   const { can } = usePermissions();
@@ -35,17 +42,32 @@ export default function EmployeesPage() {
   const refresh = () => utils.employee.list.invalidate();
 
   const createMutation = api.employee.create.useMutation(
-    mutationFeedback({ success: 'Colaborador cadastrado com sucesso!', error: 'Erro ao cadastrar colaborador', onSuccess: refresh }),
+    mutationFeedback({
+      success: 'Colaborador cadastrado com sucesso!',
+      error: 'Erro ao cadastrar colaborador',
+      onSuccess: refresh,
+    }),
   );
   const updateMutation = api.employee.update.useMutation(
-    mutationFeedback({ success: 'Colaborador atualizado com sucesso!', error: 'Erro ao atualizar colaborador', onSuccess: refresh }),
+    mutationFeedback({
+      success: 'Colaborador atualizado com sucesso!',
+      error: 'Erro ao atualizar colaborador',
+      onSuccess: refresh,
+    }),
   );
   const deleteMutation = api.employee.delete.useMutation(
-    mutationFeedback({ success: 'Colaborador removido com sucesso!', error: 'Erro ao remover colaborador', onSuccess: refresh }),
+    mutationFeedback({
+      success: 'Colaborador removido com sucesso!',
+      error: 'Erro ao remover colaborador',
+      onSuccess: refresh,
+    }),
   );
 
   const query = plain(search.trim());
-  const filtered = items.filter((item) => plain(item.name).includes(query) || item.cpf.includes(search.trim()));
+  const filtered = items.filter(
+    (item) =>
+      plain(item.name).includes(query) || item.cpf.includes(search.trim()),
+  );
 
   const handleSubmit = async (data: EmployeeFormValues) => {
     if (dialog.editing) {
@@ -81,12 +103,21 @@ export default function EmployeesPage() {
         }
       />
 
-      <SearchInput value={search} onChange={setSearch} placeholder="Buscar por nome ou CPF..." aria-label="Buscar por nome ou CPF" />
+      <SearchInput
+        value={search}
+        onChange={setSearch}
+        placeholder="Buscar por nome ou CPF..."
+        aria-label="Buscar por nome ou CPF"
+      />
 
       {isLoading ? (
         <LoadingState />
       ) : filtered.length === 0 ? (
-        <EmptyState icon={Users} title="Nenhum funcionário encontrado" description="Cadastre o primeiro funcionário ou ajuste a busca." />
+        <EmptyState
+          icon={Users}
+          title="Nenhum funcionário encontrado"
+          description="Cadastre o primeiro funcionário ou ajuste a busca."
+        />
       ) : (
         <>
           <div className="sm:hidden">

@@ -1,10 +1,10 @@
 import { z } from 'zod';
-import { can, createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import { can, createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
 
 import { sectors } from '@/server/db/schema';
 import { and, eq, isNull } from 'drizzle-orm';
 
-const manageSectors = can("sectors.manage");
+const manageSectors = can('sectors.manage');
 
 export const sectorRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({ ctx }) => {
@@ -18,10 +18,7 @@ export const sectorRouter = createTRPCRouter({
     .input(z.object({ id: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
       return ctx.db.query.sectors.findFirst({
-        where: and(
-          eq(sectors.id, input.id),
-          isNull(sectors.deletedAt)
-        ),
+        where: and(eq(sectors.id, input.id), isNull(sectors.deletedAt)),
       });
     }),
 
@@ -30,7 +27,7 @@ export const sectorRouter = createTRPCRouter({
       z.object({
         name: z.string().min(1, 'Nome do setor é obrigatório'),
         description: z.string().optional().nullable(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const [newSector] = await ctx.db
@@ -50,7 +47,7 @@ export const sectorRouter = createTRPCRouter({
         id: z.string().uuid(),
         name: z.string().min(1, 'Nome do setor é obrigatório'),
         description: z.string().optional().nullable(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const [updatedSector] = await ctx.db
@@ -64,7 +61,7 @@ export const sectorRouter = createTRPCRouter({
         .returning();
 
       if (!updatedSector) {
-        throw new Error("Setor não encontrado ou já removido");
+        throw new Error('Setor não encontrado ou já removido');
       }
 
       return updatedSector;

@@ -1,10 +1,12 @@
-"use client";
+'use client';
 
-import { api } from "@/trpc/react";
-import type { Permission } from "@/lib/permissions";
+import { api } from '@/trpc/react';
+import type { Permission } from '@/lib/permissions';
 
 export function usePermissions() {
-  const { data, isPending } = api.access.me.useQuery(undefined, { staleTime: 60_000 });
+  const { data, isPending } = api.access.me.useQuery(undefined, {
+    staleTime: 60_000,
+  });
   const granted = new Set<string>(data?.permissions);
 
   return {
@@ -12,8 +14,9 @@ export function usePermissions() {
     isAdmin: data?.isAdmin ?? false,
     /** Verdadeiro se o usuário tem ao menos UMA das permissões (ou se nenhuma foi exigida). */
     can: (...permissions: Permission[]) =>
-      permissions.length === 0 || permissions.some((permission) => granted.has(permission)),
+      permissions.length === 0 ||
+      permissions.some((permission) => granted.has(permission)),
   };
 }
 
-export type CanFn = ReturnType<typeof usePermissions>["can"];
+export type CanFn = ReturnType<typeof usePermissions>['can'];

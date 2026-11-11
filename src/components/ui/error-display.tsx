@@ -1,15 +1,20 @@
-import { AlertCircle } from "lucide-react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
+import { AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 
 interface ErrorDisplayProps {
-  message: string
-  title?: string
-  onRetry?: () => void
-  className?: string
+  message: string;
+  title?: string;
+  onRetry?: () => void;
+  className?: string;
 }
 
-export function ErrorDisplay({ message, title = "Erro", onRetry, className = "mt-4" }: ErrorDisplayProps) {
+export function ErrorDisplay({
+  message,
+  title = 'Erro',
+  onRetry,
+  className = 'mt-4',
+}: ErrorDisplayProps) {
   return (
     <Alert variant="destructive" className={className}>
       <AlertCircle className="h-4 w-4" />
@@ -17,11 +22,17 @@ export function ErrorDisplay({ message, title = "Erro", onRetry, className = "mt
       <AlertDescription>
         <p>{message}</p>
         {onRetry && (
-          <Button type="button" size="sm" variant="outline" className="mt-2 bg-background text-foreground" onClick={onRetry}>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="bg-background text-foreground mt-2"
+            onClick={onRetry}
+          >
             Tentar de novo
           </Button>
         )}
       </AlertDescription>
     </Alert>
-  )
+  );
 }

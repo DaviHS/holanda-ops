@@ -6,7 +6,16 @@ import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Eye, EyeOff, Loader2, Lock, Mail, Activity, Users, Layers } from 'lucide-react';
+import {
+  Eye,
+  EyeOff,
+  Loader2,
+  Lock,
+  Mail,
+  Activity,
+  Users,
+  Layers,
+} from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,7 +26,10 @@ import { signIn } from 'next-auth/react';
 import { toast } from 'sonner';
 
 const signInSchema = z.object({
-  email: z.string().min(1, 'Informe seu e-mail').email('Endereço de e-mail inválido'),
+  email: z
+    .string()
+    .min(1, 'Informe seu e-mail')
+    .email('Endereço de e-mail inválido'),
   password: z.string().min(1, 'Informe sua senha'),
 });
 
@@ -25,7 +37,7 @@ type SignInValues = z.infer<typeof signInSchema>;
 
 export default function SignInPage() {
   const router = useRouter();
-  
+
   const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
@@ -64,7 +76,8 @@ export default function SignInPage() {
       loading: 'Autenticando...',
       success: 'Login realizado com sucesso!',
       error: (err: { message?: string }) => {
-        const message = err.message || 'Ocorreu um erro ao tentar realizar o login.';
+        const message =
+          err.message || 'Ocorreu um erro ao tentar realizar o login.';
         setAuthError(message);
         return message;
       },
@@ -73,12 +86,12 @@ export default function SignInPage() {
 
   return (
     <div className="grid min-h-screen w-full lg:grid-cols-2">
-      <div className="hidden lg:flex flex-col justify-between p-12 bg-zinc-950 text-white relative overflow-hidden border-r border-zinc-800">
-        <div className="absolute inset-0 bg-gradient-to-tr from-primary/15 via-transparent to-transparent opacity-60" />
-        <div className="absolute -left-20 -bottom-20 size-96 rounded-full bg-primary/10 blur-3xl" />
+      <div className="relative hidden flex-col justify-between overflow-hidden border-r border-zinc-800 bg-zinc-950 p-12 text-white lg:flex">
+        <div className="from-primary/15 absolute inset-0 bg-gradient-to-tr via-transparent to-transparent opacity-60" />
+        <div className="bg-primary/10 absolute -bottom-20 -left-20 size-96 rounded-full blur-3xl" />
 
         <div className="relative z-10 flex items-center gap-3">
-          <div className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-md border border-zinc-800 shadow-lg shadow-primary/10">
+          <div className="shadow-primary/10 relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-md border border-zinc-800 shadow-lg">
             <Image
               src="/android-chrome-192x192.png"
               alt="Logo Holanda Ops"
@@ -91,25 +104,26 @@ export default function SignInPage() {
           <span className="text-xl font-bold tracking-tight">Holanda OPS</span>
         </div>
 
-        <div className="relative z-10 space-y-6 max-w-lg my-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-medium text-primary">
+        <div className="relative z-10 my-auto max-w-lg space-y-6">
+          <div className="bg-primary/10 border-primary/20 text-primary inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium">
             <Activity className="size-3.5" />
             <span>Controle e Operação em Tempo Real</span>
           </div>
 
           <div className="space-y-3">
-            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl text-balance leading-tight">
+            <h2 className="text-3xl leading-tight font-extrabold tracking-tight text-balance sm:text-4xl">
               Acelere sua gestão operacional com precisão.
             </h2>
-            <p className="text-sm text-zinc-400 leading-relaxed">
-              Centralize o controle de equipes, escalas e setores em uma única plataforma intuitiva e de alta performance.
+            <p className="text-sm leading-relaxed text-zinc-400">
+              Centralize o controle de equipes, escalas e setores em uma única
+              plataforma intuitiva e de alta performance.
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 pt-4 border-t border-zinc-800/80">
+          <div className="grid grid-cols-2 gap-4 border-t border-zinc-800/80 pt-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-md bg-zinc-900 border border-zinc-800">
-                <Users className="size-4 text-primary" />
+              <div className="rounded-md border border-zinc-800 bg-zinc-900 p-2">
+                <Users className="text-primary size-4" />
               </div>
               <div className="text-xs">
                 <p className="font-semibold text-white">Gestão de Pessoas</p>
@@ -117,8 +131,8 @@ export default function SignInPage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-md bg-zinc-900 border border-zinc-800">
-                <Layers className="size-4 text-primary" />
+              <div className="rounded-md border border-zinc-800 bg-zinc-900 p-2">
+                <Layers className="text-primary size-4" />
               </div>
               <div className="text-xs">
                 <p className="font-semibold text-white">Acessos Nativos</p>
@@ -128,19 +142,19 @@ export default function SignInPage() {
           </div>
         </div>
 
-        <div className="relative z-10 flex items-center justify-between text-xs text-zinc-500 border-t border-zinc-800/80 pt-6">
+        <div className="relative z-10 flex items-center justify-between border-t border-zinc-800/80 pt-6 text-xs text-zinc-500">
           <span>&copy; {new Date().getFullYear()} Holanda OPS</span>
           <span className="flex items-center gap-2">
-            <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="size-2 animate-pulse rounded-full bg-emerald-500" />
             Servidores Operacionais
           </span>
         </div>
       </div>
 
-      <div className="flex flex-col justify-between p-6 sm:p-10 lg:p-12 bg-background">
+      <div className="bg-background flex flex-col justify-between p-6 sm:p-10 lg:p-12">
         <div className="flex items-center justify-between lg:justify-end">
           <div className="flex items-center gap-2.5 lg:hidden">
-            <div className="relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border shadow-xs">
+            <div className="border-border relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-md border shadow-xs">
               <Image
                 src="/android-chrome-192x192.png"
                 alt="Logo Holanda Ops"
@@ -150,14 +164,18 @@ export default function SignInPage() {
                 priority
               />
             </div>
-            <span className="text-base font-bold tracking-tight">Holanda OPS</span>
+            <span className="text-base font-bold tracking-tight">
+              Holanda OPS
+            </span>
           </div>
         </div>
 
         <div className="mx-auto my-auto w-full max-w-sm space-y-6 py-8">
           <div className="space-y-1.5">
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Acessar Conta</h1>
-            <p className="text-xs sm:text-sm text-muted-foreground">
+            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+              Acessar Conta
+            </h1>
+            <p className="text-muted-foreground text-xs sm:text-sm">
               Digite seu e-mail e senha para entrar no sistema
             </p>
           </div>
@@ -176,18 +194,18 @@ export default function SignInPage() {
                 E-mail Profissional
               </Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                <Mail className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
                 <Input
                   id="email"
                   type="email"
                   placeholder="seu.email@empresa.com"
                   autoComplete="email"
-                  className="pl-9 text-sm !h-10 rounded-md"
+                  className="!h-10 rounded-md pl-9 text-sm"
                   {...register('email')}
                 />
               </div>
               {errors.email && (
-                <p className="text-[11px] text-destructive font-medium">
+                <p className="text-destructive text-[11px] font-medium">
                   {errors.email.message}
                 </p>
               )}
@@ -200,25 +218,25 @@ export default function SignInPage() {
                 </Label>
                 <Link
                   href="/forgot-password"
-                  className="text-xs font-medium text-primary hover:underline"
+                  className="text-primary text-xs font-medium hover:underline"
                 >
                   Esqueceu a senha?
                 </Link>
               </div>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                <Lock className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
                   autoComplete="current-password"
-                  className="pl-9 pr-9 text-sm !h-10 rounded-md"
+                  className="!h-10 rounded-md pr-9 pl-9 text-sm"
                   {...register('password')}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
                   tabIndex={-1}
                 >
                   {showPassword ? (
@@ -229,7 +247,7 @@ export default function SignInPage() {
                 </button>
               </div>
               {errors.password && (
-                <p className="text-[11px] text-destructive font-medium">
+                <p className="text-destructive text-[11px] font-medium">
                   {errors.password.message}
                 </p>
               )}
@@ -238,7 +256,7 @@ export default function SignInPage() {
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="w-full !h-10 rounded-md font-medium text-sm transition-all shadow-sm"
+              className="!h-10 w-full rounded-md text-sm font-medium shadow-sm transition-all"
             >
               {isSubmitting ? (
                 <>
@@ -252,8 +270,9 @@ export default function SignInPage() {
           </form>
         </div>
 
-        <div className="text-center text-xs text-muted-foreground lg:hidden">
-          &copy; {new Date().getFullYear()} Holanda OPS. Todos os direitos reservados.
+        <div className="text-muted-foreground text-center text-xs lg:hidden">
+          &copy; {new Date().getFullYear()} Holanda OPS. Todos os direitos
+          reservados.
         </div>
       </div>
     </div>

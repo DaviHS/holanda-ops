@@ -1,9 +1,13 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { ChevronRight } from "lucide-react";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { ChevronRight } from 'lucide-react';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -14,15 +18,22 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   useSidebar,
-} from "@/components/ui/sidebar";
-import { NAVIGATION, filterNavigation, isGroup, isLinkActive, isSection, type NavLink } from "@/config/navigation";
-import { usePermissions } from "@/hooks/use-permissions";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/sidebar';
+import {
+  NAVIGATION,
+  filterNavigation,
+  isGroup,
+  isLinkActive,
+  isSection,
+  type NavLink,
+} from '@/config/navigation';
+import { usePermissions } from '@/hooks/use-permissions';
+import { cn } from '@/lib/utils';
 
 const topLevelButton = cn(
-  "h-9 rounded-md px-3 text-sm font-medium transition-colors",
-  "data-active:bg-primary data-active:text-primary-foreground",
-  "data-active:hover:bg-primary/90 data-active:hover:text-primary-foreground",
+  'h-9 rounded-md px-3 text-sm font-medium transition-colors',
+  'data-active:bg-primary data-active:text-primary-foreground',
+  'data-active:hover:bg-primary/90 data-active:hover:text-primary-foreground',
 );
 
 function useCloseOnNavigate() {
@@ -42,7 +53,13 @@ function TopLevelLink({ link, pathname }: { link: NavLink; pathname: string }) {
         tooltip={link.title}
         isActive={isActive}
         className={topLevelButton}
-        render={<Link href={link.href} aria-current={isActive ? "page" : undefined} onClick={closeOnNavigate} />}
+        render={
+          <Link
+            href={link.href}
+            aria-current={isActive ? 'page' : undefined}
+            onClick={closeOnNavigate}
+          />
+        }
       >
         <link.icon />
         <span>{link.title}</span>
@@ -59,8 +76,14 @@ function SubLink({ link, pathname }: { link: NavLink; pathname: string }) {
     <SidebarMenuSubItem>
       <SidebarMenuSubButton
         isActive={isActive}
-        className="h-8 rounded-md data-active:bg-muted data-active:font-medium data-active:text-foreground"
-        render={<Link href={link.href} aria-current={isActive ? "page" : undefined} onClick={closeOnNavigate} />}
+        className="data-active:bg-muted data-active:text-foreground h-8 rounded-md data-active:font-medium"
+        render={
+          <Link
+            href={link.href}
+            aria-current={isActive ? 'page' : undefined}
+            onClick={closeOnNavigate}
+          />
+        }
       >
         <link.icon />
         <span className="truncate">{link.title}</span>
@@ -82,7 +105,7 @@ export function NavMain() {
         if (isSection(entry)) {
           return (
             <SidebarGroup key={entry.section} className="p-0 pt-5 first:pt-0">
-              <SidebarGroupLabel className="p-0 text-xs font-medium uppercase text-sidebar-foreground">
+              <SidebarGroupLabel className="text-sidebar-foreground p-0 text-xs font-medium uppercase">
                 {entry.section}
               </SidebarGroupLabel>
             </SidebarGroup>
@@ -90,7 +113,9 @@ export function NavMain() {
         }
 
         if (isGroup(entry)) {
-          const groupActive = entry.children.some((child) => isLinkActive(pathname, child.href));
+          const groupActive = entry.children.some((child) =>
+            isLinkActive(pathname, child.href),
+          );
           return (
             <SidebarGroup key={entry.title} className="p-0">
               <SidebarMenu>
@@ -99,13 +124,16 @@ export function NavMain() {
                     <CollapsibleTrigger
                       className="w-full"
                       render={
-                        <SidebarMenuButton tooltip={entry.title} className="h-9 rounded-md px-3 text-sm font-medium">
+                        <SidebarMenuButton
+                          tooltip={entry.title}
+                          className="h-9 rounded-md px-3 text-sm font-medium"
+                        >
                           <entry.icon />
                           <span>{entry.title}</span>
                           <ChevronRight
                             className={cn(
-                              "ml-auto transition-transform duration-200 group-data-open/collapsible:rotate-90",
-                              groupActive && "text-primary",
+                              'ml-auto transition-transform duration-200 group-data-open/collapsible:rotate-90',
+                              groupActive && 'text-primary',
                             )}
                           />
                         </SidebarMenuButton>
@@ -114,7 +142,11 @@ export function NavMain() {
                     <CollapsibleContent>
                       <SidebarMenuSub className="me-0 pe-0">
                         {entry.children.map((child) => (
-                          <SubLink key={child.href} link={child} pathname={pathname} />
+                          <SubLink
+                            key={child.href}
+                            link={child}
+                            pathname={pathname}
+                          />
                         ))}
                       </SidebarMenuSub>
                     </CollapsibleContent>

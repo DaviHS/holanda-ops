@@ -1,22 +1,29 @@
-"use client"
+'use client';
 
-import { Loader2, Search, X } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { cn } from "@/lib/utils"
+import { Loader2, Search, X } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 interface SearchInputProps {
-  value: string
-  onChange: (value: string) => void
-  placeholder?: string
-  isLoading?: boolean
-  className?: string
-  "aria-label"?: string
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  isLoading?: boolean;
+  className?: string;
+  'aria-label'?: string;
 }
 
-export function SearchInput({ value, onChange, placeholder = "Buscar…", isLoading = false, className, ...props }: SearchInputProps) {
+export function SearchInput({
+  value,
+  onChange,
+  placeholder = 'Buscar…',
+  isLoading = false,
+  className,
+  ...props
+}: SearchInputProps) {
   return (
-    <div className={cn("relative w-full", className)}>
-      <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+    <div className={cn('relative w-full', className)}>
+      <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
       <Input
         type="search"
         inputMode="search"
@@ -24,18 +31,18 @@ export function SearchInput({ value, onChange, placeholder = "Buscar…", isLoad
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        aria-label={props["aria-label"] ?? placeholder}
-        className="pl-9 pr-10 [&::-webkit-search-cancel-button]:hidden"
+        aria-label={props['aria-label'] ?? placeholder}
+        className="pr-10 pl-9 [&::-webkit-search-cancel-button]:hidden"
       />
-      <div className="absolute right-1 top-1/2 flex -translate-y-1/2 items-center">
+      <div className="absolute top-1/2 right-1 flex -translate-y-1/2 items-center">
         {isLoading ? (
-          <Loader2 className="mr-2 size-4 animate-spin text-muted-foreground" />
+          <Loader2 className="text-muted-foreground mr-2 size-4 animate-spin" />
         ) : (
-          value !== "" && (
+          value !== '' && (
             <button
               type="button"
-              onClick={() => onChange("")}
-              className="flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
+              onClick={() => onChange('')}
+              className="text-muted-foreground hover:bg-accent hover:text-foreground flex size-8 items-center justify-center rounded-md"
               aria-label="Limpar busca"
             >
               <X className="size-4" />
@@ -44,5 +51,5 @@ export function SearchInput({ value, onChange, placeholder = "Buscar…", isLoad
         )}
       </div>
     </div>
-  )
+  );
 }

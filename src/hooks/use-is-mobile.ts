@@ -1,11 +1,11 @@
-import * as React from "react"
+import * as React from 'react';
 
-const MOBILE_QUERY = "(max-width: 767px)"
+const MOBILE_QUERY = '(max-width: 767px)';
 
 function subscribe(onChange: () => void) {
-  const mql = window.matchMedia(MOBILE_QUERY)
-  mql.addEventListener("change", onChange)
-  return () => mql.removeEventListener("change", onChange)
+  const mql = window.matchMedia(MOBILE_QUERY);
+  mql.addEventListener('change', onChange);
+  return () => mql.removeEventListener('change', onChange);
 }
 
 export function useIsMobile() {
@@ -13,5 +13,5 @@ export function useIsMobile() {
     subscribe,
     () => window.matchMedia(MOBILE_QUERY).matches,
     () => false,
-  )
+  );
 }

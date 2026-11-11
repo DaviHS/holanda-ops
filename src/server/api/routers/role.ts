@@ -1,11 +1,11 @@
 import { z } from 'zod';
-import { can, createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import { can, createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
 
 import { roles } from '@/server/db/schema';
 import { roleSchema, roleUpdateSchema } from '@/validators/role';
 import { and, eq, isNull } from 'drizzle-orm';
 
-const manageRoles = can("roles.manage");
+const manageRoles = can('roles.manage');
 
 export const roleRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({ ctx }) => {
@@ -19,26 +19,21 @@ export const roleRouter = createTRPCRouter({
     .input(z.object({ id: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
       return ctx.db.query.roles.findFirst({
-        where: and(
-          eq(roles.id, input.id),
-          isNull(roles.deletedAt)
-        ),
+        where: and(eq(roles.id, input.id), isNull(roles.deletedAt)),
       });
     }),
 
-  create: manageRoles
-    .input(roleSchema)
-    .mutation(async ({ ctx, input }) => {
-      const [newRole] = await ctx.db
-        .insert(roles)
-        .values({
-          name: input.name,
-          description: input.description ?? null,
-        })
-        .returning();
+  create: manageRoles.input(roleSchema).mutation(async ({ ctx, input }) => {
+    const [newRole] = await ctx.db
+      .insert(roles)
+      .values({
+        name: input.name,
+        description: input.description ?? null,
+      })
+      .returning();
 
-      return newRole;
-    }),
+    return newRole;
+  }),
 
   update: manageRoles
     .input(roleUpdateSchema)
@@ -54,7 +49,7 @@ export const roleRouter = createTRPCRouter({
         .returning();
 
       if (!updatedRole) {
-        throw new Error("Cargo não encontrado ou já removido");
+        throw new Error('Cargo não encontrado ou já removido');
       }
 
       return updatedRole;

@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
-import { authProxy } from "@/server/auth/edge";
+import { NextResponse } from 'next/server';
+import { authProxy } from '@/server/auth/edge';
 
-const SIGN_IN = "/sign-in";
-const HOME = "/";
+const SIGN_IN = '/sign-in';
+const HOME = '/';
 
 export default authProxy((request) => {
   const { nextUrl, auth: session } = request;
@@ -14,11 +14,11 @@ export default authProxy((request) => {
     return NextResponse.next();
   }
 
-  if (pathname.startsWith("/register")) return NextResponse.next();
+  if (pathname.startsWith('/register')) return NextResponse.next();
 
   if (!isLoggedIn) {
     const signIn = new URL(SIGN_IN, nextUrl);
-    signIn.searchParams.set("callbackUrl", `${pathname}${search}`);
+    signIn.searchParams.set('callbackUrl', `${pathname}${search}`);
     return NextResponse.redirect(signIn);
   }
 
@@ -27,6 +27,6 @@ export default authProxy((request) => {
 
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|icons|sw.js|manifest.webmanifest|robots.txt|.*\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    '/((?!api|_next/static|_next/image|favicon.ico|icons|sw.js|manifest.webmanifest|robots.txt|.*\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
   ],
 };

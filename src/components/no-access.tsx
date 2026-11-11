@@ -1,5 +1,5 @@
-import { ShieldAlert } from "lucide-react";
-import { EmptyState } from "@/components/ui/empty-state";
+import { ShieldAlert } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
 
 export function NoAccess() {
   return (

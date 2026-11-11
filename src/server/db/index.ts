@@ -1,7 +1,7 @@
 import { drizzle } from 'drizzle-orm/node-postgres'; // ou 'drizzle-orm/postgres-js' / '@libsql/client'
 import { Pool } from 'pg';
 
-import * as schema from './schema'; 
+import * as schema from './schema';
 
 const globalForDb = globalThis as unknown as {
   conn: Pool | undefined;

@@ -15,14 +15,21 @@ import { sectors } from './sectors';
 import { shifts } from './shifts';
 import { softDeleteAndTimestamps } from './helpers';
 
-export const employeeStatusEnum = pgEnum("employee_status", [
-  "pending",
-  "active",
-  "suspended",
-  "inactive",
+export const employeeStatusEnum = pgEnum('employee_status', [
+  'pending',
+  'active',
+  'suspended',
+  'inactive',
 ]);
 
-export const shirtSizeEnum = pgEnum('shirt_size', ['PP', 'P', 'M', 'G', 'GG', 'XGG']);
+export const shirtSizeEnum = pgEnum('shirt_size', [
+  'PP',
+  'P',
+  'M',
+  'G',
+  'GG',
+  'XGG',
+]);
 
 export type UniformStatus = {
   shirt: boolean;
@@ -38,7 +45,9 @@ export const employees = pgTable(
     userId: uuid('user_id')
       .unique()
       .references(() => users.id, { onDelete: 'set null' }),
-    shiftId: uuid('shift_id').references(() => shifts.id, { onDelete: 'set null' }),
+    shiftId: uuid('shift_id').references(() => shifts.id, {
+      onDelete: 'set null',
+    }),
     name: varchar('name', { length: 255 }).notNull(),
     cpf: varchar('cpf', { length: 14 }).notNull().unique(),
     rg: varchar('rg', { length: 20 }),
@@ -61,7 +70,7 @@ export const employees = pgTable(
     index('idx_employees_status').on(table.status),
     index('idx_employees_user_id').on(table.userId),
     index('idx_employees_shift_id').on(table.shiftId),
-  ]
+  ],
 );
 
 export const employeeSectors = pgTable(
@@ -79,7 +88,7 @@ export const employeeSectors = pgTable(
     primaryKey({ columns: [table.employeeId, table.sectorId] }),
     index('idx_employee_sectors_employee_id').on(table.employeeId),
     index('idx_employee_sectors_sector_id').on(table.sectorId),
-  ]
+  ],
 );
 
 export type Employee = typeof employees.$inferSelect;

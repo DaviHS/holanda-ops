@@ -1,22 +1,27 @@
-"use client";
+'use client';
 
-import { Download, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Download, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 
 type InstallPromptEvent = Event & {
   prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 };
 
 type StandaloneNavigator = Navigator & { standalone?: boolean };
 
 export function PwaInstallPrompt() {
-  const [installEvent, setInstallEvent] = useState<InstallPromptEvent | null>(null);
+  const [installEvent, setInstallEvent] = useState<InstallPromptEvent | null>(
+    null,
+  );
   const [dismissed, setDismissed] = useState(() => {
     try {
-      return typeof window !== "undefined" && window.localStorage.getItem("holanda-ops-install-dismissed") === "true";
+      return (
+        typeof window !== 'undefined' &&
+        window.localStorage.getItem('holanda-ops-install-dismissed') === 'true'
+      );
     } catch {
       return false;
     }
@@ -24,7 +29,10 @@ export function PwaInstallPrompt() {
 
   useEffect(() => {
     const navigatorWithStandalone = window.navigator as StandaloneNavigator;
-    if (window.matchMedia("(display-mode: standalone)").matches || navigatorWithStandalone.standalone) {
+    if (
+      window.matchMedia('(display-mode: standalone)').matches ||
+      navigatorWithStandalone.standalone
+    ) {
       return;
     }
 
@@ -35,8 +43,12 @@ export function PwaInstallPrompt() {
       setInstallEvent(event as InstallPromptEvent);
     };
 
-    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-    return () => window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    return () =>
+      window.removeEventListener(
+        'beforeinstallprompt',
+        handleBeforeInstallPrompt,
+      );
   }, [dismissed]);
 
   if (!installEvent || dismissed) {
@@ -46,27 +58,35 @@ export function PwaInstallPrompt() {
   const install = async () => {
     await installEvent.prompt();
     const choice = await installEvent.userChoice;
-    if (choice.outcome === "accepted") {
+    if (choice.outcome === 'accepted') {
       setInstallEvent(null);
     }
   };
 
   const dismiss = () => {
-    window.localStorage.setItem("holanda-ops-install-dismissed", "true");
+    window.localStorage.setItem('holanda-ops-install-dismissed', 'true');
     setDismissed(true);
   };
 
   return (
-    <aside className="fixed inset-x-4 bottom-4 z-50 flex items-center gap-3 rounded-md border bg-background p-3 shadow-lg md:left-auto md:max-w-sm">
+    <aside className="bg-background fixed inset-x-4 bottom-4 z-50 flex items-center gap-3 rounded-md border p-3 shadow-lg md:left-auto md:max-w-sm">
       <div className="min-w-0 flex-1">
         <p className="font-medium">Instale o Holanda OPS</p>
-        <p className="text-sm text-muted-foreground">Acesse mais rápido pelo seu dispositivo.</p>
+        <p className="text-muted-foreground text-sm">
+          Acesse mais rápido pelo seu dispositivo.
+        </p>
       </div>
       <Button type="button" size="sm" onClick={install}>
         <Download />
         Instalar
       </Button>
-      <Button type="button" variant="ghost" size="icon" aria-label="Dispensar" onClick={dismiss}>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        aria-label="Dispensar"
+        onClick={dismiss}
+      >
         <X />
       </Button>
     </aside>

@@ -7,15 +7,15 @@
  * need to use are documented accordingly near the end.
  */
 
-import { initTRPC, TRPCError } from "@trpc/server";
-import superjson from "superjson";
-import { ZodError } from "zod";
+import { initTRPC, TRPCError } from '@trpc/server';
+import superjson from 'superjson';
+import { ZodError } from 'zod';
 
-import { auth } from "@/server/auth";
-import { db } from "@/server/db";
-import { loadAccess } from "@/server/access";
-import { recordAudit } from "@/server/audit";
-import type { Permission } from "@/lib/permissions";
+import { auth } from '@/server/auth';
+import { db } from '@/server/db';
+import { loadAccess } from '@/server/access';
+import { recordAudit } from '@/server/audit';
+import type { Permission } from '@/lib/permissions';
 
 /**
  * 1. CONTEXT
@@ -126,7 +126,7 @@ export const protectedProcedure = t.procedure
   .use(timingMiddleware)
   .use(({ ctx, next }) => {
     if (!ctx.session?.user) {
-      throw new TRPCError({ code: "UNAUTHORIZED" });
+      throw new TRPCError({ code: 'UNAUTHORIZED' });
     }
     return next({
       ctx: {
@@ -135,7 +135,6 @@ export const protectedProcedure = t.procedure
       },
     });
   });
-
 
 /**
  * Procedure que exige ao menos UMA das permissões informadas (administradores passam sempre).
@@ -146,20 +145,30 @@ export const can = (...permissions: [Permission, ...Permission[]]) =>
     const userId = ctx.session.user.id;
     const access = await loadAccess(userId);
     if (!permissions.some((permission) => access.permissions.has(permission))) {
-      throw new TRPCError({ code: "FORBIDDEN", message: "Você não tem permissão para esta ação." });
+      throw new TRPCError({
+        code: 'FORBIDDEN',
+        message: 'Você não tem permissão para esta ação.',
+      });
     }
 
-    const rawInput: unknown = type === "mutation" ? await getRawInput().catch(() => null) : null;
+    const rawInput: unknown =
+      type === 'mutation' ? await getRawInput().catch(() => null) : null;
     const result = await next({ ctx: { ...ctx, access } });
 
-    if (type === "mutation" && result.ok) {
-      const fields = rawInput && typeof rawInput === "object" ? (rawInput as Record<string, unknown>) : {};
+    if (type === 'mutation' && result.ok) {
+      const fields =
+        rawInput && typeof rawInput === 'object'
+          ? (rawInput as Record<string, unknown>)
+          : {};
       const target = fields.name ?? fields.email ?? fields.id;
       await recordAudit({
         userId,
-        userLabel: ctx.session.user.name ?? ctx.session.user.email ?? `Usuário ${userId}`,
+        userLabel:
+          ctx.session.user.name ??
+          ctx.session.user.email ??
+          `Usuário ${userId}`,
         action: path,
-        target: typeof target === "string" ? target : null,
+        target: typeof target === 'string' ? target : null,
         input: rawInput,
       });
     }

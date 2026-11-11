@@ -15,56 +15,63 @@ interface UserCardProps {
 }
 
 export function UserCard({ user, onEdit, onDelete }: UserCardProps) {
-
-  const displayName = user.employee?.name ?? user.email.split('@')[0] ?? 'Usuário';
+  const displayName =
+    user.employee?.name ?? user.email.split('@')[0] ?? 'Usuário';
   const roleName = user.role?.name ?? 'Sem Perfil';
 
   return (
     <>
-      <Card 
-        className="mb-3 cursor-pointer hover:bg-muted/10 transition-colors relative group"
+      <Card
+        className="hover:bg-muted/10 group relative mb-3 cursor-pointer transition-colors"
         onClick={() => onEdit?.(user)}
       >
         <CardContent className="p-4">
           <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-xs">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-bold">
                 {displayName.substring(0, 2).toUpperCase()}
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <p className="font-semibold truncate">{displayName}</p>
-                  <Badge 
-                    variant={roleName.toLowerCase() === 'admin' ? 'default' : 'secondary'} 
-                    className="text-[10px] px-1.5 py-0 h-4 rounded-md"
+                  <p className="truncate font-semibold">{displayName}</p>
+                  <Badge
+                    variant={
+                      roleName.toLowerCase() === 'admin'
+                        ? 'default'
+                        : 'secondary'
+                    }
+                    className="h-4 rounded-md px-1.5 py-0 text-[10px]"
                   >
                     {roleName}
                   </Badge>
                 </div>
-                <p className="text-xs text-muted-foreground truncate font-mono mt-0.5">
+                <p className="text-muted-foreground mt-0.5 truncate font-mono text-xs">
                   {user.email}
                 </p>
                 {user.employee?.name && (
-                  <p className="text-[11px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1 mt-1">
+                  <p className="mt-1 flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400">
                     <UserCheck className="size-3" /> {user.employee.name}
                   </p>
                 )}
               </div>
             </div>
-            
-            <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+
+            <div
+              className="flex items-center gap-1"
+              onClick={(e) => e.stopPropagation()}
+            >
               {onDelete && (
                 <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="size-8 text-muted-foreground hover:text-destructive"
-                onClick={() => onDelete(user)}
-              >
-                <Trash2 className="size-4" />
-              </Button>
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="text-muted-foreground hover:text-destructive size-8"
+                  onClick={() => onDelete(user)}
+                >
+                  <Trash2 className="size-4" />
+                </Button>
               )}
-              <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+              <ChevronRight className="text-muted-foreground size-4 shrink-0" />
             </div>
           </div>
         </CardContent>

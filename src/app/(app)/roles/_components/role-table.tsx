@@ -29,10 +29,9 @@ interface RoleTableProps {
 }
 
 export function RoleTable({ roles, onEdit, onDelete }: RoleTableProps) {
-
   return (
     <>
-      <Card className="rounded-md overflow-hidden">
+      <Card className="overflow-hidden rounded-md">
         <ScrollArea className="w-full">
           <CardContent className="p-0">
             <Table>
@@ -48,11 +47,11 @@ export function RoleTable({ roles, onEdit, onDelete }: RoleTableProps) {
                   <TableRow
                     key={role.id}
                     onClick={() => onEdit?.(role)}
-                    className="cursor-pointer hover:bg-muted/20 transition-colors"
+                    className="hover:bg-muted/20 cursor-pointer transition-colors"
                   >
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <div className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+                        <div className="bg-primary/10 text-primary flex size-9 items-center justify-center rounded-full">
                           <ShieldCheck className="size-4" />
                         </div>
                         <div>
@@ -60,35 +59,42 @@ export function RoleTable({ roles, onEdit, onDelete }: RoleTableProps) {
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
+                    <TableCell className="text-muted-foreground text-xs">
                       {orDash(role.description)}
                     </TableCell>
                     <TableCell onClick={(e) => e.stopPropagation()}>
-                      {(onEdit ?? onDelete) && (<DropdownMenu>
-                        <DropdownMenuTrigger className="inline-flex size-8 items-center justify-center rounded-md hover:bg-accent hover:text-accent-foreground text-muted-foreground transition-colors">
-                          <MoreHorizontal className="size-4" />
-                          <span className="sr-only">Abrir menu</span>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          {onEdit && (<DropdownMenuItem onClick={() => onEdit(role)}>
-                            <Eye className="mr-2 size-4" /> Visualizar
-                          </DropdownMenuItem>)}
-                          {onDelete && (
-                            <DropdownMenuItem
-                              onClick={() => onDelete(role)}
-                              className="text-destructive focus:text-destructive"
-                            >
-                              <Trash2 className="mr-2 size-4" /> Excluir
-                            </DropdownMenuItem>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>)}
+                      {(onEdit ?? onDelete) && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger className="hover:bg-accent hover:text-accent-foreground text-muted-foreground inline-flex size-8 items-center justify-center rounded-md transition-colors">
+                            <MoreHorizontal className="size-4" />
+                            <span className="sr-only">Abrir menu</span>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {onEdit && (
+                              <DropdownMenuItem onClick={() => onEdit(role)}>
+                                <Eye className="mr-2 size-4" /> Visualizar
+                              </DropdownMenuItem>
+                            )}
+                            {onDelete && (
+                              <DropdownMenuItem
+                                onClick={() => onDelete(role)}
+                                className="text-destructive focus:text-destructive"
+                              >
+                                <Trash2 className="mr-2 size-4" /> Excluir
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}
                 {roles.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={3} className="py-10 text-center text-muted-foreground">
+                    <TableCell
+                      colSpan={3}
+                      className="text-muted-foreground py-10 text-center"
+                    >
                       Nenhum cargo encontrado.
                     </TableCell>
                   </TableRow>

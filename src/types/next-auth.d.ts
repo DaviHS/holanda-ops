@@ -1,8 +1,8 @@
-import { type DefaultSession } from "next-auth";
+import { type DefaultSession } from 'next-auth';
 
-type UserStatus = "active" | "inactive" | "suspended";
+type UserStatus = 'active' | 'inactive' | 'suspended';
 
-declare module "next-auth" {
+declare module 'next-auth' {
   interface User {
     id?: string;
     roleId?: string;
@@ -16,11 +16,11 @@ declare module "next-auth" {
       roleId: string;
       status: UserStatus;
       employeeId?: string | null;
-    } & DefaultSession["user"];
+    } & DefaultSession['user'];
   }
 }
 
-declare module "@auth/core/jwt" {
+declare module '@auth/core/jwt' {
   interface JWT {
     id?: string;
     roleId?: string;

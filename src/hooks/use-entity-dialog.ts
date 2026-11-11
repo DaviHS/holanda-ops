@@ -1,9 +1,11 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useCreateRequest } from "@/hooks/use-create-request";
+import { useState } from 'react';
+import { useCreateRequest } from '@/hooks/use-create-request';
 
-export function useEntityDialog<T>({ fromUrl = false }: { fromUrl?: boolean } = {}) {
+export function useEntityDialog<T>({
+  fromUrl = false,
+}: { fromUrl?: boolean } = {}) {
   const [isOpen, setIsOpen] = useState(false);
   const [editing, setEditing] = useState<T | null>(null);
   const createRequest = useCreateRequest();

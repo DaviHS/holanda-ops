@@ -19,4 +19,6 @@ export const publicEmployeeRegisterSchema = z.object({
   shoeSize: z.number().optional(),
 });
 
-export type PublicEmployeeRegisterValues = z.infer<typeof publicEmployeeRegisterSchema>;
+export type PublicEmployeeRegisterValues = z.infer<
+  typeof publicEmployeeRegisterSchema
+>;

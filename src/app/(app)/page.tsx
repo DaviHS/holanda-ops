@@ -1,23 +1,45 @@
 'use client';
 
 import { api } from '@/trpc/react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Users, UserCheck, Building2, Shirt, Clock, ArrowUpRight, BarChart3 } from 'lucide-react';
+import {
+  Users,
+  UserCheck,
+  Building2,
+  Shirt,
+  Clock,
+  ArrowUpRight,
+  BarChart3,
+} from 'lucide-react';
 import { PageContainer, PageHeader } from '@/components/page-header';
 import { EmptyState } from '@/components/ui/empty-state';
 import { LoadingState } from '@/components/ui/loading-state';
 import Link from 'next/link';
 
 export default function DashboardPage() {
-  const { data: stats, isLoading, error } = api.dashboard.getStats.useQuery(undefined, { retry: false });
+  const {
+    data: stats,
+    isLoading,
+    error,
+  } = api.dashboard.getStats.useQuery(undefined, { retry: false });
 
   if (isLoading) return <LoadingState />;
 
   if (error) {
     return (
       <PageContainer>
-        <PageHeader title="Visão Geral" icon={BarChart3} description="Bem-vindo ao Holanda Ops." />
+        <PageHeader
+          title="Visão Geral"
+          icon={BarChart3}
+          description="Bem-vindo ao Holanda Ops."
+        />
         <EmptyState
           icon={BarChart3}
           title="Sem indicadores para o seu cargo"
@@ -44,57 +66,73 @@ export default function DashboardPage() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Total de Colaboradores</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Total de Colaboradores
+            </CardTitle>
+            <Users className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats?.totalEmployees}</div>
-            <p className="text-xs text-muted-foreground">Cadastrados no sistema</p>
+            <p className="text-muted-foreground text-xs">
+              Cadastrados no sistema
+            </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Colaboradores Ativos</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Colaboradores Ativos
+            </CardTitle>
             <UserCheck className="h-4 w-4 text-emerald-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats?.activeEmployees}</div>
-            <p className="text-xs text-muted-foreground">Em atividade normal</p>
+            <p className="text-muted-foreground text-xs">Em atividade normal</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Setores Cadastrados</CardTitle>
-            <Building2 className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Setores Cadastrados
+            </CardTitle>
+            <Building2 className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats?.totalSectors}</div>
-            <p className="text-xs text-muted-foreground">Departamentos mapeados</p>
+            <p className="text-muted-foreground text-xs">
+              Departamentos mapeados
+            </p>
           </CardContent>
         </Card>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-base font-semibold">Demandas de Uniforme</CardTitle>
-              <CardDescription>Quantidade necessária por tamanho de camiseta</CardDescription>
+              <CardTitle className="text-base font-semibold">
+                Demandas de Uniforme
+              </CardTitle>
+              <CardDescription>
+                Quantidade necessária por tamanho de camiseta
+              </CardDescription>
             </div>
-            <Shirt className="h-5 w-5 text-muted-foreground" />
+            <Shirt className="text-muted-foreground h-5 w-5" />
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-3 gap-3">
               {stats?.shirtSizesDistribution.map((item) => (
-                <div key={item.size ?? 'NA'} className="flex flex-col items-center justify-center rounded-md border p-3 bg-card">
-                  <span className="text-xs text-muted-foreground uppercase font-semibold">
+                <div
+                  key={item.size ?? 'NA'}
+                  className="bg-card flex flex-col items-center justify-center rounded-md border p-3"
+                >
+                  <span className="text-muted-foreground text-xs font-semibold uppercase">
                     Tamanho {item.size ?? 'N/A'}
                   </span>
-                  <span className="text-xl font-bold mt-1">{item.total}</span>
+                  <span className="mt-1 text-xl font-bold">{item.total}</span>
                 </div>
               ))}
             </div>
@@ -104,17 +142,26 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-base font-semibold">Distribuição por Turno</CardTitle>
-              <CardDescription>Quantidade de funcionários alocados</CardDescription>
+              <CardTitle className="text-base font-semibold">
+                Distribuição por Turno
+              </CardTitle>
+              <CardDescription>
+                Quantidade de funcionários alocados
+              </CardDescription>
             </div>
-            <Clock className="h-5 w-5 text-muted-foreground" />
+            <Clock className="text-muted-foreground h-5 w-5" />
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {stats?.shiftDistribution.map((item) => (
-                <div key={item.shift ?? 'NA'} className="flex items-center justify-between text-sm border-b pb-2 last:border-0">
+                <div
+                  key={item.shift ?? 'NA'}
+                  className="flex items-center justify-between border-b pb-2 text-sm last:border-0"
+                >
                   <span className="font-medium">
-                    {shiftLabels[item.shift ?? ''] ?? item.shift ?? 'Não definido'}
+                    {shiftLabels[item.shift ?? ''] ??
+                      item.shift ??
+                      'Não definido'}
                   </span>
                   <Badge variant="secondary">{item.total} pessoas</Badge>
                 </div>
@@ -122,18 +169,21 @@ export default function DashboardPage() {
             </div>
           </CardContent>
         </Card>
-
       </div>
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle className="text-base font-semibold">Últimas Admissões</CardTitle>
-            <CardDescription>Colaboradores adicionados recentemente ao sistema</CardDescription>
+            <CardTitle className="text-base font-semibold">
+              Últimas Admissões
+            </CardTitle>
+            <CardDescription>
+              Colaboradores adicionados recentemente ao sistema
+            </CardDescription>
           </div>
-          <Link 
-            href="/employees" 
-            className="text-xs text-primary flex items-center gap-1 hover:underline font-medium"
+          <Link
+            href="/employees"
+            className="text-primary flex items-center gap-1 text-xs font-medium hover:underline"
           >
             Ver todos <ArrowUpRight className="h-3 w-3" />
           </Link>
@@ -141,12 +191,19 @@ export default function DashboardPage() {
         <CardContent>
           <div className="divide-y">
             {stats?.recentEmployees.map((employee) => (
-              <div key={employee.id} className="flex items-center justify-between py-3">
+              <div
+                key={employee.id}
+                className="flex items-center justify-between py-3"
+              >
                 <div>
-                  <p className="font-medium text-sm">{employee.name}</p>
-                  <p className="text-xs text-muted-foreground">CPF: {employee.cpf}</p>
+                  <p className="text-sm font-medium">{employee.name}</p>
+                  <p className="text-muted-foreground text-xs">
+                    CPF: {employee.cpf}
+                  </p>
                 </div>
-                <Badge variant={employee.status === 'active' ? 'default' : 'outline'}>
+                <Badge
+                  variant={employee.status === 'active' ? 'default' : 'outline'}
+                >
                   {employee.status === 'active' ? 'Ativo' : employee.status}
                 </Badge>
               </div>

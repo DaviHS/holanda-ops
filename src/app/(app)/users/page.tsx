@@ -14,11 +14,18 @@ import { usePermissions } from '@/hooks/use-permissions';
 import { mutationFeedback } from '@/lib/mutation-feedback';
 import { UserCard } from './_components/user-card';
 import { UserTable } from './_components/user-table';
-import { UserFormDialog, type UserFormValues } from './_components/user-form-dialog';
+import {
+  UserFormDialog,
+  type UserFormValues,
+} from './_components/user-form-dialog';
 
 type User = RouterOutputs['user']['list'][number];
 
-const plain = (value: string) => value.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+const plain = (value: string) =>
+  value
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase();
 
 export default function UsersPage() {
   const { can } = usePermissions();
@@ -33,23 +40,40 @@ export default function UsersPage() {
   const refresh = () => utils.user.list.invalidate();
 
   const createMutation = api.user.create.useMutation(
-    mutationFeedback({ success: 'Usuário criado com sucesso!', error: 'Erro ao criar usuário', onSuccess: refresh }),
+    mutationFeedback({
+      success: 'Usuário criado com sucesso!',
+      error: 'Erro ao criar usuário',
+      onSuccess: refresh,
+    }),
   );
   const updateMutation = api.user.update.useMutation(
-    mutationFeedback({ success: 'Usuário atualizado com sucesso!', error: 'Erro ao atualizar usuário', onSuccess: refresh }),
+    mutationFeedback({
+      success: 'Usuário atualizado com sucesso!',
+      error: 'Erro ao atualizar usuário',
+      onSuccess: refresh,
+    }),
   );
   const deleteMutation = api.user.delete.useMutation(
-    mutationFeedback({ success: 'Usuário removido com sucesso!', error: 'Erro ao remover usuário', onSuccess: refresh }),
+    mutationFeedback({
+      success: 'Usuário removido com sucesso!',
+      error: 'Erro ao remover usuário',
+      onSuccess: refresh,
+    }),
   );
 
   const query = plain(search.trim());
-  const filtered = items.filter((item) => plain(`${item.employee?.name ?? ''} ${item.email}`).includes(query));
+  const filtered = items.filter((item) =>
+    plain(`${item.employee?.name ?? ''} ${item.email}`).includes(query),
+  );
 
   const handleSubmit = async (data: UserFormValues) => {
     if (dialog.editing) {
       await updateMutation.mutateAsync({ id: dialog.editing.id, ...data });
     } else {
-      await createMutation.mutateAsync({ ...data, password: data.password ?? '' });
+      await createMutation.mutateAsync({
+        ...data,
+        password: data.password ?? '',
+      });
     }
   };
 
@@ -79,12 +103,21 @@ export default function UsersPage() {
         }
       />
 
-      <SearchInput value={search} onChange={setSearch} placeholder="Buscar por nome ou e-mail..." aria-label="Buscar por nome ou e-mail" />
+      <SearchInput
+        value={search}
+        onChange={setSearch}
+        placeholder="Buscar por nome ou e-mail..."
+        aria-label="Buscar por nome ou e-mail"
+      />
 
       {isLoading ? (
         <LoadingState />
       ) : filtered.length === 0 ? (
-        <EmptyState icon={UserCog} title="Nenhum usuário encontrado" description="Crie o primeiro acesso ou ajuste a busca." />
+        <EmptyState
+          icon={UserCog}
+          title="Nenhum usuário encontrado"
+          description="Crie o primeiro acesso ou ajuste a busca."
+        />
       ) : (
         <>
           <div className="sm:hidden">

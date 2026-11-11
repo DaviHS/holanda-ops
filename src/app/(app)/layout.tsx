@@ -1,6 +1,6 @@
-import { redirect } from "next/navigation";
-import { auth } from "@/server/auth";
-import AppLayout from "@/components/sidebar/app-layout";
+import { redirect } from 'next/navigation';
+import { auth } from '@/server/auth';
+import AppLayout from '@/components/sidebar/app-layout';
 
 export default async function AppLayoutWrapper({
   children,
@@ -10,7 +10,7 @@ export default async function AppLayoutWrapper({
   const session = await auth();
 
   if (!session?.user) {
-    redirect("/sign-in");
+    redirect('/sign-in');
   }
 
   return <AppLayout>{children}</AppLayout>;

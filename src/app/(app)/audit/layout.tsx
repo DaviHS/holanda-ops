@@ -1,8 +1,10 @@
-import type { PropsWithChildren } from "react";
-import { NoAccess } from "@/components/no-access";
-import { hasPermission } from "@/server/require-permission";
+import type { PropsWithChildren } from 'react';
+import { NoAccess } from '@/components/no-access';
+import { hasPermission } from '@/server/require-permission';
 
-export default async function Layout({ children }: Readonly<PropsWithChildren>) {
-  if (!(await hasPermission("audit.view"))) return <NoAccess />;
+export default async function Layout({
+  children,
+}: Readonly<PropsWithChildren>) {
+  if (!(await hasPermission('audit.view'))) return <NoAccess />;
   return children;
 }

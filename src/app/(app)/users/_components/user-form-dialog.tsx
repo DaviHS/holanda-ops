@@ -40,7 +40,8 @@ const updateUserFormSchema = userSchema.extend({
     .optional(),
 });
 
-export type UserFormValues = z.input<typeof createUserFormSchema> | z.input<typeof updateUserFormSchema>;
+export type UserFormValues =
+  z.input<typeof createUserFormSchema> | z.input<typeof updateUserFormSchema>;
 
 interface UserFormDialogProps {
   open: boolean;
@@ -67,7 +68,9 @@ export function UserFormDialog({
     control,
     formState: { errors, isSubmitting },
   } = useForm<UserFormValues>({
-    resolver: zodResolver(isEditing ? updateUserFormSchema : createUserFormSchema),
+    resolver: zodResolver(
+      isEditing ? updateUserFormSchema : createUserFormSchema,
+    ),
     defaultValues: {
       email: '',
       password: '',
@@ -110,17 +113,19 @@ export function UserFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] flex flex-col gap-0 p-0 overflow-hidden rounded-md">
-        <DialogHeader className="px-6 py-4 border-b bg-background shrink-0">
-          <DialogTitle className="text-lg font-semibold flex items-center gap-2">
-            <UserPlus className="size-5 text-muted-foreground" />
+      <DialogContent className="flex flex-col gap-0 overflow-hidden rounded-md p-0 sm:max-w-[500px]">
+        <DialogHeader className="bg-background shrink-0 border-b px-6 py-4">
+          <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
+            <UserPlus className="text-muted-foreground size-5" />
             {isEditing ? 'Editar Usuário' : 'Novo Usuário'}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col">
-          <div className="px-6 py-5 space-y-4">
-            
+        <form
+          onSubmit={handleSubmit(handleFormSubmit)}
+          className="flex flex-col"
+        >
+          <div className="space-y-4 px-6 py-5">
             <div className="space-y-1.5">
               <Label htmlFor="employeeId" className="text-xs font-medium">
                 Funcionário <span className="text-destructive">*</span>
@@ -129,21 +134,27 @@ export function UserFormDialog({
                 control={control}
                 name="employeeId"
                 render={({ field }) => {
-                  const selectedEmp = employees.find((e) => e.id === field.value);
+                  const selectedEmp = employees.find(
+                    (e) => e.id === field.value,
+                  );
                   return (
                     <Select
                       value={field.value || undefined}
                       onValueChange={(val) => val && field.onChange(val)}
                       disabled={isEditing}
                     >
-                      <SelectTrigger className="mt-1 text-sm !h-10 w-full rounded-md">
+                      <SelectTrigger className="mt-1 !h-10 w-full rounded-md text-sm">
                         <SelectValue placeholder="Selecione um funcionário...">
                           {selectedEmp?.name}
                         </SelectValue>
                       </SelectTrigger>
                       <SelectContent className="rounded-md">
                         {employees.map((emp) => (
-                          <SelectItem key={emp.id} value={emp.id} className="text-sm py-2 rounded-none">
+                          <SelectItem
+                            key={emp.id}
+                            value={emp.id}
+                            className="rounded-none py-2 text-sm"
+                          >
                             {emp.name}
                           </SelectItem>
                         ))}
@@ -153,7 +164,7 @@ export function UserFormDialog({
                 }}
               />
               {errors.employeeId && (
-                <p className="text-[11px] text-destructive mt-1">
+                <p className="text-destructive mt-1 text-[11px]">
                   {errors.employeeId.message}
                 </p>
               )}
@@ -168,26 +179,32 @@ export function UserFormDialog({
                 type="email"
                 placeholder="usuario@empresa.com"
                 {...register('email')}
-                className="text-sm !h-10 w-full rounded-md"
+                className="!h-10 w-full rounded-md text-sm"
               />
               {errors.email && (
-                <p className="text-[11px] text-destructive mt-1">{errors.email.message}</p>
+                <p className="text-destructive mt-1 text-[11px]">
+                  {errors.email.message}
+                </p>
               )}
             </div>
 
             <div className="space-y-1.5">
               <Label htmlFor="password" className="text-xs font-medium">
-                {isEditing ? 'Nova Senha (deixe em branco para manter)' : 'Senha de Acesso'}
+                {isEditing
+                  ? 'Nova Senha (deixe em branco para manter)'
+                  : 'Senha de Acesso'}
               </Label>
               <Input
                 id="password"
                 type="password"
                 placeholder="••••••••"
                 {...register('password')}
-                className="text-sm !h-10 w-full rounded-md"
+                className="!h-10 w-full rounded-md text-sm"
               />
               {errors.password && (
-                <p className="text-[11px] text-destructive mt-1">{errors.password.message}</p>
+                <p className="text-destructive mt-1 text-[11px]">
+                  {errors.password.message}
+                </p>
               )}
             </div>
 
@@ -205,14 +222,18 @@ export function UserFormDialog({
                       value={field.value || undefined}
                       onValueChange={(val) => val && field.onChange(val)}
                     >
-                      <SelectTrigger className="mt-1 text-sm !h-10 w-full rounded-md">
+                      <SelectTrigger className="mt-1 !h-10 w-full rounded-md text-sm">
                         <SelectValue placeholder="Selecione um perfil...">
                           {selectedRole?.name}
                         </SelectValue>
                       </SelectTrigger>
                       <SelectContent className="rounded-md">
                         {roles.map((role) => (
-                          <SelectItem key={role.id} value={role.id} className="text-sm py-2 rounded-none">
+                          <SelectItem
+                            key={role.id}
+                            value={role.id}
+                            className="rounded-none py-2 text-sm"
+                          >
                             {role.name}
                           </SelectItem>
                         ))}
@@ -222,7 +243,9 @@ export function UserFormDialog({
                 }}
               />
               {errors.roleId && (
-                <p className="text-[11px] text-destructive mt-1">{errors.roleId.message}</p>
+                <p className="text-destructive mt-1 text-[11px]">
+                  {errors.roleId.message}
+                </p>
               )}
             </div>
 
@@ -238,23 +261,32 @@ export function UserFormDialog({
                     value={field.value || 'active'}
                     onValueChange={(val) => val && field.onChange(val)}
                   >
-                    <SelectTrigger className="mt-1 text-sm !h-10 w-full rounded-md">
+                    <SelectTrigger className="mt-1 !h-10 w-full rounded-md text-sm">
                       <SelectValue placeholder="Selecione">
                         {field.value === 'inactive'
                           ? 'Inativo'
                           : field.value === 'suspended'
-                          ? 'Suspenso'
-                          : 'Ativo'}
+                            ? 'Suspenso'
+                            : 'Ativo'}
                       </SelectValue>
                     </SelectTrigger>
                     <SelectContent className="rounded-md">
-                      <SelectItem value="active" className="text-sm py-2 rounded-none">
+                      <SelectItem
+                        value="active"
+                        className="rounded-none py-2 text-sm"
+                      >
                         Ativo
                       </SelectItem>
-                      <SelectItem value="inactive" className="text-sm py-2 rounded-none">
+                      <SelectItem
+                        value="inactive"
+                        className="rounded-none py-2 text-sm"
+                      >
                         Inativo
                       </SelectItem>
-                      <SelectItem value="suspended" className="text-sm py-2 rounded-none">
+                      <SelectItem
+                        value="suspended"
+                        className="rounded-none py-2 text-sm"
+                      >
                         Suspenso
                       </SelectItem>
                     </SelectContent>
@@ -262,22 +294,28 @@ export function UserFormDialog({
                 )}
               />
               {errors.status && (
-                <p className="text-[11px] text-destructive mt-1">{errors.status.message}</p>
+                <p className="text-destructive mt-1 text-[11px]">
+                  {errors.status.message}
+                </p>
               )}
             </div>
           </div>
 
-          <DialogFooter className="px-6 py-3 border-t bg-muted/20 gap-2 sm:gap-0 shrink-0">
+          <DialogFooter className="bg-muted/20 shrink-0 gap-2 border-t px-6 py-3 sm:gap-0">
             <Button
               type="button"
               variant="ghost"
               onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
-              className="rounded-md hover:bg-destructive/10 hover:text-destructive transition-colors"
+              className="hover:bg-destructive/10 hover:text-destructive rounded-md transition-colors"
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={isSubmitting} className="rounded-md">
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="rounded-md"
+            >
               {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}
               {isEditing ? 'Salvar Alterações' : 'Criar Usuário'}
             </Button>

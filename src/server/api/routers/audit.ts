@@ -1,10 +1,10 @@
-import { z } from "zod";
-import { and, count, desc, ilike, or } from "drizzle-orm";
-import { can, createTRPCRouter } from "@/server/api/trpc";
-import { db } from "@/server/db";
-import { auditLogs } from "@/server/db/schema";
+import { z } from 'zod';
+import { and, count, desc, ilike, or } from 'drizzle-orm';
+import { can, createTRPCRouter } from '@/server/api/trpc';
+import { db } from '@/server/db';
+import { auditLogs } from '@/server/db/schema';
 
-const viewAudit = can("audit.view");
+const viewAudit = can('audit.view');
 
 export const auditRouter = createTRPCRouter({
   list: viewAudit
@@ -20,8 +20,14 @@ export const auditRouter = createTRPCRouter({
       const filters = [];
       if (input.area) filters.push(ilike(auditLogs.action, `${input.area}.%`));
       if (input.search) {
-        const term = `%${input.search.replace(/[%_]/g, "")}%`;
-        filters.push(or(ilike(auditLogs.userLabel, term), ilike(auditLogs.action, term), ilike(auditLogs.target, term)));
+        const term = `%${input.search.replace(/[%_]/g, '')}%`;
+        filters.push(
+          or(
+            ilike(auditLogs.userLabel, term),
+            ilike(auditLogs.action, term),
+            ilike(auditLogs.target, term),
+          ),
+        );
       }
       const where = filters.length > 0 ? and(...filters) : undefined;
 
@@ -36,6 +42,10 @@ export const auditRouter = createTRPCRouter({
         db.select({ value: count() }).from(auditLogs).where(where),
       ]);
       const totalItems = total?.value ?? 0;
-      return { items, total: totalItems, totalPages: Math.max(1, Math.ceil(totalItems / input.limit)) };
+      return {
+        items,
+        total: totalItems,
+        totalPages: Math.max(1, Math.ceil(totalItems / input.limit)),
+      };
     }),
 });

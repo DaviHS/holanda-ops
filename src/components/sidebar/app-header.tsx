@@ -26,22 +26,22 @@ export function AppHeader({
   pageTitle,
 }: AppHeaderProps) {
   return (
-    <header className="z-10 my-2 mx-4 flex h-14 shrink-0 items-center gap-2 rounded-md border border-border/80 bg-card/95 px-4 shadow-sm backdrop-blur-md transition-all">
-      <SidebarTrigger className="flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-background text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/10 hover:text-primary [&_svg]:size-4" />
+    <header className="border-border/80 bg-card/95 z-10 mx-4 my-2 flex h-14 shrink-0 items-center gap-2 rounded-md border px-4 shadow-sm backdrop-blur-md transition-all">
+      <SidebarTrigger className="border-border bg-background text-muted-foreground hover:border-primary/50 hover:bg-primary/10 hover:text-primary flex size-9 shrink-0 items-center justify-center rounded-md border transition-colors [&_svg]:size-4" />
 
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
             <Link
               href={homeUrl}
-              className="flex items-center gap-1 text-muted-foreground transition-colors hover:text-foreground"
+              className="text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
             >
               <Home className="size-4" />
               <span className="text-sm">{homeLabel}</span>
             </Link>
           </BreadcrumbItem>
           {pageTitle && (
-            <BreadcrumbItem className="text-sm font-medium text-foreground">
+            <BreadcrumbItem className="text-foreground text-sm font-medium">
               {pageTitle}
             </BreadcrumbItem>
           )}
@@ -52,12 +52,12 @@ export function AppHeader({
         <ThemeToggle
           theme={theme}
           setTheme={setTheme}
-          className="flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-background text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/10 hover:text-primary [&_svg]:size-4"
+          className="border-border bg-background text-muted-foreground hover:border-primary/50 hover:bg-primary/10 hover:text-primary flex size-9 shrink-0 items-center justify-center rounded-md border transition-colors [&_svg]:size-4"
         />
 
         <button
           onClick={onLogout}
-          className="flex items-center gap-2 rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:border-destructive/50 hover:bg-destructive/10 hover:text-destructive"
+          className="border-border bg-background text-muted-foreground hover:border-destructive/50 hover:bg-destructive/10 hover:text-destructive flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors"
         >
           <LogOut className="size-4" />
           Sair

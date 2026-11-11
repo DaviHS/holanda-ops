@@ -7,7 +7,7 @@
 @theme inline {
   --sidebar-width: 16rem;
   --sidebar-width-icon: 3.5rem;
-  
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -49,36 +49,36 @@
 
 :root {
   color-scheme: light;
-  
+
   /* Tema Claro: Fundo Branco Limpo + Destaques em Laranja Vibrante */
   --background: oklch(1 0 0); /* Branco absoluto */
   --foreground: oklch(0.205 0 0); /* Texto escuro equilibrado */
-  
+
   --card: oklch(0.985 0 0);
   --card-foreground: oklch(0.205 0 0);
-  
+
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.205 0 0);
-  
+
   /* Destaque Principal: Laranja Vibrante */
   --primary: oklch(0.646 0.222 41.116);
   --primary-foreground: oklch(0.985 0 0);
-  
+
   --secondary: oklch(0.96 0.015 41.116);
   --secondary-foreground: oklch(0.35 0.12 41.116);
-  
+
   --muted: oklch(0.965 0 0);
   --muted-foreground: oklch(0.556 0 0);
-  
+
   --accent: oklch(0.95 0.03 41.116);
   --accent-foreground: oklch(0.646 0.222 41.116);
-  
+
   --destructive: oklch(0.577 0.245 27.325);
-  
+
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.646 0.222 41.116);
-  
+
   /* Sidebar Clara */
   --sidebar: oklch(0.99 0 0);
   --sidebar-foreground: oklch(0.205 0 0);
@@ -100,36 +100,36 @@
 
 .dark {
   color-scheme: dark;
-  
+
   /* Tema Escuro: Azul Noturno Profundo + Destaques em Laranja */
   --background: oklch(0.16 0.04 250); /* Azul escuro profundo */
   --foreground: oklch(0.985 0 0);
-  
-  --card: oklch(0.20 0.04 250); /* Card azul levemente mais claro */
+
+  --card: oklch(0.2 0.04 250); /* Card azul levemente mais claro */
   --card-foreground: oklch(0.985 0 0);
-  
-  --popover: oklch(0.20 0.04 250);
+
+  --popover: oklch(0.2 0.04 250);
   --popover-foreground: oklch(0.985 0 0);
-  
+
   /* Destaque Principal: Laranja contraste com Azul */
   --primary: oklch(0.68 0.22 41.116);
   --primary-foreground: oklch(0.15 0 0);
-  
+
   --secondary: oklch(0.25 0.05 250);
   --secondary-foreground: oklch(0.985 0 0);
-  
+
   --muted: oklch(0.23 0.04 250);
   --muted-foreground: oklch(0.708 0 0);
-  
+
   --accent: oklch(0.26 0.05 250);
   --accent-foreground: oklch(0.68 0.22 41.116);
-  
+
   --destructive: oklch(0.65 0.22 22);
-  
+
   --border: oklch(0.28 0.04 250);
   --input: oklch(0.28 0.04 250);
   --ring: oklch(0.68 0.22 41.116);
-  
+
   /* Sidebar Escura Azulada */
   --sidebar: oklch(0.18 0.04 250);
   --sidebar-foreground: oklch(0.985 0 0);
@@ -142,7 +142,7 @@
 
   --chart-1: oklch(0.68 0.22 41.116);
   --chart-2: oklch(0.45 0.12 250);
-  --chart-3: oklch(0.55 0.10 250);
+  --chart-3: oklch(0.55 0.1 250);
   --chart-4: oklch(0.65 0.08 250);
   --chart-5: oklch(0.75 0.06 250);
 }
@@ -156,7 +156,7 @@
     @apply font-sans;
   }
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
   }
   button,
   input,

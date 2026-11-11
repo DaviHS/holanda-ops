@@ -1,17 +1,14 @@
-import { and, eq, isNull } from "drizzle-orm";
-import { z } from "zod";
-import { can, createTRPCRouter, publicProcedure } from "@/server/api/trpc";
+import { and, eq, isNull } from 'drizzle-orm';
+import { z } from 'zod';
+import { can, createTRPCRouter, publicProcedure } from '@/server/api/trpc';
 
-import {
-  employees,
-  employeeSectors,
-} from "@/server/db/schema";
-import { employeeSchema, employeeUpdateSchema } from "@/validators/employee";
-import { TRPCError } from "@trpc/server";
-import { publicEmployeeRegisterSchema } from "@/validators/register";
+import { employees, employeeSectors } from '@/server/db/schema';
+import { employeeSchema, employeeUpdateSchema } from '@/validators/employee';
+import { TRPCError } from '@trpc/server';
+import { publicEmployeeRegisterSchema } from '@/validators/register';
 
-const viewEmployees = can("employees.view", "employees.manage", "users.manage");
-const manageEmployees = can("employees.manage");
+const viewEmployees = can('employees.view', 'employees.manage', 'users.manage');
+const manageEmployees = can('employees.manage');
 
 export const employeeRouter = createTRPCRouter({
   list: viewEmployees.query(async ({ ctx }) => {
@@ -31,7 +28,7 @@ export const employeeRouter = createTRPCRouter({
       ...emp,
       shift,
       sectorIds: sectors.map((s) => s.sectorId),
-      sector: sectors.map((s) => s.sector.name).join(", "),
+      sector: sectors.map((s) => s.sector.name).join(', '),
     }));
   }),
 
@@ -39,10 +36,7 @@ export const employeeRouter = createTRPCRouter({
     .input(z.object({ id: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
       const employee = await ctx.db.query.employees.findFirst({
-        where: and(
-          eq(employees.id, input.id),
-          isNull(employees.deletedAt)
-        ),
+        where: and(eq(employees.id, input.id), isNull(employees.deletedAt)),
         with: {
           shift: true,
           sectors: {
@@ -61,7 +55,7 @@ export const employeeRouter = createTRPCRouter({
         ...emp,
         shift,
         sectorIds: sectors.map((s) => s.sectorId),
-        sector: sectors.map((s) => s.sector.name).join(", "),
+        sector: sectors.map((s) => s.sector.name).join(', '),
       };
     }),
 
@@ -77,7 +71,7 @@ export const employeeRouter = createTRPCRouter({
           .returning();
 
         if (!newEmployee) {
-          throw new Error("Falha ao criar funcionário");
+          throw new Error('Falha ao criar funcionário');
         }
 
         if (sectorIds && sectorIds.length > 0) {
@@ -85,7 +79,7 @@ export const employeeRouter = createTRPCRouter({
             sectorIds.map((sectorId) => ({
               employeeId: newEmployee.id,
               sectorId,
-            }))
+            })),
           );
         }
 
@@ -106,7 +100,7 @@ export const employeeRouter = createTRPCRouter({
           .returning();
 
         if (!updatedEmployee) {
-          throw new Error("Funcionário não encontrado ou já removido");
+          throw new Error('Funcionário não encontrado ou já removido');
         }
 
         if (sectorIds) {
@@ -119,7 +113,7 @@ export const employeeRouter = createTRPCRouter({
               sectorIds.map((sectorId) => ({
                 employeeId: id,
                 sectorId,
-              }))
+              })),
             );
           }
         }
@@ -133,7 +127,7 @@ export const employeeRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const [softDeletedEmployee] = await ctx.db
         .update(employees)
-        .set({ 
+        .set({
           deletedAt: new Date(),
           updatedAt: new Date(),
         })
@@ -148,16 +142,13 @@ export const employeeRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       // 1. Validar se o CPF já está cadastrado
       const existingEmployee = await ctx.db.query.employees.findFirst({
-        where: and(
-          eq(employees.cpf, input.cpf),
-          isNull(employees.deletedAt)
-        ),
+        where: and(eq(employees.cpf, input.cpf), isNull(employees.deletedAt)),
       });
 
       if (existingEmployee) {
         throw new TRPCError({
-          code: "CONFLICT",
-          message: "Já existe um funcionário cadastrado com este CPF.",
+          code: 'CONFLICT',
+          message: 'Já existe um funcionário cadastrado com este CPF.',
         });
       }
 
@@ -173,7 +164,7 @@ export const employeeRouter = createTRPCRouter({
           shirtSize: input.shirtSize,
           pantsSize: input.pantsSize ? input.pantsSize.trim() : null,
           shoeSize: input.shoeSize ?? null,
-          status: "pending",
+          status: 'pending',
         })
         .returning({
           id: employees.id,
@@ -185,8 +176,8 @@ export const employeeRouter = createTRPCRouter({
 
       if (!newEmployee) {
         throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Falha ao registrar pré-cadastro do funcionário.",
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Falha ao registrar pré-cadastro do funcionário.',
         });
       }
 

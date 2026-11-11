@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { Checkbox } from "@/components/ui/checkbox";
-import { PERMISSION_GROUPS, type Permission } from "@/lib/permissions";
+import { Checkbox } from '@/components/ui/checkbox';
+import { PERMISSION_GROUPS, type Permission } from '@/lib/permissions';
 
 export function PermissionChecklist({
   value,
@@ -21,13 +21,25 @@ export function PermissionChecklist({
     <div className="space-y-3">
       {PERMISSION_GROUPS.map((group) => (
         <div key={group.title} className="space-y-1.5">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{group.title}</p>
+          <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+            {group.title}
+          </p>
           {group.items.map((item) => (
-            <label key={item.key} className="flex items-start gap-3 rounded-md border p-2.5 text-sm">
-              <Checkbox checked={value.has(item.key)} onCheckedChange={(checked) => toggle(item.key, checked === true)} />
+            <label
+              key={item.key}
+              className="flex items-start gap-3 rounded-md border p-2.5 text-sm"
+            >
+              <Checkbox
+                checked={value.has(item.key)}
+                onCheckedChange={(checked) =>
+                  toggle(item.key, checked === true)
+                }
+              />
               <span className="min-w-0">
                 <span className="block font-medium">{item.label}</span>
-                <span className="block text-xs text-muted-foreground">{item.description}</span>
+                <span className="text-muted-foreground block text-xs">
+                  {item.description}
+                </span>
               </span>
             </label>
           ))}

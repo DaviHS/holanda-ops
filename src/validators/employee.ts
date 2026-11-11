@@ -16,11 +16,18 @@ export const employeeSchema = z.object({
   pixKey: z.string().optional().nullable(),
   address: z.string().optional().nullable(),
   sectorIds: z.array(z.string().uuid()).min(1, 'Selecione ao menos um setor'),
-  status: z.enum(['active', 'inactive', 'suspended', 'pending']).default('active'),
+  status: z
+    .enum(['active', 'inactive', 'suspended', 'pending'])
+    .default('active'),
   shirtSize: z.enum(['PP', 'P', 'M', 'G', 'GG', 'XGG']).default('M'),
   pantsSize: z.string().optional().nullable(),
   shoeSize: z.number().optional().nullable(),
-  uniform: uniformSchema.default({ shirt: false, pants: false, shoes: false, jacket: false }),
+  uniform: uniformSchema.default({
+    shirt: false,
+    pants: false,
+    shoes: false,
+    jacket: false,
+  }),
 });
 
 export const employeeUpdateSchema = employeeSchema.partial().extend({

@@ -1,21 +1,27 @@
-import { and, count, desc, eq, isNull } from "drizzle-orm";
-import { can, createTRPCRouter } from "@/server/api/trpc";
-import { employees, sectors, shifts } from "@/server/db/schema";
+import { and, count, desc, eq, isNull } from 'drizzle-orm';
+import { can, createTRPCRouter } from '@/server/api/trpc';
+import { employees, sectors, shifts } from '@/server/db/schema';
 
-const viewDashboard = can("employees.view", "employees.manage");
+const viewDashboard = can('employees.view', 'employees.manage');
 
 export const dashboardRouter = createTRPCRouter({
   getStats: viewDashboard.query(async ({ ctx }) => {
     const activeEmployeeFilter = isNull(employees.deletedAt);
 
-    const [totalEmployees] = await ctx.db.select({ count: count() }).from(employees).where(activeEmployeeFilter);
+    const [totalEmployees] = await ctx.db
+      .select({ count: count() })
+      .from(employees)
+      .where(activeEmployeeFilter);
 
     const [activeEmployees] = await ctx.db
       .select({ count: count() })
       .from(employees)
-      .where(and(activeEmployeeFilter, eq(employees.status, "active")));
+      .where(and(activeEmployeeFilter, eq(employees.status, 'active')));
 
-    const [totalSectors] = await ctx.db.select({ count: count() }).from(sectors).where(isNull(sectors.deletedAt));
+    const [totalSectors] = await ctx.db
+      .select({ count: count() })
+      .from(sectors)
+      .where(isNull(sectors.deletedAt));
 
     const shirtSizesDistribution = await ctx.db
       .select({ size: employees.shirtSize, total: count() })

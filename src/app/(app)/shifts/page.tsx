@@ -14,11 +14,18 @@ import { usePermissions } from '@/hooks/use-permissions';
 import { mutationFeedback } from '@/lib/mutation-feedback';
 import { ShiftCard } from './_components/shift-card';
 import { ShiftTable } from './_components/shift-table';
-import { ShiftFormDialog, type ShiftFormValues } from './_components/shift-form-dialog';
+import {
+  ShiftFormDialog,
+  type ShiftFormValues,
+} from './_components/shift-form-dialog';
 
 type Shift = RouterOutputs['shift']['list'][number];
 
-const plain = (value: string) => value.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+const plain = (value: string) =>
+  value
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase();
 
 export default function ShiftsPage() {
   const { can } = usePermissions();
@@ -33,17 +40,31 @@ export default function ShiftsPage() {
   const refresh = () => utils.shift.list.invalidate();
 
   const createMutation = api.shift.create.useMutation(
-    mutationFeedback({ success: 'Turno criado com sucesso!', error: 'Erro ao criar turno', onSuccess: refresh }),
+    mutationFeedback({
+      success: 'Turno criado com sucesso!',
+      error: 'Erro ao criar turno',
+      onSuccess: refresh,
+    }),
   );
   const updateMutation = api.shift.update.useMutation(
-    mutationFeedback({ success: 'Turno atualizado com sucesso!', error: 'Erro ao atualizar turno', onSuccess: refresh }),
+    mutationFeedback({
+      success: 'Turno atualizado com sucesso!',
+      error: 'Erro ao atualizar turno',
+      onSuccess: refresh,
+    }),
   );
   const deleteMutation = api.shift.delete.useMutation(
-    mutationFeedback({ success: 'Turno removido com sucesso!', error: 'Erro ao remover turno', onSuccess: refresh }),
+    mutationFeedback({
+      success: 'Turno removido com sucesso!',
+      error: 'Erro ao remover turno',
+      onSuccess: refresh,
+    }),
   );
 
   const query = plain(search.trim());
-  const filtered = items.filter((item) => plain(`${item.name} ${item.description ?? ''}`).includes(query));
+  const filtered = items.filter((item) =>
+    plain(`${item.name} ${item.description ?? ''}`).includes(query),
+  );
 
   const handleSubmit = async (data: ShiftFormValues) => {
     if (dialog.editing) {
@@ -79,12 +100,21 @@ export default function ShiftsPage() {
         }
       />
 
-      <SearchInput value={search} onChange={setSearch} placeholder="Buscar turno..." aria-label="Buscar turno" />
+      <SearchInput
+        value={search}
+        onChange={setSearch}
+        placeholder="Buscar turno..."
+        aria-label="Buscar turno"
+      />
 
       {isLoading ? (
         <LoadingState />
       ) : filtered.length === 0 ? (
-        <EmptyState icon={CalendarClock} title="Nenhum turno encontrado" description="Cadastre o primeiro turno ou ajuste a busca." />
+        <EmptyState
+          icon={CalendarClock}
+          title="Nenhum turno encontrado"
+          description="Cadastre o primeiro turno ou ajuste a busca."
+        />
       ) : (
         <>
           <div className="sm:hidden">
