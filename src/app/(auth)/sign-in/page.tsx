@@ -6,16 +6,7 @@ import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import {
-  Eye,
-  EyeOff,
-  Loader2,
-  Lock,
-  Mail,
-  Activity,
-  Users,
-  Layers,
-} from 'lucide-react';
+import { Loader2, Lock, Mail, Building2, ShieldCheck } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,6 +15,14 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { toast } from 'sonner';
+import { toastError } from '@/lib/toast';
+import { PasswordInput } from '@/components/password-input';
+
+/** Só aceita caminhos internos, para não redirecionar para outro site. */
+function destinationAfterLogin(): string {
+  const target = new URLSearchParams(window.location.search).get('callbackUrl');
+  return target?.startsWith('/') && !target.startsWith('//') ? target : '/';
+}
 
 const signInSchema = z.object({
   email: z
@@ -38,7 +37,6 @@ type SignInValues = z.infer<typeof signInSchema>;
 export default function SignInPage() {
   const router = useRouter();
 
-  const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
   const {
@@ -55,8 +53,9 @@ export default function SignInPage() {
 
   const onSubmit = async (data: SignInValues) => {
     setAuthError(null);
+    const toastId = toast.loading('Validando credenciais...');
 
-    const loginPromise = async () => {
+    try {
       const result = await signIn('credentials', {
         email: data.email,
         password: data.password,
@@ -64,24 +63,21 @@ export default function SignInPage() {
       });
 
       if (result?.error) {
-        throw new Error('Credenciais inválidas ou conta inativa.');
+        const message = 'Credenciais inválidas ou conta inativa.';
+        setAuthError(message);
+        toastError(message, { id: toastId });
+        return;
       }
 
-      router.push('/');
+      toast.success('Login realizado com sucesso', { id: toastId });
+      router.push(destinationAfterLogin());
       router.refresh();
-      return result;
-    };
-
-    void toast.promise(loginPromise(), {
-      loading: 'Autenticando...',
-      success: 'Login realizado com sucesso!',
-      error: (err: { message?: string }) => {
-        const message =
-          err.message || 'Ocorreu um erro ao tentar realizar o login.';
-        setAuthError(message);
-        return message;
-      },
-    });
+    } catch {
+      setAuthError('Ocorreu um erro ao fazer login. Tente novamente.');
+      toastError('Erro de servidor. Tente novamente mais tarde.', {
+        id: toastId,
+      });
+    }
   };
 
   return (
@@ -105,38 +101,33 @@ export default function SignInPage() {
         </div>
 
         <div className="relative z-10 my-auto max-w-lg space-y-6">
-          <div className="bg-primary/10 border-primary/20 text-primary inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium">
-            <Activity className="size-3.5" />
-            <span>Controle e Operação em Tempo Real</span>
-          </div>
-
           <div className="space-y-3">
             <h2 className="text-3xl leading-tight font-extrabold tracking-tight text-balance sm:text-4xl">
-              Acelere sua gestão operacional com precisão.
+              Colaboradores, setores, turnos e permissões num só lugar.
             </h2>
             <p className="text-sm leading-relaxed text-zinc-400">
-              Centralize o controle de equipes, escalas e setores em uma única
-              plataforma intuitiva e de alta performance.
+              Cadastre a equipe, organize setores e turnos e controle quem pode
+              fazer o quê no sistema.
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-4 border-t border-zinc-800/80 pt-4">
             <div className="flex items-center gap-3">
               <div className="rounded-md border border-zinc-800 bg-zinc-900 p-2">
-                <Users className="text-primary size-4" />
+                <Building2 className="text-primary size-4" />
               </div>
               <div className="text-xs">
-                <p className="font-semibold text-white">Gestão de Pessoas</p>
-                <p className="text-zinc-500">Escalas e setores</p>
+                <p className="font-semibold text-white">Equipe</p>
+                <p className="text-zinc-500">Setores e turnos</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <div className="rounded-md border border-zinc-800 bg-zinc-900 p-2">
-                <Layers className="text-primary size-4" />
+                <ShieldCheck className="text-primary size-4" />
               </div>
               <div className="text-xs">
-                <p className="font-semibold text-white">Acessos Nativos</p>
-                <p className="text-zinc-500">Permissões por perfil</p>
+                <p className="font-semibold text-white">Acessos</p>
+                <p className="text-zinc-500">Permissões por cargo</p>
               </div>
             </div>
           </div>
@@ -144,10 +135,6 @@ export default function SignInPage() {
 
         <div className="relative z-10 flex items-center justify-between border-t border-zinc-800/80 pt-6 text-xs text-zinc-500">
           <span>&copy; {new Date().getFullYear()} Holanda OPS</span>
-          <span className="flex items-center gap-2">
-            <span className="size-2 animate-pulse rounded-full bg-emerald-500" />
-            Servidores Operacionais
-          </span>
         </div>
       </div>
 
@@ -191,14 +178,14 @@ export default function SignInPage() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="email" className="text-xs font-medium">
-                E-mail Profissional
+                E-mail
               </Label>
               <div className="relative">
                 <Mail className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
                 <Input
                   id="email"
                   type="email"
-                  placeholder="seu.email@empresa.com"
+                  placeholder="seu@email.com"
                   autoComplete="email"
                   className="!h-10 rounded-md pl-9 text-sm"
                   {...register('email')}
@@ -224,27 +211,14 @@ export default function SignInPage() {
                 </Link>
               </div>
               <div className="relative">
-                <Lock className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
-                <Input
+                <Lock className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 z-10 size-4 -translate-y-1/2" />
+                <PasswordInput
                   id="password"
-                  type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
                   autoComplete="current-password"
-                  className="!h-10 rounded-md pr-9 pl-9 text-sm"
+                  className="!h-10 rounded-md pl-9 text-sm"
                   {...register('password')}
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
-                  tabIndex={-1}
-                >
-                  {showPassword ? (
-                    <EyeOff className="size-4" />
-                  ) : (
-                    <Eye className="size-4" />
-                  )}
-                </button>
               </div>
               {errors.password && (
                 <p className="text-destructive text-[11px] font-medium">
@@ -268,6 +242,13 @@ export default function SignInPage() {
               )}
             </Button>
           </form>
+
+          <p className="text-muted-foreground text-center text-sm">
+            Primeiro acesso?{' '}
+            <Link href="/register" className="text-primary hover:underline">
+              Faça seu pré-cadastro.
+            </Link>
+          </p>
         </div>
 
         <div className="text-muted-foreground text-center text-xs lg:hidden">

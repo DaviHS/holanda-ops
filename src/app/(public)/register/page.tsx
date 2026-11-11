@@ -40,6 +40,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import { errorMessage, toastError } from '@/lib/toast';
 import { api } from '@/trpc/react';
 import {
   publicEmployeeRegisterSchema,
@@ -70,21 +71,21 @@ export default function EmployeeRegisterPage() {
     },
   });
 
-  const onSubmit = (data: PublicEmployeeRegisterValues) => {
-    const promise = registerMutation.mutateAsync(data);
-
-    void toast.promise(promise, {
-      loading: 'Enviando pré-cadastro...',
-      success: () => {
-        reset();
-        setIsSuccessOpen(true);
-        return 'Pré-cadastro realizado com sucesso!';
-      },
-      error: (err: { message?: string }) => {
-        const message = err.message || 'Tente novamente.';
-        return `Erro ao realizar o pré-cadastro: ${message}`;
-      },
-    });
+  const onSubmit = async (data: PublicEmployeeRegisterValues) => {
+    const toastId = toast.loading('Enviando pré-cadastro...');
+    try {
+      await registerMutation.mutateAsync(data);
+      toast.success('Pré-cadastro realizado com sucesso!', { id: toastId });
+      reset();
+      setIsSuccessOpen(true);
+    } catch (cause) {
+      toastError(
+        errorMessage('Erro ao realizar o pré-cadastro', {
+          message: cause instanceof Error ? cause.message : 'Tente novamente.',
+        }),
+        { id: toastId },
+      );
+    }
   };
 
   return (

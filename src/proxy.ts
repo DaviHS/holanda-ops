@@ -3,6 +3,7 @@ import { authProxy } from '@/server/auth/edge';
 
 const SIGN_IN = '/sign-in';
 const HOME = '/';
+const PUBLIC_PATHS = ['/register', '/forgot-password', '/reset-password'];
 
 export default authProxy((request) => {
   const { nextUrl, auth: session } = request;
@@ -14,7 +15,8 @@ export default authProxy((request) => {
     return NextResponse.next();
   }
 
-  if (pathname.startsWith('/register')) return NextResponse.next();
+  if (PUBLIC_PATHS.some((path) => pathname.startsWith(path)))
+    return NextResponse.next();
 
   if (!isLoggedIn) {
     const signIn = new URL(SIGN_IN, nextUrl);

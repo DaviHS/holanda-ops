@@ -3,6 +3,7 @@ import {
   uuid,
   varchar,
   boolean,
+  timestamp,
   pgEnum,
   index,
 } from 'drizzle-orm/pg-core';
@@ -25,6 +26,8 @@ export const users = pgTable(
     passwordHash: varchar('password_hash', { length: 255 }).notNull(),
     status: userStatusEnum('status').default('active').notNull(),
     isAdmin: boolean('is_admin').default(false).notNull(),
+    resetToken: varchar('reset_token', { length: 64 }),
+    resetTokenExpires: timestamp('reset_token_expires', { withTimezone: true }),
     roleId: uuid('role_id')
       .notNull()
       .references(() => roles.id, { onDelete: 'restrict' }),
