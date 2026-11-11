@@ -22,7 +22,6 @@ import { usePermissions } from '@/hooks/use-permissions';
 import { mutationFeedback } from '@/lib/mutation-feedback';
 import { USER_STATUS, userStatusLabel } from '@/lib/user-status';
 import { UserCard } from './_components/user-card';
-import { UserTable } from './_components/user-table';
 import {
   UserFormDialog,
   type UserFormValues,
@@ -205,17 +204,11 @@ export default function UsersPage() {
           description="Crie o primeiro acesso ou ajuste a busca e os filtros."
         />
       ) : (
-        <>
-          <div className="sm:hidden">
-            {filtered.map((item) => (
-              <UserCard key={item.id} user={item} {...actions} />
-            ))}
-          </div>
-
-          <div className="hidden sm:block">
-            <UserTable users={filtered} {...actions} />
-          </div>
-        </>
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-4">
+          {filtered.map((item) => (
+            <UserCard key={item.id} user={item} {...actions} />
+          ))}
+        </div>
       )}
 
       {canManage && (

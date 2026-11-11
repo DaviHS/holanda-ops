@@ -14,7 +14,6 @@ import { usePermissions } from '@/hooks/use-permissions';
 import { mutationFeedback } from '@/lib/mutation-feedback';
 import type { Permission } from '@/lib/permissions';
 import { RoleCard } from './_components/role-card';
-import { RoleTable } from './_components/role-table';
 import {
   RoleFormDialog,
   type RoleFormValues,
@@ -132,26 +131,16 @@ export default function RolesPage() {
           description="Cadastre o primeiro cargo ou ajuste a busca."
         />
       ) : (
-        <>
-          <div className="sm:hidden">
-            {filtered.map((item) => (
-              <RoleCard
-                key={item.id}
-                role={item}
-                onEdit={canManage ? dialog.openEdit : undefined}
-                onDelete={canManage ? handleDelete : undefined}
-              />
-            ))}
-          </div>
-
-          <div className="hidden sm:block">
-            <RoleTable
-              roles={filtered}
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-4">
+          {filtered.map((item) => (
+            <RoleCard
+              key={item.id}
+              role={item}
               onEdit={canManage ? dialog.openEdit : undefined}
               onDelete={canManage ? handleDelete : undefined}
             />
-          </div>
-        </>
+          ))}
+        </div>
       )}
 
       {canManage && (

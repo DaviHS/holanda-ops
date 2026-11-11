@@ -13,7 +13,6 @@ import { useEntityDialog } from '@/hooks/use-entity-dialog';
 import { usePermissions } from '@/hooks/use-permissions';
 import { mutationFeedback } from '@/lib/mutation-feedback';
 import { SectorCard } from './_components/sector-card';
-import { SectorTable } from './_components/sector-table';
 import {
   SectorFormDialog,
   type SectorFormValues,
@@ -116,26 +115,16 @@ export default function SectorsPage() {
           description="Cadastre o primeiro setor ou ajuste a busca."
         />
       ) : (
-        <>
-          <div className="sm:hidden">
-            {filtered.map((item) => (
-              <SectorCard
-                key={item.id}
-                sector={item}
-                onEdit={canManage ? dialog.openEdit : undefined}
-                onDelete={canManage ? handleDelete : undefined}
-              />
-            ))}
-          </div>
-
-          <div className="hidden sm:block">
-            <SectorTable
-              sectors={filtered}
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-4">
+          {filtered.map((item) => (
+            <SectorCard
+              key={item.id}
+              sector={item}
               onEdit={canManage ? dialog.openEdit : undefined}
               onDelete={canManage ? handleDelete : undefined}
             />
-          </div>
-        </>
+          ))}
+        </div>
       )}
 
       {canManage && (

@@ -21,7 +21,6 @@ import { useEntityDialog } from '@/hooks/use-entity-dialog';
 import { usePermissions } from '@/hooks/use-permissions';
 import { mutationFeedback } from '@/lib/mutation-feedback';
 import { EmployeeCard } from './_components/employee-card';
-import { EmployeeTable } from './_components/employee-table';
 import {
   EmployeeFormDialog,
   type EmployeeFormValues,
@@ -54,7 +53,12 @@ export default function EmployeesPage() {
   const { data: sectors = [] } = api.sector.list.useQuery();
   const { data: shifts = [] } = api.shift.list.useQuery();
 
-  const refresh = () => utils.employee.list.invalidate();
+  // Turnos mostram a contagem de funcionários, então também precisam ser recarregados.
+  const refresh = () =>
+    Promise.all([
+      utils.employee.list.invalidate(),
+      utils.shift.list.invalidate(),
+    ]);
 
   const createMutation = api.employee.create.useMutation(
     mutationFeedback({
@@ -192,26 +196,16 @@ export default function EmployeesPage() {
           description="Cadastre o primeiro funcionário ou ajuste a busca e os filtros."
         />
       ) : (
-        <>
-          <div className="sm:hidden">
-            {filtered.map((item) => (
-              <EmployeeCard
-                key={item.id}
-                employee={item}
-                onEdit={canManage ? dialog.openEdit : undefined}
-                onDelete={canManage ? handleDelete : undefined}
-              />
-            ))}
-          </div>
-
-          <div className="hidden sm:block">
-            <EmployeeTable
-              employees={filtered}
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-4">
+          {filtered.map((item) => (
+            <EmployeeCard
+              key={item.id}
+              employee={item}
               onEdit={canManage ? dialog.openEdit : undefined}
               onDelete={canManage ? handleDelete : undefined}
             />
-          </div>
-        </>
+          ))}
+        </div>
       )}
 
       {canManage && (
