@@ -1,4 +1,4 @@
-import { and, count, eq, isNull, ne } from 'drizzle-orm';
+import { and, count, eq, isNull, ne, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { can, createTRPCRouter, publicProcedure } from '@/server/api/trpc';
 
@@ -11,14 +11,28 @@ const viewEmployees = can('employees.view', 'employees.manage', 'users.manage');
 const manageEmployees = can('employees.manage');
 
 export const employeeRouter = createTRPCRouter({
-  /** Opcionalmente só os funcionários de um turno. */
+  /** Opcionalmente só os funcionários de um turno ou de um setor. */
   list: viewEmployees
-    .input(z.object({ shiftId: z.string().uuid().optional() }).optional())
+    .input(
+      z
+        .object({
+          shiftId: z.string().uuid().optional(),
+          sectorId: z.string().uuid().optional(),
+        })
+        .optional(),
+    )
     .query(async ({ ctx, input }) => {
       const result = await ctx.db.query.employees.findMany({
         where: and(
           isNull(employees.deletedAt),
           input?.shiftId ? eq(employees.shiftId, input.shiftId) : undefined,
+          input?.sectorId
+            ? sql`exists (
+                select 1 from employee_sectors es
+                where es.employee_id = "employees"."id"
+                  and es.sector_id = ${input.sectorId}
+              )`
+            : undefined,
         ),
         with: {
           shift: true,

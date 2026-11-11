@@ -16,6 +16,7 @@ const ACTIONS: Record<string, string> = {
   'sector.create': 'Criou setor',
   'sector.update': 'Editou setor',
   'sector.delete': 'Removeu setor',
+  'sector.setEmployeeSector': 'Alterou o setor de um funcionário',
 
   'shift.create': 'Criou turno',
   'shift.update': 'Editou turno',
