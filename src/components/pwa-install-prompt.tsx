@@ -14,7 +14,13 @@ type StandaloneNavigator = Navigator & { standalone?: boolean };
 
 export function PwaInstallPrompt() {
   const [installEvent, setInstallEvent] = useState<InstallPromptEvent | null>(null);
-  const [dismissed, setDismissed] = useState(false);
+  const [dismissed, setDismissed] = useState(() => {
+    try {
+      return typeof window !== "undefined" && window.localStorage.getItem("holanda-ops-install-dismissed") === "true";
+    } catch {
+      return false;
+    }
+  });
 
   useEffect(() => {
     const navigatorWithStandalone = window.navigator as StandaloneNavigator;
@@ -22,10 +28,7 @@ export function PwaInstallPrompt() {
       return;
     }
 
-    if (window.localStorage.getItem("holanda-ops-install-dismissed") === "true") {
-      setDismissed(true);
-      return;
-    }
+    if (dismissed) return;
 
     const handleBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();
@@ -34,7 +37,7 @@ export function PwaInstallPrompt() {
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     return () => window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-  }, []);
+  }, [dismissed]);
 
   if (!installEvent || dismissed) {
     return null;

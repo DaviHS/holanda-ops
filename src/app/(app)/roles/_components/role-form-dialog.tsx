@@ -73,14 +73,14 @@ export function RoleFormDialog({
 
     const actionPromise = onSubmit(payload);
 
-    toast.promise(actionPromise, {
+    void toast.promise(actionPromise, {
       loading: isEditing ? 'Atualizando cargo...' : 'Criando cargo...',
       success: () => {
         onOpenChange(false);
         return isEditing ? 'Cargo atualizado com sucesso!' : 'Cargo criado com sucesso!';
       },
-      error: (err) => {
-        const message = err?.message || 'Tente novamente.';
+      error: (err: { message?: string }) => {
+        const message = err.message || 'Tente novamente.';
         return `Erro ao ${isEditing ? 'atualizar' : 'criar'} cargo: ${message}`;
       },
     });

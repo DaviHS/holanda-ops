@@ -60,11 +60,11 @@ export default function SignInPage() {
       return result;
     };
 
-    toast.promise(loginPromise(), {
+    void toast.promise(loginPromise(), {
       loading: 'Autenticando...',
       success: 'Login realizado com sucesso!',
-      error: (err) => {
-        const message = err?.message || 'Ocorreu um erro ao tentar realizar o login.';
+      error: (err: { message?: string }) => {
+        const message = err.message || 'Ocorreu um erro ao tentar realizar o login.';
         setAuthError(message);
         return message;
       },

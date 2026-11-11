@@ -33,7 +33,7 @@ export function DeleteShiftDialog({
   const deleteMutation = api.shifts.delete.useMutation({
     onSuccess: () => {
       toast.success('Turno removido com sucesso!');
-      utils.shifts.getAll.invalidate();
+      void utils.shifts.getAll.invalidate();
       onOpenChange(false);
       onSuccess?.();
     },

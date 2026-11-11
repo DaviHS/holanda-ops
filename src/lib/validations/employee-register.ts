@@ -13,10 +13,10 @@ export const publicEmployeeRegisterSchema = z.object({
   pixKey: z.string().optional(),
   address: z.string().optional(),
   shirtSize: z.enum(shirtSizes, {
-    required_error: 'Selecione o tamanho da camiseta',
+    error: 'Selecione o tamanho da camiseta',
   }),
   pantsSize: z.string().optional(),
-  shoeSize: z.coerce.number().optional(),
+  shoeSize: z.number().optional(),
 });
 
 export type PublicEmployeeRegisterValues = z.infer<typeof publicEmployeeRegisterSchema>;

@@ -45,15 +45,15 @@ export default function EmployeeRegisterPage() {
   const onSubmit = (data: PublicEmployeeRegisterValues) => {
     const promise = registerMutation.mutateAsync(data);
 
-    toast.promise(promise, {
+    void toast.promise(promise, {
       loading: 'Enviando pré-cadastro...',
       success: () => {
         reset();
         setIsSuccessOpen(true);
         return 'Pré-cadastro realizado com sucesso!';
       },
-      error: (err) => {
-        const message = err?.message || 'Tente novamente.';
+      error: (err: { message?: string }) => {
+        const message = err.message || 'Tente novamente.';
         return `Erro ao realizar o pré-cadastro: ${message}`;
       },
     });
@@ -133,7 +133,7 @@ export default function EmployeeRegisterPage() {
                     <Shirt className="size-3.5 shrink-0 text-muted-foreground" />
                     <span className="truncate">Camiseta *</span>
                   </Label>
-                  <Select defaultValue="M" onValueChange={(value) => setValue('shirtSize', value as any)}>
+                  <Select defaultValue="M" onValueChange={(value) => setValue('shirtSize', value as (typeof shirtSizes)[number])}>
                     <SelectTrigger className="!h-10 text-sm rounded-md w-full">
                       <SelectValue placeholder="Tamanho" />
                     </SelectTrigger>
@@ -155,7 +155,7 @@ export default function EmployeeRegisterPage() {
                     <Footprints className="size-3.5 shrink-0 text-muted-foreground" />
                     <span className="truncate">Calçado</span>
                   </Label>
-                  <Input id="shoeSize" type="number" placeholder="Ex: 40" className="text-sm rounded-md !h-10 w-full" {...register('shoeSize')} />
+                  <Input id="shoeSize" type="number" placeholder="Ex: 40" className="text-sm rounded-md !h-10 w-full" {...register('shoeSize', { setValueAs: (v: string) => (v === '' ? undefined : Number(v)) })} />
                 </div>
               </div>
             </div>

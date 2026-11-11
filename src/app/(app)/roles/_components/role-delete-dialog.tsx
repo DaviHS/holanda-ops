@@ -37,16 +37,16 @@ export function DeleteRoleDialog({
 
     const promise = deleteMutation.mutateAsync({ id: roleId });
 
-    toast.promise(promise, {
+    void toast.promise(promise, {
       loading: 'Removendo cargo...',
       success: () => {
-        utils.roles.getAll.invalidate();
+        void utils.roles.getAll.invalidate();
         onOpenChange(false);
         onSuccess?.();
         return 'Cargo removido com sucesso!';
       },
-      error: (err) => {
-        return err?.message || 'Erro ao remover cargo. Tente novamente.';
+      error: (err: { message?: string }) => {
+        return err.message || 'Erro ao remover cargo. Tente novamente.';
       },
     });
   };

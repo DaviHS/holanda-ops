@@ -9,7 +9,6 @@ import {
   LayoutDashboard,
   MoreHorizontal,
   Plus,
-  Settings2,
   UserRound,
   Users,
   X,

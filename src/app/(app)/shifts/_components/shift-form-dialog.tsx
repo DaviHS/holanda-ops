@@ -79,14 +79,14 @@ export function ShiftFormDialog({
 
     const actionPromise = onSubmit(payload);
 
-    toast.promise(actionPromise, {
+    void toast.promise(actionPromise, {
       loading: isEditing ? 'Atualizando turno...' : 'Criando turno...',
       success: () => {
         onOpenChange(false);
         return isEditing ? 'Turno atualizado com sucesso!' : 'Turno criado com sucesso!';
       },
-      error: (err) => {
-        const message = err?.message || 'Tente novamente.';
+      error: (err: { message?: string }) => {
+        const message = err.message || 'Tente novamente.';
         return `Erro ao ${isEditing ? 'atualizar' : 'criar'} turno: ${message}`;
       },
     });

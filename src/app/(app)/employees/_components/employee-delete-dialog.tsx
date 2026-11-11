@@ -37,16 +37,16 @@ export function DeleteEmployeeDialog({
 
     const promise = deleteMutation.mutateAsync({ id: employeeId });
 
-    toast.promise(promise, {
+    void toast.promise(promise, {
       loading: 'Removendo funcionário...',
       success: () => {
-        utils.employees.getAll.invalidate();
+        void utils.employees.getAll.invalidate();
         onOpenChange(false);
         onSuccess?.();
         return 'Funcionário removido com sucesso!';
       },
-      error: (err) => {
-        return err?.message || 'Erro ao remover funcionário. Tente novamente.';
+      error: (err: { message?: string }) => {
+        return err.message || 'Erro ao remover funcionário. Tente novamente.';
       },
     });
   };

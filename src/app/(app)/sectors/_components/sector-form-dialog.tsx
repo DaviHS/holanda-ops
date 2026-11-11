@@ -76,14 +76,14 @@ export function SectorFormDialog({ open, onOpenChange, sectorToEdit }: SectorFor
       ? updateMutation.mutateAsync({ id: sectorToEdit.id, ...payload })
       : createMutation.mutateAsync(payload);
 
-    toast.promise(actionPromise, {
+    void toast.promise(actionPromise, {
       loading: isEditing ? 'Atualizando setor...' : 'Criando setor...',
       success: () => {
         onOpenChange(false);
         return isEditing ? 'Setor atualizado com sucesso!' : 'Setor criado com sucesso!';
       },
-      error: (err) => {
-        const message = err?.message || 'Tente novamente.';
+      error: (err: { message?: string }) => {
+        const message = err.message || 'Tente novamente.';
         return `Erro ao ${isEditing ? 'atualizar' : 'criar'} setor: ${message}`;
       },
     });

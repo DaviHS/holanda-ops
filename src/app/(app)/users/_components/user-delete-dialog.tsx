@@ -37,16 +37,16 @@ export function DeleteUserDialog({
 
     const promise = deleteMutation.mutateAsync({ id: userId });
 
-    toast.promise(promise, {
+    void toast.promise(promise, {
       loading: 'Removendo usuário...',
       success: () => {
-        utils.users.getAll.invalidate();
+        void utils.users.getAll.invalidate();
         onOpenChange(false);
         onSuccess?.();
         return 'Usuário removido com sucesso!';
       },
-      error: (err) => {
-        return err?.message || 'Erro ao remover usuário. Tente novamente.';
+      error: (err: { message?: string }) => {
+        return err.message || 'Erro ao remover usuário. Tente novamente.';
       },
     });
   };

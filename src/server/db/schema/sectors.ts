@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, text } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
 import { softDeleteAndTimestamps } from './helpers';
 

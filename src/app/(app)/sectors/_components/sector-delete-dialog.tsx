@@ -37,16 +37,16 @@ export function DeleteSectorDialog({
 
     const promise = deleteMutation.mutateAsync({ id: sectorId });
 
-    toast.promise(promise, {
+    void toast.promise(promise, {
       loading: 'Removendo setor...',
       success: () => {
-        utils.sectors.getAll.invalidate();
+        void utils.sectors.getAll.invalidate();
         onOpenChange(false);
         onSuccess?.();
         return 'Setor removido com sucesso!';
       },
-      error: (err) => {
-        return err?.message || 'Erro ao remover setor. Tente novamente.';
+      error: (err: { message?: string }) => {
+        return err.message || 'Erro ao remover setor. Tente novamente.';
       },
     });
   };

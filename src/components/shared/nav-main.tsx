@@ -67,12 +67,12 @@ function NavMainItem({
   const isParentActive = activeParent === item.title;
   const [isOpen, setIsOpen] = React.useState(isParentActive);
 
-  // Sync open state when activeParent changes
-  React.useEffect(() => {
-    if (isParentActive) {
-      setIsOpen(true);
-    }
-  }, [isParentActive]);
+  // Abre o grupo quando ele passa a ser o pai ativo (ajuste de estado durante o render)
+  const [wasParentActive, setWasParentActive] = React.useState(isParentActive);
+  if (wasParentActive !== isParentActive) {
+    setWasParentActive(isParentActive);
+    if (isParentActive) setIsOpen(true);
+  }
 
   // Section label
   if (item.isSection && item.label) {

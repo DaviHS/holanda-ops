@@ -101,14 +101,14 @@ export function UserFormDialog({
   const handleFormSubmit = (data: UserFormValues) => {
     const actionPromise = onSubmit(data);
 
-    toast.promise(actionPromise, {
+    void toast.promise(actionPromise, {
       loading: isEditing ? 'Atualizando usuário...' : 'Criando usuário...',
       success: () => {
         onOpenChange(false);
         return isEditing ? 'Usuário atualizado com sucesso!' : 'Usuário criado com sucesso!';
       },
-      error: (err) => {
-        const message = err?.message || 'Tente novamente.';
+      error: (err: { message?: string }) => {
+        const message = err.message || 'Tente novamente.';
         return `Erro ao ${isEditing ? 'atualizar' : 'criar'} usuário: ${message}`;
       },
     });
@@ -242,7 +242,7 @@ export function UserFormDialog({
                 render={({ field }) => (
                   <Select
                     value={field.value || 'active'}
-                    onValueChange={(val) => val && field.onChange(val as 'active' | 'inactive' | 'suspended')}
+                    onValueChange={(val) => val && field.onChange(val)}
                   >
                     <SelectTrigger className="mt-1 text-sm !h-10 w-full rounded-md">
                       <SelectValue placeholder="Selecione">

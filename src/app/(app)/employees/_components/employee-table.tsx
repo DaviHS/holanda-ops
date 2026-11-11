@@ -17,7 +17,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
 import { EmployeeStatusBadge } from './employee-status-badge';
 import { DeleteEmployeeDialog } from './employee-delete-dialog';
 

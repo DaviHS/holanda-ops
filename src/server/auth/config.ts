@@ -1,47 +1,15 @@
-import type { AuthOptions } from "next-auth";
-import "next-auth/jwt";
-
-type UserStatus = "active" | "inactive" | "suspended";
-
-declare module "next-auth" {
-  interface Session {
-    user: {
-      id: string;
-      name?: string | null;
-      email?: string | null;
-      roleId: string;
-      status: UserStatus;
-      employeeId?: string | null;
-    };
-  }
-
-  interface User {
-    id?: string;
-    name?: string | null;
-    email?: string | null;
-    roleId?: string;
-    status?: UserStatus;
-    employeeId?: string | null;
-  }
-}
-
-declare module "next-auth/jwt" {
-  interface JWT {
-    id?: string;
-    name?: string | null;
-    email?: string | null;
-    roleId?: string;
-    status?: UserStatus;
-    employeeId?: string | null;
-  }
-}
+import type { NextAuthConfig } from "next-auth";
 
 export const authConfig = {
+  secret: process.env.AUTH_SECRET,
+  trustHost: true,
   session: {
     strategy: "jwt",
+    maxAge: 60 * 60 * 24 * 7,
   },
   pages: {
     signIn: "/sign-in",
+    signOut: "/sign-in",
   },
   providers: [],
   callbacks: {
@@ -68,4 +36,4 @@ export const authConfig = {
       return session;
     },
   },
-} satisfies AuthOptions;
+} satisfies NextAuthConfig;

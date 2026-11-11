@@ -1,4 +1,5 @@
-import NextAuth, { getServerSession } from "next-auth";
+import NextAuth from "next-auth";
+import { cache } from "react";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 import { z } from "zod";
@@ -13,7 +14,12 @@ const credentialsSchema = z.object({
   password: z.string().min(1),
 });
 
-const authOptions = {
+const {
+  auth: uncachedAuth,
+  handlers,
+  signIn,
+  signOut,
+} = NextAuth({
   ...authConfig,
   providers: [
     CredentialsProvider({
@@ -38,7 +44,7 @@ const authOptions = {
           },
         });
 
-        if (!user || !user.passwordHash) {
+        if (!user?.passwordHash) {
           return null;
         }
 
@@ -63,13 +69,8 @@ const authOptions = {
       },
     }),
   ],
-};
+});
 
-const nextAuthHandler = NextAuth(authOptions);
+const auth = cache(uncachedAuth);
 
-export const handlers = {
-  GET: nextAuthHandler,
-  POST: nextAuthHandler,
-};
-
-export const auth = () => getServerSession(authOptions);
+export { auth, handlers, signIn, signOut };

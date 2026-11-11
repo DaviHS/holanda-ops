@@ -50,7 +50,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { type Employee, insertEmployeeSchema } from '@/server/db/schema/employees';
-import { z } from 'zod';
+import { type z } from 'zod';
 
 import { toast } from '@/components/ui/toast';
 
@@ -161,20 +161,13 @@ export function EmployeeFormDialog({
       shoeSize: data.shoeSize && !isNaN(Number(data.shoeSize)) ? Number(data.shoeSize) : null,
     };
 
-    toast.promise(
-      new Promise((resolve, reject) => {
-        try {
-          const result = onSubmit(payload);
-          resolve(result);
-        } catch (error) {
-          reject(error);
-        }
-      }),
+    void toast.promise(
+      Promise.resolve().then(() => onSubmit(payload)),
       {
         loading: isEditing ? 'Atualizando colaborador...' : 'Cadastrando colaborador...',
         success: isEditing ? 'Colaborador atualizado com sucesso!' : 'Colaborador cadastrado com sucesso!',
-        error: (err) => {
-          const message = err?.message || 'tente novamente.';
+        error: (err: { message?: string }) => {
+          const message = err.message || 'tente novamente.';
           return `Erro ao ${isEditing ? 'atualizar' : 'cadastrar'}: ${message}`;
         },
       }
@@ -223,7 +216,7 @@ export function EmployeeFormDialog({
         </DialogHeader>
 
         <form
-          onSubmit={handleSubmit((data) => handleFormSubmit(data as EmployeeFormValues))}
+          onSubmit={handleSubmit((data) => handleFormSubmit(data))}
           className="flex flex-col flex-1 overflow-hidden min-h-0"
         >
           <Tabs defaultValue="pessoais" className="flex-1 flex flex-col overflow-hidden min-h-0">
@@ -433,7 +426,7 @@ export function EmployeeFormDialog({
                       <Label className="text-xs font-medium h-4 flex items-center">Camisa</Label>
                       <Select
                         value={watch('shirtSize') || 'M'}
-                        onValueChange={(val) => val && setValue('shirtSize', val as EmployeeFormValues['shirtSize'])}
+                        onValueChange={(val) => val && setValue('shirtSize', val)}
                       >
                         <SelectTrigger className="mt-1 text-sm !h-10 w-full rounded-md">
                           <SelectValue />
