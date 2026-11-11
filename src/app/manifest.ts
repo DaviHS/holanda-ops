@@ -5,6 +5,9 @@ export default function manifest(): MetadataRoute.Manifest {
     name: 'Holanda Ops',
     short_name: 'HolandaOps',
     description: 'Sistema de Gestão Operacional e Recursos Humanos',
+    id: '/',
+    lang: 'pt-BR',
+    scope: '/',
     start_url: '/',
     display: 'standalone',
     background_color: '#09213d',
@@ -21,7 +24,7 @@ export default function manifest(): MetadataRoute.Manifest {
         src: '/android-chrome-512x512.png',
         sizes: '512x512',
         type: 'image/png',
-        purpose: 'maskable',
+        purpose: 'any',
       },
     ],
   };

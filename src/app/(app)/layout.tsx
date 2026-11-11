@@ -1,6 +1,9 @@
+import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { auth } from '@/server/auth';
 import AppLayout from '@/components/sidebar/app-layout';
+
+export const metadata: Metadata = { title: 'Visão Geral' };
 
 export default async function AppLayoutWrapper({
   children,

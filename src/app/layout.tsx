@@ -16,7 +16,6 @@ const geistMono = Geist_Mono({
 export const viewport: Viewport = {
   colorScheme: 'light dark',
   themeColor: '#F58220',
-  userScalable: false,
 };
 
 export * from './__metadata';

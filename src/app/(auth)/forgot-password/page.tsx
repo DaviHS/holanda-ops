@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Mail } from 'lucide-react';
 import {
@@ -9,6 +10,8 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { ForgotPasswordForm } from './_components/forgot-password-form';
+
+export const metadata: Metadata = { title: 'Esqueci minha senha' };
 
 export default function ForgotPasswordPage() {
   return (

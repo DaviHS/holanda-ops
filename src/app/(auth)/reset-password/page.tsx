@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Key } from 'lucide-react';
 import {
@@ -9,6 +10,8 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { ResetPasswordForm } from './_components/reset-password-form';
+
+export const metadata: Metadata = { title: 'Criar nova senha' };
 
 export default async function ResetPasswordPage({
   searchParams,
