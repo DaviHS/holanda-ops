@@ -34,7 +34,7 @@ export function SearchInput({
         aria-label={props['aria-label'] ?? placeholder}
         className="pr-10 pl-9 [&::-webkit-search-cancel-button]:hidden"
       />
-      <div className="absolute top-1/2 right-1 flex -translate-y-1/2 items-center">
+      <div className="absolute top-1/2 right-1.5 flex -translate-y-1/2 items-center">
         {isLoading ? (
           <Loader2 className="text-muted-foreground mr-2 size-4 animate-spin" />
         ) : (
@@ -42,10 +42,10 @@ export function SearchInput({
             <button
               type="button"
               onClick={() => onChange('')}
-              className="text-muted-foreground hover:bg-accent hover:text-foreground flex size-8 items-center justify-center rounded-md"
+              className="text-muted-foreground hover:bg-accent hover:text-foreground flex size-6 items-center justify-center rounded-sm"
               aria-label="Limpar busca"
             >
-              <X className="size-4" />
+              <X className="size-3.5" />
             </button>
           )
         )}
