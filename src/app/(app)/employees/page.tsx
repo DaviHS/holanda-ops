@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Plus, Users } from 'lucide-react';
 import { api, type RouterOutputs } from '@/trpc/react';
 import { Button } from '@/components/ui/button';
@@ -45,6 +45,10 @@ export default function EmployeesPage() {
   const [search, setSearch] = useState('');
   // Vem preenchido quando se chega por um atalho, ex.: /employees?turno=<id> (tela de turnos).
   const params = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  // Atalho da tela de turnos: /employees?editar=<id> abre o cadastro daquele funcionário.
+  const editId = params.get('editar');
   const [shiftFilter, setShiftFilter] = useState(params.get('turno') ?? ALL);
   const [sectorFilter, setSectorFilter] = useState(params.get('setor') ?? ALL);
 
@@ -96,9 +100,26 @@ export default function EmployeesPage() {
           : item.sectorIds.includes(sectorFilter))),
   );
 
+  const [dismissedEdit, setDismissedEdit] = useState<string | null>(null);
+  const urlTarget =
+    editId && editId !== dismissedEdit
+      ? (items.find((item) => item.id === editId) ?? null)
+      : null;
+  const dialogOpen = dialog.open || !!urlTarget;
+  const editingTarget = dialog.open ? dialog.editing : urlTarget;
+
+  const handleDialogChange = (open: boolean) => {
+    if (!open && !dialog.open && urlTarget) {
+      setDismissedEdit(urlTarget.id);
+      router.replace(pathname, { scroll: false });
+      return;
+    }
+    dialog.onOpenChange(open);
+  };
+
   const handleSubmit = async (data: EmployeeFormValues) => {
-    if (dialog.editing) {
-      await updateMutation.mutateAsync({ id: dialog.editing.id, ...data });
+    if (editingTarget) {
+      await updateMutation.mutateAsync({ id: editingTarget.id, ...data });
     } else {
       await createMutation.mutateAsync(data);
     }
@@ -210,9 +231,9 @@ export default function EmployeesPage() {
 
       {canManage && (
         <EmployeeFormDialog
-          open={dialog.open}
-          onOpenChange={dialog.onOpenChange}
-          editing={dialog.editing}
+          open={dialogOpen}
+          onOpenChange={handleDialogChange}
+          editing={editingTarget}
           sectors={sectors}
           shifts={shifts}
           onSubmit={handleSubmit}

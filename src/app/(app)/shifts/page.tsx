@@ -6,11 +6,19 @@ import { api, type RouterOutputs } from '@/trpc/react';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { LoadingState } from '@/components/ui/loading-state';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { PageContainer, PageHeader } from '@/components/page-header';
 import { SearchInput } from '@/components/search-input';
 import { useConfirm } from '@/components/confirm-dialog';
 import { useEntityDialog } from '@/hooks/use-entity-dialog';
 import { usePermissions } from '@/hooks/use-permissions';
+import { formatShiftTime } from '@/lib/formatters';
 import { mutationFeedback } from '@/lib/mutation-feedback';
 import { ShiftCard } from './_components/shift-card';
 import { ShiftEmployeesDialog } from './_components/shift-employees-dialog';
@@ -20,6 +28,15 @@ import {
 } from './_components/shift-form-dialog';
 
 type Shift = RouterOutputs['shift']['list'][number];
+
+const ALL = 'all';
+const WITH = 'with';
+const WITHOUT = 'without';
+const OCCUPANCY_LABELS: Record<string, string> = {
+  [ALL]: 'Todos os turnos',
+  [WITH]: 'Com funcionários',
+  [WITHOUT]: 'Sem funcionários',
+};
 
 const plain = (value: string) =>
   value
@@ -32,6 +49,8 @@ export default function ShiftsPage() {
   const canManage = can('shifts.manage');
   const canSeeEmployees = can('employees.view', 'employees.manage');
   const [viewing, setViewing] = useState<Shift | null>(null);
+  const [occupancy, setOccupancy] = useState(ALL);
+  const canAssign = can('shifts.manage', 'employees.manage');
   const dialog = useEntityDialog<Shift>({ fromUrl: true });
   const confirm = useConfirm();
   const [search, setSearch] = useState('');
@@ -66,8 +85,15 @@ export default function ShiftsPage() {
   );
 
   const query = plain(search.trim());
-  const filtered = items.filter((item) =>
-    plain(`${item.name} ${item.description ?? ''}`).includes(query),
+  const filtered = items.filter(
+    (item) =>
+      plain(
+        `${item.name} ${item.description ?? ''} ${formatShiftTime(item)}`,
+      ).includes(query) &&
+      (occupancy === ALL ||
+        (occupancy === WITH
+          ? item.employeeCount > 0
+          : item.employeeCount === 0)),
   );
 
   const handleSubmit = async (data: ShiftFormValues) => {
@@ -108,12 +134,29 @@ export default function ShiftsPage() {
         }
       />
 
-      <SearchInput
-        value={search}
-        onChange={setSearch}
-        placeholder="Buscar turno..."
-        aria-label="Buscar turno"
-      />
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <SearchInput
+          value={search}
+          onChange={setSearch}
+          placeholder="Buscar por nome, horário ou descrição..."
+          aria-label="Buscar turno"
+        />
+        <Select
+          value={occupancy}
+          onValueChange={(value) => setOccupancy(value ?? ALL)}
+        >
+          <SelectTrigger className="w-full sm:w-52" aria-label="Funcionários">
+            <SelectValue>{OCCUPANCY_LABELS[occupancy]}</SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {Object.entries(OCCUPANCY_LABELS).map(([value, label]) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
       {isLoading ? (
         <LoadingState />
@@ -149,6 +192,8 @@ export default function ShiftsPage() {
         <ShiftEmployeesDialog
           shift={viewing}
           onOpenChange={(open) => !open && setViewing(null)}
+          canAssign={canAssign}
+          canOpenEmployee={can('employees.manage')}
         />
       )}
     </PageContainer>

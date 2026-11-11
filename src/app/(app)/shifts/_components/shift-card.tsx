@@ -1,11 +1,15 @@
 'use client';
 
-import { CalendarClock, Users } from 'lucide-react';
+import { CalendarClock, Moon, Users } from 'lucide-react';
 import { type RouterOutputs } from '@/trpc/react';
 import { EntityCard } from '@/components/entity-card';
 import { RowActions } from '@/components/row-actions';
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import { formatShiftTime } from '@/lib/formatters';
+import {
+  formatShiftDuration,
+  formatShiftTime,
+  isOvernightShift,
+} from '@/lib/formatters';
 
 type Shift = RouterOutputs['shift']['list'][number];
 
@@ -31,8 +35,14 @@ export function ShiftCard({
       subtitle={
         <>
           <span className="font-mono">{formatShiftTime(shift)}</span>
-          {' · '}
-          {shift.employeeCount} func.
+          {formatShiftDuration(shift) && ` · ${formatShiftDuration(shift)}`}
+          {isOvernightShift(shift) && (
+            <Moon
+              className="mb-0.5 ml-1 inline size-3"
+              aria-label="Vira a noite"
+            />
+          )}
+          {` · ${shift.employeeCount} func.`}
         </>
       }
       onOpen={onEdit && (() => onEdit(shift))}
