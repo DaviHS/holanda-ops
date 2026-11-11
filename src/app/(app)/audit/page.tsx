@@ -71,7 +71,9 @@ export default function AuditPage() {
           }}
         >
           <SelectTrigger className="w-full sm:w-56" aria-label="Área">
-            <SelectValue />
+            <SelectValue>
+              {area === ALL ? 'Todas as áreas' : (AUDIT_AREAS[area] ?? area)}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={ALL}>Todas as áreas</SelectItem>

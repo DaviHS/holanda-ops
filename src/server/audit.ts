@@ -1,6 +1,13 @@
-import { lt } from 'drizzle-orm';
+import { eq, lt } from 'drizzle-orm';
 import { db } from '@/server/db';
-import { auditLogs } from '@/server/db/schema';
+import {
+  auditLogs,
+  employees,
+  roles,
+  sectors,
+  shifts,
+  users,
+} from '@/server/db/schema';
 
 export const AUDIT_RETENTION_MONTHS = 24;
 const PURGE_CHANCE = 0.02;
@@ -60,5 +67,71 @@ export async function recordAudit(entry: {
     if (Math.random() < PURGE_CHANCE) await purgeOldAudit();
   } catch (error) {
     console.error('[audit] falha ao registrar', error);
+  }
+}
+
+/**
+ * Nome legível do registro afetado, buscado ANTES da ação (assim exclusões
+ * também ficam identificadas). Devolve null se não achar.
+ */
+export async function resolveAuditTarget(
+  path: string,
+  input: Record<string, unknown>,
+): Promise<string | null> {
+  const direct = input.name ?? input.email;
+  if (typeof direct === 'string') return direct;
+
+  const area = path.split('.')[0];
+  const id = typeof input.id === 'string' ? input.id : input.roleId;
+  if (typeof id !== 'string') return null;
+
+  try {
+    switch (area) {
+      case 'employee': {
+        const [row] = await db
+          .select({ v: employees.name })
+          .from(employees)
+          .where(eq(employees.id, id))
+          .limit(1);
+        return row?.v ?? null;
+      }
+      case 'sector': {
+        const [row] = await db
+          .select({ v: sectors.name })
+          .from(sectors)
+          .where(eq(sectors.id, id))
+          .limit(1);
+        return row?.v ?? null;
+      }
+      case 'shift': {
+        const [row] = await db
+          .select({ v: shifts.name })
+          .from(shifts)
+          .where(eq(shifts.id, id))
+          .limit(1);
+        return row?.v ?? null;
+      }
+      case 'role':
+      case 'access': {
+        const [row] = await db
+          .select({ v: roles.name })
+          .from(roles)
+          .where(eq(roles.id, id))
+          .limit(1);
+        return row?.v ?? null;
+      }
+      case 'user': {
+        const [row] = await db
+          .select({ v: users.email })
+          .from(users)
+          .where(eq(users.id, id))
+          .limit(1);
+        return row?.v ?? null;
+      }
+      default:
+        return null;
+    }
+  } catch {
+    return null;
   }
 }

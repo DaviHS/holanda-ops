@@ -1,8 +1,9 @@
 import { z } from 'zod';
-import { and, count, desc, ilike, or } from 'drizzle-orm';
+import { and, count, desc, ilike, inArray, or } from 'drizzle-orm';
 import { can, createTRPCRouter } from '@/server/api/trpc';
 import { db } from '@/server/db';
 import { auditLogs } from '@/server/db/schema';
+import { actionsMatching } from '@/lib/audit-labels';
 
 const viewAudit = can('audit.view');
 
@@ -21,8 +22,10 @@ export const auditRouter = createTRPCRouter({
       if (input.area) filters.push(ilike(auditLogs.action, `${input.area}.%`));
       if (input.search) {
         const term = `%${input.search.replace(/[%_]/g, '')}%`;
+        const byLabel = actionsMatching(input.search);
         filters.push(
           or(
+            byLabel.length > 0 ? inArray(auditLogs.action, byLabel) : undefined,
             ilike(auditLogs.userLabel, term),
             ilike(auditLogs.action, term),
             ilike(auditLogs.target, term),

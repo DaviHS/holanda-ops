@@ -57,3 +57,21 @@ export function summarizeAuditInput(input: unknown): string {
   }
   return parts.join(' · ');
 }
+
+const plain = (value: string) =>
+  value
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase();
+
+/** Ações cujo texto exibido (ou nome da área) contém o termo digitado. */
+export function actionsMatching(term: string): string[] {
+  const needle = plain(term);
+  if (!needle) return [];
+  return Object.entries(ACTIONS)
+    .filter(([action, label]) => {
+      const area = AUDIT_AREAS[action.split('.')[0] ?? ''] ?? '';
+      return plain(label).includes(needle) || plain(area).includes(needle);
+    })
+    .map(([action]) => action);
+}

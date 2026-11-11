@@ -14,7 +14,7 @@ import { ZodError } from 'zod';
 import { auth } from '@/server/auth';
 import { db } from '@/server/db';
 import { loadAccess } from '@/server/access';
-import { recordAudit } from '@/server/audit';
+import { recordAudit, resolveAuditTarget } from '@/server/audit';
 import type { Permission } from '@/lib/permissions';
 
 /**
@@ -153,14 +153,15 @@ export const can = (...permissions: [Permission, ...Permission[]]) =>
 
     const rawInput: unknown =
       type === 'mutation' ? await getRawInput().catch(() => null) : null;
+    const fields =
+      rawInput && typeof rawInput === 'object'
+        ? (rawInput as Record<string, unknown>)
+        : {};
+    const target =
+      type === 'mutation' ? await resolveAuditTarget(path, fields) : null;
     const result = await next({ ctx: { ...ctx, access } });
 
     if (type === 'mutation' && result.ok) {
-      const fields =
-        rawInput && typeof rawInput === 'object'
-          ? (rawInput as Record<string, unknown>)
-          : {};
-      const target = fields.name ?? fields.email ?? fields.id;
       await recordAudit({
         userId,
         userLabel:
@@ -168,7 +169,7 @@ export const can = (...permissions: [Permission, ...Permission[]]) =>
           ctx.session.user.email ??
           `Usuário ${userId}`,
         action: path,
-        target: typeof target === 'string' ? target : null,
+        target,
         input: rawInput,
       });
     }
