@@ -104,8 +104,11 @@ export function NavMain() {
       {entries.map((entry) => {
         if (isSection(entry)) {
           return (
-            <SidebarGroup key={entry.section} className="p-0 pt-5 first:pt-0">
-              <SidebarGroupLabel className="text-sidebar-foreground p-0 text-xs font-medium uppercase">
+            <SidebarGroup
+              key={entry.section}
+              className="-mb-1 p-0 pt-2 first:pt-0"
+            >
+              <SidebarGroupLabel className="text-sidebar-foreground h-6 p-0 text-xs font-medium uppercase">
                 {entry.section}
               </SidebarGroupLabel>
             </SidebarGroup>

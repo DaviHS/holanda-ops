@@ -25,16 +25,12 @@ export function PageHeader({
       )}
     >
       <div className="min-w-0 space-y-1">
-        <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight sm:text-3xl">
-          {Icon && (
-            <Icon className="text-primary h-6 w-6 shrink-0 sm:h-7 sm:w-7" />
-          )}
+        <h1 className="flex items-center gap-2 text-xl font-bold tracking-tight sm:text-2xl">
+          {Icon && <Icon className="text-primary size-5 shrink-0 sm:size-6" />}
           <span className="truncate">{title}</span>
         </h1>
         {description && (
-          <p className="text-muted-foreground text-sm sm:text-base">
-            {description}
-          </p>
+          <p className="text-muted-foreground text-sm">{description}</p>
         )}
       </div>
       {actions && (

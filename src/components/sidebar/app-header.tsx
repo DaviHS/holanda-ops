@@ -1,28 +1,28 @@
+import { Fragment } from 'react';
 import { Home, LogOut } from 'lucide-react';
 import Link from 'next/link';
-import { ThemeToggle, type Theme } from '@/components/theme-toggle';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { Separator } from '@/components/ui/separator';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 
 type AppHeaderProps = {
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
   onLogout: () => void;
   homeUrl?: string;
-  pageTitle?: string;
+  /** Itens depois do ícone de início, ex.: ["Equipe e RH", "Funcionários"]. */
+  trail?: string[];
 };
 
 export function AppHeader({
-  theme,
-  setTheme,
   onLogout,
   homeUrl = '/',
-  pageTitle,
+  trail = [],
 }: AppHeaderProps) {
   return (
     <header className="border-border/80 bg-card/95 z-10 mx-4 my-2 flex h-14 shrink-0 items-center gap-2 rounded-md border px-4 shadow-sm backdrop-blur-md transition-all">
@@ -40,20 +40,25 @@ export function AppHeader({
               <Home className="size-4" />
             </Link>
           </BreadcrumbItem>
-          {pageTitle && (
-            <BreadcrumbItem className="text-foreground text-sm font-medium">
-              {pageTitle}
-            </BreadcrumbItem>
-          )}
+          {trail.map((label, index) => (
+            <Fragment key={label}>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                {index === trail.length - 1 ? (
+                  <BreadcrumbPage className="text-sm font-medium">
+                    {label}
+                  </BreadcrumbPage>
+                ) : (
+                  <span className="text-muted-foreground text-sm">{label}</span>
+                )}
+              </BreadcrumbItem>
+            </Fragment>
+          ))}
         </BreadcrumbList>
       </Breadcrumb>
 
       <div className="ml-auto flex items-center gap-2">
-        <ThemeToggle
-          theme={theme}
-          setTheme={setTheme}
-          className="border-border bg-background text-muted-foreground hover:border-primary/50 hover:bg-primary/10 hover:text-primary flex size-9 shrink-0 items-center justify-center rounded-md border transition-colors [&_svg]:size-4"
-        />
+        <ThemeToggle className="border-border bg-background text-muted-foreground hover:border-primary/50 hover:bg-primary/10 hover:text-primary flex size-9 shrink-0 items-center justify-center rounded-md border transition-colors [&_svg]:size-4" />
 
         <button
           onClick={onLogout}

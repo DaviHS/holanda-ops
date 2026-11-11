@@ -7,7 +7,7 @@ import {
   Building2,
   MoreHorizontal,
   Plus,
-  UserRound,
+  ShieldCheck,
   Users,
   X,
 } from 'lucide-react';
@@ -82,7 +82,7 @@ export function MobileNavigation({ onTriggerAction }: MobileNavigationProps) {
               onClick={() => handleActionClick('role')}
               className="border-border bg-card flex items-center gap-2 rounded-full border px-4 py-2.5 text-xs font-semibold shadow-lg active:scale-95"
             >
-              <UserRound className="text-primary size-4" />+ Cargo
+              <ShieldCheck className="text-primary size-4" />+ Cargo
             </button>
           )}
         </div>

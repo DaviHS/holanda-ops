@@ -1,25 +1,24 @@
+'use client';
+
 import { Moon, Sun } from 'lucide-react';
+import { useTheme } from 'next-themes';
 
-export type Theme = 'light' | 'dark';
+/**
+ * O ícone troca só por CSS (classe `dark`), então o HTML do servidor e o do navegador
+ * são idênticos e não há erro de hidratação.
+ */
+export function ThemeToggle({ className }: { className?: string }) {
+  const { resolvedTheme, setTheme } = useTheme();
 
-type ThemeToggleProps = {
-  theme: Theme;
-  setTheme: (t: Theme) => void;
-  className?: string;
-};
-
-export function ThemeToggle({ theme, setTheme, className }: ThemeToggleProps) {
   return (
     <button
+      type="button"
       aria-label="Alternar tema"
-      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+      onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
       className={className}
     >
-      {theme === 'dark' ? (
-        <Sun className="size-4" />
-      ) : (
-        <Moon className="size-4" />
-      )}
+      <Sun className="size-4 dark:hidden" />
+      <Moon className="hidden size-4 dark:block" />
     </button>
   );
 }

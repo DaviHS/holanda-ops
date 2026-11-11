@@ -1,23 +1,22 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
-import { useTheme } from 'next-themes';
 import { AppHeader } from './app-header';
 import { AppSidebar } from './app-sidebar';
 import { MobileNavigation, type QuickActionKind } from './mobile-nav';
 import { Suspense } from 'react';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { LoadingState } from '@/components/ui/loading-state';
+import { getBreadcrumb } from '@/config/navigation';
 
 type AppLayoutProps = {
   children: React.ReactNode;
-  pageTitle?: string;
 };
 
-export default function AppLayout({ children, pageTitle }: AppLayoutProps) {
-  const { theme, setTheme } = useTheme();
+export default function AppLayout({ children }: AppLayoutProps) {
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleLogout = async () => {
     await signOut({ redirect: true, callbackUrl: '/sign-in' });
@@ -45,11 +44,9 @@ export default function AppLayout({ children, pageTitle }: AppLayoutProps) {
       <AppSidebar />
       <SidebarInset className="bg-background flex min-h-screen min-w-0 flex-col overflow-x-auto">
         <AppHeader
-          theme={theme as 'light' | 'dark'}
-          setTheme={setTheme}
           onLogout={handleLogout}
           homeUrl="/"
-          pageTitle={pageTitle}
+          trail={getBreadcrumb(pathname)}
         />
 
         <main className="w-full flex-1 p-4 pb-24 md:p-6 lg:pb-6">

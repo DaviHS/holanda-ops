@@ -1,10 +1,12 @@
 import {
   BarChart3,
+  Briefcase,
   Building2,
   CalendarClock,
   History,
   Settings2,
-  UserRound,
+  ShieldCheck,
+  UserCog,
   Users,
   type LucideIcon,
 } from 'lucide-react';
@@ -46,7 +48,7 @@ const EMPLOYEES: NavLink = {
 const ROLES: NavLink = {
   title: 'Cargos',
   href: '/roles',
-  icon: UserRound,
+  icon: ShieldCheck,
   permissions: ['roles.manage'],
 };
 const SHIFTS: NavLink = {
@@ -58,7 +60,7 @@ const SHIFTS: NavLink = {
 const USERS: NavLink = {
   title: 'Usuários',
   href: '/users',
-  icon: Users,
+  icon: UserCog,
   permissions: ['users.manage'],
 };
 const AUDIT: NavLink = {
@@ -74,7 +76,7 @@ export const NAVIGATION: NavEntry[] = [
   { section: 'Gestão de Pessoal' },
   {
     title: 'Equipe e RH',
-    icon: Users,
+    icon: Briefcase,
     children: [SECTORS, EMPLOYEES, ROLES, SHIFTS],
   },
   { title: 'Configurações', icon: Settings2, children: [USERS, AUDIT] },
@@ -120,3 +122,19 @@ export const isLinkActive = (pathname: string, href: string) =>
   href === '/'
     ? pathname === '/'
     : pathname === href || pathname.startsWith(`${href}/`);
+
+/** Trilha do breadcrumb para a rota atual, ex.: "/employees" -> ["Equipe e RH", "Funcionários"]. */
+export function getBreadcrumb(pathname: string): string[] {
+  for (const entry of NAVIGATION) {
+    if (isSection(entry)) continue;
+    if (isGroup(entry)) {
+      const child = entry.children.find((link) =>
+        isLinkActive(pathname, link.href),
+      );
+      if (child) return [entry.title, child.title];
+    } else if (entry.href !== '/' && isLinkActive(pathname, entry.href)) {
+      return [entry.title];
+    }
+  }
+  return [];
+}
