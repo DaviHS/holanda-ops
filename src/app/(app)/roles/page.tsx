@@ -8,7 +8,7 @@ import { RoleToolbar } from './_components/role-toolbar';
 import { RoleFormDialog, type RoleFormValues } from './_components/role-form-dialog';
 import { useSearchParams } from 'next/navigation';
 
-type Role = RouterOutputs['roles']['getAll'][number];
+type Role = RouterOutputs['role']['list'][number];
 
 export default function RolesPage() {
   const searchParams = useSearchParams()
@@ -17,18 +17,18 @@ export default function RolesPage() {
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
 
   const utils = api.useUtils();
-  const { data: roles = [], isLoading } = api.roles.getAll.useQuery();
+  const { data: roles = [], isLoading } = api.role.list.useQuery();
 
-  const createMutation = api.roles.create.useMutation({
+  const createMutation = api.role.create.useMutation({
     onSuccess: () => {
-      void utils.roles.getAll.invalidate();
+      void utils.role.list.invalidate();
       setDialogOpen(false);
     },
   });
 
-  const updateMutation = api.roles.update.useMutation({
+  const updateMutation = api.role.update.useMutation({
     onSuccess: () => {
-      void utils.roles.getAll.invalidate();
+      void utils.role.list.invalidate();
       setDialogOpen(false);
     },
   });

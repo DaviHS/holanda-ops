@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/server/auth";
-import AppLayout from "@/components/shared/app-layout";
+import AppLayout from "@/components/sidebar/app-layout";
 
 export default async function AppLayoutWrapper({
   children,

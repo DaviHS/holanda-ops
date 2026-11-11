@@ -1,5 +1,4 @@
 import { pgTable, uuid, varchar, text } from 'drizzle-orm/pg-core';
-import { z } from 'zod';
 import { softDeleteAndTimestamps } from './helpers';
 
 export const sectors = pgTable('sectors', {
@@ -9,14 +8,4 @@ export const sectors = pgTable('sectors', {
   ...softDeleteAndTimestamps,
 });
 
-export const insertSectorSchema = z.object({
-  name: z.string().min(2, 'Nome do setor é obrigatório'),
-  description: z.string().optional().nullable(),
-});
-
-export const updateSectorSchema = insertSectorSchema.partial().extend({
-  id: z.string().uuid(),
-});
-
 export type Sector = typeof sectors.$inferSelect;
-export type NewSector = z.infer<typeof insertSectorSchema>;

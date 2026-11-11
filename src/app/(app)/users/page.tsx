@@ -7,7 +7,7 @@ import { UserTable } from './_components/user-table';
 import { UserToolbar } from './_components/user-toolbar';
 import { UserFormDialog, type UserFormValues } from './_components/user-form-dialog';
 
-type User = RouterOutputs['users']['getAll'][number];
+type User = RouterOutputs['user']['list'][number];
 
 export default function UsersPage() {
   const [search, setSearch] = useState('');
@@ -15,18 +15,18 @@ export default function UsersPage() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   const utils = api.useUtils();
-  const { data: users = [], isLoading } = api.users.getAll.useQuery();
+  const { data: users = [], isLoading } = api.user.list.useQuery();
 
-  const createMutation = api.users.create.useMutation({
+  const createMutation = api.user.create.useMutation({
     onSuccess: () => {
-      void utils.users.getAll.invalidate();
+      void utils.user.list.invalidate();
       setDialogOpen(false);
     },
   });
 
-  const updateMutation = api.users.update.useMutation({
+  const updateMutation = api.user.update.useMutation({
     onSuccess: () => {
-      void utils.users.getAll.invalidate();
+      void utils.user.list.invalidate();
       setDialogOpen(false);
     },
   });

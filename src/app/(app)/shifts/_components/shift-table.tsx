@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { DeleteShiftDialog } from './shift-delete-dialog';
 
-type Shift = RouterOutputs['shifts']['getAll'][number];
+type Shift = RouterOutputs['shift']['list'][number];
 
 interface ShiftTableProps {
   shifts: Shift[];

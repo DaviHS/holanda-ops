@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DeleteRoleDialog } from './role-delete-dialog';
 
-type Role = RouterOutputs['roles']['getAll'][number];
+type Role = RouterOutputs['role']['list'][number];
 
 interface RoleCardProps {
   role: Role;

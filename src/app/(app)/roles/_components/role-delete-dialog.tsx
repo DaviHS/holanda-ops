@@ -30,7 +30,7 @@ export function DeleteRoleDialog({
 }: DeleteRoleDialogProps) {
   const utils = api.useUtils();
 
-  const deleteMutation = api.roles.delete.useMutation();
+  const deleteMutation = api.role.delete.useMutation();
 
   const handleDelete = () => {
     if (!roleId) return;
@@ -40,7 +40,7 @@ export function DeleteRoleDialog({
     void toast.promise(promise, {
       loading: 'Removendo cargo...',
       success: () => {
-        void utils.roles.getAll.invalidate();
+        void utils.role.list.invalidate();
         onOpenChange(false);
         onSuccess?.();
         return 'Cargo removido com sucesso!';

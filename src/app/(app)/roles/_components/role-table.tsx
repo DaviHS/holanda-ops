@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { DeleteRoleDialog } from './role-delete-dialog';
 
-type Role = RouterOutputs['roles']['getAll'][number];
+type Role = RouterOutputs['role']['list'][number];
 
 interface RoleTableProps {
   roles: Role[];

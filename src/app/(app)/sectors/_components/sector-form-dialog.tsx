@@ -4,7 +4,8 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { api } from '@/trpc/react';
-import { insertSectorSchema, type NewSector, type Sector } from '@/server/db/schema/sectors';
+import { type Sector } from '@/server/db/schema/sectors';
+import { sectorSchema, type SectorInput } from '@/validators/sector';
 import {
   Dialog,
   DialogContent,
@@ -17,7 +18,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Loader2, Building2 } from 'lucide-react';
-import { toast } from '@/components/ui/toast';
+import { toast } from 'sonner';
 
 interface SectorFormDialogProps {
   open: boolean;
@@ -34,8 +35,8 @@ export function SectorFormDialog({ open, onOpenChange, sectorToEdit }: SectorFor
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<NewSector>({
-    resolver: zodResolver(insertSectorSchema),
+  } = useForm<SectorInput>({
+    resolver: zodResolver(sectorSchema),
     defaultValues: {
       name: '',
       description: '',
@@ -56,17 +57,17 @@ export function SectorFormDialog({ open, onOpenChange, sectorToEdit }: SectorFor
     }
   }, [sectorToEdit, reset, open]);
 
-  const createMutation = api.sectors.create.useMutation({
-    onSuccess: () => utils.sectors.getAll.invalidate(),
+  const createMutation = api.sector.create.useMutation({
+    onSuccess: () => utils.sector.list.invalidate(),
   });
 
-  const updateMutation = api.sectors.update.useMutation({
-    onSuccess: () => utils.sectors.getAll.invalidate(),
+  const updateMutation = api.sector.update.useMutation({
+    onSuccess: () => utils.sector.list.invalidate(),
   });
 
   const isLoading = createMutation.isPending || updateMutation.isPending;
 
-  const handleFormSubmit = (data: NewSector) => {
+  const handleFormSubmit = (data: SectorInput) => {
     const payload = {
       ...data,
       description: data.description || null,

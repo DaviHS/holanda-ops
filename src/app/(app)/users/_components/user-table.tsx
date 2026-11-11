@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { DeleteUserDialog } from './user-delete-dialog';
 
-type User = RouterOutputs['users']['getAll'][number];
+type User = RouterOutputs['user']['list'][number];
 
 interface UserTableProps {
   users: User[];

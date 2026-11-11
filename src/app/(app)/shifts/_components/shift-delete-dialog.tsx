@@ -30,10 +30,10 @@ export function DeleteShiftDialog({
 }: DeleteShiftDialogProps) {
   const utils = api.useUtils();
 
-  const deleteMutation = api.shifts.delete.useMutation({
+  const deleteMutation = api.shift.delete.useMutation({
     onSuccess: () => {
       toast.success('Turno removido com sucesso!');
-      void utils.shifts.getAll.invalidate();
+      void utils.shift.list.invalidate();
       onOpenChange(false);
       onSuccess?.();
     },

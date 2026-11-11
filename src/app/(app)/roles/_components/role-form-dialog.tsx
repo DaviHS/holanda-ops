@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type RouterOutputs } from '@/trpc/react';
-import { insertRoleSchema, type NewRole } from '@/server/db/schema/roles';
+import { roleSchema, type RoleInput } from '@/validators/role';
 import {
   Dialog,
   DialogContent,
@@ -17,11 +17,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Loader2, ShieldCheck } from 'lucide-react';
-import { toast } from '@/components/ui/toast';
+import { toast } from 'sonner';
 
-type Role = RouterOutputs['roles']['getAll'][number];
+type Role = RouterOutputs['role']['list'][number];
 
-export type RoleFormValues = NewRole;
+export type RoleFormValues = RoleInput;
 
 interface RoleFormDialogProps {
   open: boolean;
@@ -44,7 +44,7 @@ export function RoleFormDialog({
     reset,
     formState: { errors, isSubmitting },
   } = useForm<RoleFormValues>({
-    resolver: zodResolver(insertRoleSchema),
+    resolver: zodResolver(roleSchema),
     defaultValues: {
       name: '',
       description: '',

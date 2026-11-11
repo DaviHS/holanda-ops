@@ -4,11 +4,8 @@ import { eq, and, ne, isNull } from 'drizzle-orm';
 import { hash } from 'bcryptjs';
 import { can, createTRPCRouter } from "@/server/api/trpc";
 
-import {
-  users,
-  insertUserSchema,
-  updateUserSchema,
-} from '@/server/db/schema/users';
+import { users } from '@/server/db/schema/users';
+import { userSchema, userUpdateSchema } from '@/validators/user';
 import { employees } from '@/server/db/schema/employees';
 
 const manageUsers = can("users.manage");
@@ -19,8 +16,8 @@ function assertCanTouch(target: { isAdmin: boolean }, actorIsAdmin: boolean) {
   }
 }
 
-export const usersRouter = createTRPCRouter({
-  getAll: manageUsers.query(async ({ ctx }) => {
+export const userRouter = createTRPCRouter({
+  list: manageUsers.query(async ({ ctx }) => {
     return await ctx.db.query.users.findMany({
       where: isNull(users.deletedAt),
       columns: { passwordHash: false },
@@ -58,7 +55,7 @@ export const usersRouter = createTRPCRouter({
     }),
 
   create: manageUsers
-    .input(insertUserSchema)
+    .input(userSchema)
     .mutation(async ({ ctx, input }) => {
       const existingEmail = await ctx.db.query.users.findFirst({
         where: and(
@@ -126,7 +123,7 @@ export const usersRouter = createTRPCRouter({
     }),
 
   update: manageUsers
-    .input(updateUserSchema)
+    .input(userUpdateSchema)
     .mutation(async ({ ctx, input }) => {
       const existingUser = await ctx.db.query.users.findFirst({
         where: and(

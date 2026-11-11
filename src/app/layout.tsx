@@ -1,10 +1,10 @@
 import { Geist, Geist_Mono, Inter } from 'next/font/google'
 import type { Viewport } from 'next'
 import { cn } from "@/lib/utils";
-import { Toaster } from '@/components/ui/toast';
+import { Toaster } from '@/components/ui/sonner';
 import { PwaInstallPrompt } from '@/components/pwa-install-prompt';
 import { PwaRegister } from '@/components/pwa-register';
-import { Providers } from '@/components/provider/providers';
+import { Providers } from '@/components/providers';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 const geist = Geist({ subsets: ['latin'], variable: '--font-geist' });

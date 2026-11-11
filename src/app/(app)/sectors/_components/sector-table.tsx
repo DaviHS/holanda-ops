@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { DeleteSectorDialog } from './sector-delete-dialog';
 
-type Sector = RouterOutputs['sectors']['getAll'][number];
+type Sector = RouterOutputs['sector']['list'][number];
 
 interface SectorTableProps {
   sectors: Sector[];

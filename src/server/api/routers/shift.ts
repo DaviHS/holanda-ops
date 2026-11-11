@@ -1,13 +1,14 @@
 import { z } from 'zod';
 import { can, createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 
-import { shifts, insertShiftSchema } from '@/server/db/schema';
+import { shifts } from '@/server/db/schema';
+import { shiftSchema } from '@/validators/shift';
 import { and, eq, isNull } from 'drizzle-orm';
 
 const manageShifts = can("shifts.manage");
 
-export const shiftsRouter = createTRPCRouter({
-  getAll: protectedProcedure.query(async ({ ctx }) => {
+export const shiftRouter = createTRPCRouter({
+  list: protectedProcedure.query(async ({ ctx }) => {
     return ctx.db.query.shifts.findMany({
       where: isNull(shifts.deletedAt),
       orderBy: (shifts, { asc }) => [asc(shifts.name)],
@@ -26,7 +27,7 @@ export const shiftsRouter = createTRPCRouter({
     }),
 
   create: manageShifts
-    .input(insertShiftSchema)
+    .input(shiftSchema)
     .mutation(async ({ ctx, input }) => {
       const [newShift] = await ctx.db
         .insert(shifts)
@@ -43,7 +44,7 @@ export const shiftsRouter = createTRPCRouter({
 
   update: manageShifts
     .input(
-      insertShiftSchema.extend({
+      shiftSchema.extend({
         id: z.string().uuid(),
       })
     )

@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DeleteSectorDialog } from './sector-delete-dialog';
 
-type Sector = RouterOutputs['sectors']['getAll'][number];
+type Sector = RouterOutputs['sector']['list'][number];
 
 interface SectorCardProps {
   sector: Sector;

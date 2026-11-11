@@ -30,7 +30,7 @@ export function DeleteUserDialog({
 }: DeleteUserDialogProps) {
   const utils = api.useUtils();
 
-  const deleteMutation = api.users.delete.useMutation();
+  const deleteMutation = api.user.delete.useMutation();
 
   const handleDelete = () => {
     if (!userId) return;
@@ -40,7 +40,7 @@ export function DeleteUserDialog({
     void toast.promise(promise, {
       loading: 'Removendo usuário...',
       success: () => {
-        void utils.users.getAll.invalidate();
+        void utils.user.list.invalidate();
         onOpenChange(false);
         onSuccess?.();
         return 'Usuário removido com sucesso!';

@@ -1,13 +1,14 @@
 import { z } from 'zod';
 import { can, createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 
-import { roles, insertRoleSchema, updateRoleSchema } from '@/server/db/schema';
+import { roles } from '@/server/db/schema';
+import { roleSchema, roleUpdateSchema } from '@/validators/role';
 import { and, eq, isNull } from 'drizzle-orm';
 
 const manageRoles = can("roles.manage");
 
-export const rolesRouter = createTRPCRouter({
-  getAll: protectedProcedure.query(async ({ ctx }) => {
+export const roleRouter = createTRPCRouter({
+  list: protectedProcedure.query(async ({ ctx }) => {
     return ctx.db.query.roles.findMany({
       where: isNull(roles.deletedAt),
       orderBy: (roles, { asc }) => [asc(roles.name)],
@@ -26,7 +27,7 @@ export const rolesRouter = createTRPCRouter({
     }),
 
   create: manageRoles
-    .input(insertRoleSchema)
+    .input(roleSchema)
     .mutation(async ({ ctx, input }) => {
       const [newRole] = await ctx.db
         .insert(roles)
@@ -40,7 +41,7 @@ export const rolesRouter = createTRPCRouter({
     }),
 
   update: manageRoles
-    .input(updateRoleSchema)
+    .input(roleUpdateSchema)
     .mutation(async ({ ctx, input }) => {
       const [updatedRole] = await ctx.db
         .update(roles)

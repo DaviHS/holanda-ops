@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type RouterOutputs } from '@/trpc/react';
-import { insertShiftSchema, type NewShift } from '@/server/db/schema/shifts';
+import { shiftSchema, type ShiftInput } from '@/validators/shift';
 import {
   Dialog,
   DialogContent,
@@ -17,11 +17,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Loader2, Clock } from 'lucide-react';
-import { toast } from '@/components/ui/toast';
+import { toast } from 'sonner';
 
-type Shift = RouterOutputs['shifts']['getAll'][number];
+type Shift = RouterOutputs['shift']['list'][number];
 
-export type ShiftFormValues = NewShift;
+export type ShiftFormValues = ShiftInput;
 
 interface ShiftFormDialogProps {
   open: boolean;
@@ -44,7 +44,7 @@ export function ShiftFormDialog({
     reset,
     formState: { errors, isSubmitting },
   } = useForm<ShiftFormValues>({
-    resolver: zodResolver(insertShiftSchema),
+    resolver: zodResolver(shiftSchema),
     defaultValues: {
       name: '',
       startTime: '',

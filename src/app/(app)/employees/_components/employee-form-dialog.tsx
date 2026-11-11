@@ -49,12 +49,13 @@ import {
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { type Employee, insertEmployeeSchema } from '@/server/db/schema/employees';
+import { type Employee } from '@/server/db/schema/employees';
+import { employeeSchema } from '@/validators/employee';
 import { type z } from 'zod';
 
-import { toast } from '@/components/ui/toast';
+import { toast } from 'sonner';
 
-export type EmployeeFormValues = z.infer<typeof insertEmployeeSchema>;
+export type EmployeeFormValues = z.infer<typeof employeeSchema>;
 
 type SectorItem = { id: string; name: string };
 type ShiftItem = {
@@ -95,7 +96,7 @@ export function EmployeeFormDialog({
     reset,
     formState: { errors },
   } = useForm<EmployeeFormValues>({
-    resolver: zodResolver(insertEmployeeSchema) as Resolver<EmployeeFormValues>,
+    resolver: zodResolver(employeeSchema) as Resolver<EmployeeFormValues>,
     defaultValues: {
       name: '',
       cpf: '',

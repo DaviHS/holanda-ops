@@ -8,7 +8,7 @@ import { SectorCard } from './_components/sector-card';
 import { SectorFormDialog } from './_components/sector-form-dialog';
 import { useSearchParams } from 'next/navigation';
 
-type Sector = RouterOutputs['sectors']['getAll'][number];
+type Sector = RouterOutputs['sector']['list'][number];
 
 export default function SectorsPage() {
   const searchParams = useSearchParams()
@@ -16,7 +16,7 @@ export default function SectorsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSector, setSelectedSector] = useState<Sector | null>(null);
 
-  const { data: sectors = [], isLoading } = api.sectors.getAll.useQuery();
+  const { data: sectors = [], isLoading } = api.sector.list.useQuery();
 
   const handleSelectSector = (sector: Sector) => {
     setSelectedSector(sector);

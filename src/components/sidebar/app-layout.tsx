@@ -24,16 +24,16 @@ export default function AppLayout({ children, pageTitle }: AppLayoutProps) {
   const handleTriggerAction = (action: QuickActionKind) => {
     switch (action) {
       case 'employee':
-        router.push('/employees?action=new')
+        router.push('/employees?novo=1')
         break
       case 'sector':
-        router.push('/sectors?action=new')
+        router.push('/sectors?novo=1')
         break
       case 'role':
-        router.push('/roles?action=new')
+        router.push('/roles?novo=1')
         break
       case 'shift':
-        router.push('/shifts?action=new')
+        router.push('/shifts?novo=1')
         break
     }
   }

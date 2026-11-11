@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DeleteUserDialog } from './user-delete-dialog';
 
-type User = RouterOutputs['users']['getAll'][number];
+type User = RouterOutputs['user']['list'][number];
 
 interface UserCardProps {
   user: User;

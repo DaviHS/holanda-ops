@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { EmployeeStatusBadge } from './employee-status-badge';
 import { DeleteEmployeeDialog } from './employee-delete-dialog';
 
-type Employee = RouterOutputs['employees']['getAll'][number];
+type Employee = RouterOutputs['employee']['list'][number];
 
 interface EmployeeCardProps {
   employee: Employee;

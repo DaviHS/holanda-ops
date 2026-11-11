@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { api, type RouterOutputs } from '@/trpc/react';
-import { insertUserSchema } from '@/server/db/schema/users';
+import { userSchema } from '@/validators/user';
 import { z } from 'zod';
 import {
   Dialog,
@@ -24,15 +24,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, UserPlus } from 'lucide-react';
-import { toast } from '@/components/ui/toast';
+import { toast } from 'sonner';
 
-type User = RouterOutputs['users']['getAll'][number];
+type User = RouterOutputs['user']['list'][number];
 
-const createUserFormSchema = insertUserSchema.extend({
+const createUserFormSchema = userSchema.extend({
   employeeId: z.string().min(1, 'Selecione um funcionário'),
 });
 
-const updateUserFormSchema = insertUserSchema.extend({
+const updateUserFormSchema = userSchema.extend({
   employeeId: z.string().min(1, 'Selecione um funcionário'),
   password: z
     .string()
@@ -58,8 +58,8 @@ export function UserFormDialog({
 }: UserFormDialogProps) {
   const isEditing = !!user;
 
-  const { data: roles = [] } = api.roles.getAll.useQuery();
-  const { data: employees = [] } = api.employees.getAll.useQuery();
+  const { data: roles = [] } = api.role.list.useQuery();
+  const { data: employees = [] } = api.employee.list.useQuery();
 
   const {
     register,

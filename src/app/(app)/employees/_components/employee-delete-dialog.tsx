@@ -30,7 +30,7 @@ export function DeleteEmployeeDialog({
 }: DeleteEmployeeDialogProps) {
   const utils = api.useUtils();
 
-  const deleteMutation = api.employees.delete.useMutation();
+  const deleteMutation = api.employee.delete.useMutation();
 
   const handleDelete = () => {
     if (!employeeId) return;
@@ -40,7 +40,7 @@ export function DeleteEmployeeDialog({
     void toast.promise(promise, {
       loading: 'Removendo funcionário...',
       success: () => {
-        void utils.employees.getAll.invalidate();
+        void utils.employee.list.invalidate();
         onOpenChange(false);
         onSuccess?.();
         return 'Funcionário removido com sucesso!';

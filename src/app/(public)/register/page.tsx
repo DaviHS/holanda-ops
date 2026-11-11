@@ -17,11 +17,11 @@ import {
   publicEmployeeRegisterSchema, 
   type PublicEmployeeRegisterValues, 
   shirtSizes 
-} from '@/lib/validations/employee-register';
+} from '@/validators/register';
 
 export default function EmployeeRegisterPage() {
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
-  const registerMutation = api.employees.publicRegister.useMutation();
+  const registerMutation = api.employee.publicRegister.useMutation();
 
   const {
     register,

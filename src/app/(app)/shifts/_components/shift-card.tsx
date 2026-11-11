@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DeleteShiftDialog } from './shift-delete-dialog';
 
-type Shift = RouterOutputs['shifts']['getAll'][number];
+type Shift = RouterOutputs['shift']['list'][number];
 
 interface ShiftCardProps {
   shift: Shift;

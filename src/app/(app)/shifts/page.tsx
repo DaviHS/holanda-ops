@@ -7,7 +7,7 @@ import { ShiftTable } from './_components/shift-table';
 import { ShiftToolbar } from './_components/shift-toolbar';
 import { ShiftFormDialog, type ShiftFormValues } from './_components/shift-form-dialog';
 
-type Shift = RouterOutputs['shifts']['getAll'][number];
+type Shift = RouterOutputs['shift']['list'][number];
 
 export default function ShiftsPage() {
   const [search, setSearch] = useState('');
@@ -15,18 +15,18 @@ export default function ShiftsPage() {
   const [selectedShift, setSelectedShift] = useState<Shift | null>(null);
 
   const utils = api.useUtils();
-  const { data: shifts = [], isLoading } = api.shifts.getAll.useQuery();
+  const { data: shifts = [], isLoading } = api.shift.list.useQuery();
 
-  const createMutation = api.shifts.create.useMutation({
+  const createMutation = api.shift.create.useMutation({
     onSuccess: () => {
-      void utils.shifts.getAll.invalidate();
+      void utils.shift.list.invalidate();
       setDialogOpen(false);
     },
   });
 
-  const updateMutation = api.shifts.update.useMutation({
+  const updateMutation = api.shift.update.useMutation({
     onSuccess: () => {
-      void utils.shifts.getAll.invalidate();
+      void utils.shift.list.invalidate();
       setDialogOpen(false);
     },
   });

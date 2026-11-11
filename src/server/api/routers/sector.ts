@@ -6,8 +6,8 @@ import { and, eq, isNull } from 'drizzle-orm';
 
 const manageSectors = can("sectors.manage");
 
-export const sectorsRouter = createTRPCRouter({
-  getAll: protectedProcedure.query(async ({ ctx }) => {
+export const sectorRouter = createTRPCRouter({
+  list: protectedProcedure.query(async ({ ctx }) => {
     return ctx.db.query.sectors.findMany({
       where: isNull(sectors.deletedAt),
       orderBy: (sectors, { asc }) => [asc(sectors.name)],

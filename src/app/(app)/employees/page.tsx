@@ -8,7 +8,7 @@ import { EmployeeToolbar } from './_components/employee-toolbar';
 import { EmployeeFormDialog, type EmployeeFormValues } from './_components/employee-form-dialog';
 import { useSearchParams } from 'next/navigation';
 
-type Employee = RouterOutputs['employees']['getAll'][number];
+type Employee = RouterOutputs['employee']['list'][number];
 
 export default function EmployeesPage() {
   const searchParams = useSearchParams();
@@ -17,20 +17,20 @@ export default function EmployeesPage() {
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
 
   const utils = api.useUtils();
-  const { data: employees = [], isLoading } = api.employees.getAll.useQuery();
-  const { data: sectors = [] } = api.sectors.getAll.useQuery();
-  const { data: shifts = [] } = api.shifts.getAll.useQuery();
+  const { data: employees = [], isLoading } = api.employee.list.useQuery();
+  const { data: sectors = [] } = api.sector.list.useQuery();
+  const { data: shifts = [] } = api.shift.list.useQuery();
 
-  const createMutation = api.employees.create.useMutation({
+  const createMutation = api.employee.create.useMutation({
     onSuccess: () => {
-      void utils.employees.getAll.invalidate();
+      void utils.employee.list.invalidate();
       setDialogOpen(false);
     },
   });
 
-  const updateMutation = api.employees.update.useMutation({
+  const updateMutation = api.employee.update.useMutation({
     onSuccess: () => {
-      void utils.employees.getAll.invalidate();
+      void utils.employee.list.invalidate();
       setDialogOpen(false);
     },
   });

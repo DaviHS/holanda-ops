@@ -1,5 +1,4 @@
 import { pgTable, uuid, varchar, text } from 'drizzle-orm/pg-core';
-import { z } from 'zod';
 import { softDeleteAndTimestamps } from './helpers';
 
 export const roles = pgTable('roles', {
@@ -9,14 +8,4 @@ export const roles = pgTable('roles', {
   ...softDeleteAndTimestamps,
 });
 
-export const insertRoleSchema = z.object({
-  name: z.string().min(2, 'Nome do perfil é obrigatório'),
-  description: z.string().optional().nullable(),
-});
-
-export const updateRoleSchema = insertRoleSchema.partial().extend({
-  id: z.string().uuid(),
-});
-
 export type Role = typeof roles.$inferSelect;
-export type NewRole = z.infer<typeof insertRoleSchema>;

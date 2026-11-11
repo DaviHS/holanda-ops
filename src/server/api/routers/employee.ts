@@ -5,17 +5,16 @@ import { can, createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import {
   employees,
   employeeSectors,
-  insertEmployeeSchema,
-  updateEmployeeSchema,
 } from "@/server/db/schema";
+import { employeeSchema, employeeUpdateSchema } from "@/validators/employee";
 import { TRPCError } from "@trpc/server";
-import { publicEmployeeRegisterSchema } from "@/lib/validations/employee-register";
+import { publicEmployeeRegisterSchema } from "@/validators/register";
 
 const viewEmployees = can("employees.view", "employees.manage", "users.manage");
 const manageEmployees = can("employees.manage");
 
-export const employeesRouter = createTRPCRouter({
-  getAll: viewEmployees.query(async ({ ctx }) => {
+export const employeeRouter = createTRPCRouter({
+  list: viewEmployees.query(async ({ ctx }) => {
     const result = await ctx.db.query.employees.findMany({
       where: isNull(employees.deletedAt),
       with: {
@@ -67,7 +66,7 @@ export const employeesRouter = createTRPCRouter({
     }),
 
   create: manageEmployees
-    .input(insertEmployeeSchema)
+    .input(employeeSchema)
     .mutation(async ({ ctx, input }) => {
       const { sectorIds, ...employeeData } = input;
 
@@ -95,7 +94,7 @@ export const employeesRouter = createTRPCRouter({
     }),
 
   update: manageEmployees
-    .input(updateEmployeeSchema)
+    .input(employeeUpdateSchema)
     .mutation(async ({ ctx, input }) => {
       const { id, sectorIds, ...employeeData } = input;
 

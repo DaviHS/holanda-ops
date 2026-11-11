@@ -1,10 +1,10 @@
 import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
 import { dashboardRouter } from "./routers/dashboard";
-import { employeesRouter } from "./routers/employees";
-import { sectorsRouter } from "./routers/sectors";
-import { shiftsRouter } from "./routers/shifts";
-import { rolesRouter } from "./routers/roles";
-import { usersRouter } from "./routers/users";
+import { employeeRouter } from "./routers/employee";
+import { sectorRouter } from "./routers/sector";
+import { shiftRouter } from "./routers/shift";
+import { roleRouter } from "./routers/role";
+import { userRouter } from "./routers/user";
 import { accessRouter } from "./routers/access";
 import { auditRouter } from "./routers/audit";
 
@@ -15,11 +15,11 @@ import { auditRouter } from "./routers/audit";
  */
 export const appRouter = createTRPCRouter({
   dashboard: dashboardRouter,
-  employees: employeesRouter,
-  sectors: sectorsRouter,
-  shifts: shiftsRouter,
-  roles: rolesRouter,
-  users: usersRouter,
+  employee: employeeRouter,
+  sector: sectorRouter,
+  shift: shiftRouter,
+  role: roleRouter,
+  user: userRouter,
   access: accessRouter,
   audit: auditRouter,
 });
@@ -31,7 +31,7 @@ export type AppRouter = typeof appRouter;
  * Create a server-side caller for the tRPC API.
  * @example 
  * const trpc = createCaller(createContext);
- * const res = await trpc.employees.getAll();
+ * const res = await trpc.employees.list();
  *       ^? Employee[]
  */
 export const createCaller = createCallerFactory(appRouter);

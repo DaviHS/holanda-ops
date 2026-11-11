@@ -30,7 +30,7 @@ export function DeleteSectorDialog({
 }: DeleteSectorDialogProps) {
   const utils = api.useUtils();
 
-  const deleteMutation = api.sectors.delete.useMutation();
+  const deleteMutation = api.sector.delete.useMutation();
 
   const handleDelete = () => {
     if (!sectorId) return;
@@ -40,7 +40,7 @@ export function DeleteSectorDialog({
     void toast.promise(promise, {
       loading: 'Removendo setor...',
       success: () => {
-        void utils.sectors.getAll.invalidate();
+        void utils.sector.list.invalidate();
         onOpenChange(false);
         onSuccess?.();
         return 'Setor removido com sucesso!';
