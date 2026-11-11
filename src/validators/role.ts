@@ -1,11 +1,21 @@
 import { z } from 'zod';
+import { isPermission } from '@/lib/permissions';
 
 export const roleSchema = z.object({
-  name: z.string().min(2, 'Nome do cargo é obrigatório'),
+  name: z.string().trim().min(2, 'Nome do cargo é obrigatório'),
   description: z.string().optional().nullable(),
 });
 
-export const roleUpdateSchema = roleSchema.partial().extend({
+const permissionList = z
+  .array(z.string().refine(isPermission, 'Permissão inválida'))
+  .default([]);
+
+/** Cargo + as permissões que ele concede (salvos juntos, numa transação). */
+export const roleSaveSchema = roleSchema.extend({
+  permissions: permissionList,
+});
+
+export const roleUpdateSchema = roleSaveSchema.extend({
   id: z.string().uuid(),
 });
 

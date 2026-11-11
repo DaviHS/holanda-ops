@@ -1,62 +1,94 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
+import { and, count, eq, getTableColumns, isNull, sql } from 'drizzle-orm';
 import { can, createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
 
 import { roles, users } from '@/server/db/schema';
-import { roleSchema, roleUpdateSchema } from '@/validators/role';
-import { and, count, eq, isNull } from 'drizzle-orm';
+import { roleSaveSchema, roleUpdateSchema } from '@/validators/role';
+import {
+  assertGrantable,
+  assertNoSelfLockout,
+  replaceRolePermissions,
+} from '@/server/role-permissions';
 
 const manageRoles = can('roles.manage');
 
 export const roleRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({ ctx }) => {
-    return ctx.db.query.roles.findMany({
-      where: isNull(roles.deletedAt),
-      orderBy: (roles, { asc }) => [asc(roles.name)],
-    });
+    return ctx.db
+      .select({
+        ...getTableColumns(roles),
+        // Colunas escritas por extenso: numa consulta de uma tabela só o Drizzle omite o nome
+        // da tabela, e o "id" acabaria sendo o de outra tabela (contagem sempre 0).
+        userCount: sql<number>`(
+          select count(*)::int from users u
+          where u.role_id = "roles"."id" and u.deleted_at is null
+        )`,
+        permissionCount: sql<number>`(
+          select count(*)::int from role_permissions rp
+          where rp.role_id = "roles"."id"
+        )`,
+      })
+      .from(roles)
+      .where(isNull(roles.deletedAt))
+      .orderBy(roles.name);
   }),
 
-  getById: protectedProcedure
-    .input(z.object({ id: z.string().uuid() }))
-    .query(async ({ ctx, input }) => {
-      return ctx.db.query.roles.findFirst({
-        where: and(eq(roles.id, input.id), isNull(roles.deletedAt)),
-      });
-    }),
+  /** Cria o cargo já com as permissões, tudo numa transação. */
+  create: manageRoles.input(roleSaveSchema).mutation(async ({ ctx, input }) => {
+    assertGrantable(input.permissions, ctx.access);
 
-  create: manageRoles.input(roleSchema).mutation(async ({ ctx, input }) => {
-    const [newRole] = await ctx.db
-      .insert(roles)
-      .values({
-        name: input.name,
-        description: input.description ?? null,
-      })
-      .returning();
-
-    return newRole;
+    return await ctx.db.transaction(async (tx) => {
+      const [newRole] = await tx
+        .insert(roles)
+        .values({
+          name: input.name,
+          description: input.description ?? null,
+        })
+        .returning();
+      if (!newRole) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Erro ao criar o cargo.',
+        });
+      }
+      await replaceRolePermissions(tx, newRole.id, input.permissions);
+      return newRole;
+    });
   }),
 
   update: manageRoles
     .input(roleUpdateSchema)
     .mutation(async ({ ctx, input }) => {
-      const [updatedRole] = await ctx.db
-        .update(roles)
-        .set({
-          name: input.name,
-          description: input.description ?? null,
-          updatedAt: new Date(),
-        })
-        .where(and(eq(roles.id, input.id), isNull(roles.deletedAt)))
-        .returning();
+      assertGrantable(input.permissions, ctx.access);
+      await assertNoSelfLockout(
+        input.id,
+        input.permissions,
+        ctx.session.user.id,
+        ctx.access,
+      );
 
-      if (!updatedRole) {
-        throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Cargo não encontrado ou já removido.',
-        });
-      }
+      return await ctx.db.transaction(async (tx) => {
+        const [updatedRole] = await tx
+          .update(roles)
+          .set({
+            name: input.name,
+            description: input.description ?? null,
+            updatedAt: new Date(),
+          })
+          .where(and(eq(roles.id, input.id), isNull(roles.deletedAt)))
+          .returning();
 
-      return updatedRole;
+        if (!updatedRole) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Cargo não encontrado ou já removido.',
+          });
+        }
+
+        await replaceRolePermissions(tx, input.id, input.permissions);
+        return updatedRole;
+      });
     }),
 
   delete: manageRoles
