@@ -17,15 +17,15 @@ interface RowActionsProps {
   label: string;
   onEdit?: () => void;
   onDelete?: () => void;
-  /** Itens extras do menu "⋯", entre o início e o "Excluir". */
+  /** Itens extras do menu, entre "Editar" e "Excluir". */
   children?: ReactNode;
-  /** Botões menores (8), para cards no celular. */
+  /** Botão menor (8), para cards no celular. */
   compact?: boolean;
 }
 
 /**
- * Ações padrão das listas (tabela e card): botão "Editar" sempre visível e menu "⋯"
- * com os demais itens. Não aparece se não houver nenhuma ação.
+ * Menu "Ações" padrão das listas (tabela e card): Editar, itens extras e Excluir.
+ * Não aparece se não houver nenhuma ação.
  */
 export function RowActions({
   label,
@@ -34,67 +34,54 @@ export function RowActions({
   children,
   compact,
 }: RowActionsProps) {
-  const hasMenu = Boolean(onDelete) || Boolean(children);
-  if (!onEdit && !hasMenu) return null;
+  if (!onEdit && !onDelete && !children) return null;
 
   return (
     <div
-      className="flex items-center justify-end gap-0.5"
+      className="flex items-center justify-end"
       onClick={stopRowEvent}
       onKeyDown={(event) => event.stopPropagation()}
     >
-      {onEdit && (
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-sm"
-          className={cn(
-            'text-muted-foreground hover:text-foreground',
-            compact && 'size-8',
-          )}
-          aria-label={`Editar ${label}`}
-          title="Editar"
-          onClick={onEdit}
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              className={cn(
+                'text-muted-foreground hover:text-foreground',
+                compact && 'size-8',
+              )}
+              aria-label={`Ações de ${label}`}
+              title="Ações"
+            />
+          }
         >
-          <Pencil className="size-4" />
-        </Button>
-      )}
-
-      {hasMenu && (
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                className={cn(
-                  'text-muted-foreground hover:text-foreground',
-                  compact && 'size-8',
-                )}
-                aria-label={`Mais ações de ${label}`}
-                title="Mais ações"
-              />
-            }
-          >
-            <MoreHorizontal className="size-4" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {children}
-            {onDelete && (
-              <>
-                {Boolean(children) && <DropdownMenuSeparator />}
-                <DropdownMenuItem
-                  onClick={onDelete}
-                  className="text-destructive focus:text-destructive"
-                >
-                  <Trash2 className="mr-2 size-4" /> Excluir
-                </DropdownMenuItem>
-              </>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
+          <MoreHorizontal className="size-4" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          {onEdit && (
+            <DropdownMenuItem onClick={onEdit}>
+              <Pencil className="mr-2 size-4" /> Editar
+            </DropdownMenuItem>
+          )}
+          {children}
+          {onDelete && (
+            <>
+              {(Boolean(onEdit) || Boolean(children)) && (
+                <DropdownMenuSeparator />
+              )}
+              <DropdownMenuItem
+                onClick={onDelete}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="mr-2 size-4" /> Excluir
+              </DropdownMenuItem>
+            </>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }
@@ -111,9 +98,5 @@ export function editableRowProps(onEdit?: () => void) {
   };
 }
 
-/** Impede que clique dentro de uma área (ex.: os botões de ação) acione a linha ou o card. */
+/** Impede que clique dentro de uma área (ex.: o menu de ações) acione a linha ou o card. */
 export const stopRowEvent = (event: MouseEvent) => event.stopPropagation();
-
-/** Classes da célula de ações da tabela: fica fixa na borda direita ao rolar na horizontal. */
-export const ACTIONS_CELL_CLASS =
-  'bg-card sticky right-0 w-[88px] text-right group-hover/row:bg-muted';
