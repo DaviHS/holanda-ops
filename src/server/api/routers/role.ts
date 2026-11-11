@@ -1,9 +1,10 @@
 import { z } from 'zod';
+import { TRPCError } from '@trpc/server';
 import { can, createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
 
-import { roles } from '@/server/db/schema';
+import { roles, users } from '@/server/db/schema';
 import { roleSchema, roleUpdateSchema } from '@/validators/role';
-import { and, eq, isNull } from 'drizzle-orm';
+import { and, count, eq, isNull } from 'drizzle-orm';
 
 const manageRoles = can('roles.manage');
 
@@ -58,6 +59,17 @@ export const roleRouter = createTRPCRouter({
   delete: manageRoles
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
+      const [inUse] = await ctx.db
+        .select({ value: count() })
+        .from(users)
+        .where(and(eq(users.roleId, input.id), isNull(users.deletedAt)));
+      if (inUse && inUse.value > 0) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: `Este cargo está em uso por ${inUse.value} usuário(s). Troque o cargo deles antes de remover.`,
+        });
+      }
+
       const [softDeletedRole] = await ctx.db
         .update(roles)
         .set({

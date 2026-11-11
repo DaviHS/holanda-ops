@@ -1,7 +1,6 @@
 'use client';
 
 import { type RouterOutputs } from '@/trpc/react';
-import { UserCheck, MoreHorizontal, Trash2, Eye } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
@@ -13,131 +12,94 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { formatDateTime } from '@/lib/formatters';
+import { userInitials } from '@/lib/user-status';
+import { UserAdminBadge, UserStatusBadge } from './user-badges';
+import { UserActions, type UserActionHandlers } from './user-actions';
 
 type User = RouterOutputs['user']['list'][number];
 
-interface UserTableProps {
+interface UserTableProps extends UserActionHandlers {
   users: User[];
-  onEdit?: (user: User) => void;
-  onDelete?: (user: User) => void;
 }
 
-export function UserTable({ users, onEdit, onDelete }: UserTableProps) {
+export function UserTable({ users, onEdit, ...actions }: UserTableProps) {
   return (
-    <>
-      <Card className="overflow-hidden rounded-md">
-        <ScrollArea className="w-full">
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Usuário</TableHead>
-                  <TableHead>E-mail</TableHead>
-                  <TableHead>Funcionário Vinculado</TableHead>
-                  <TableHead>Perfil / Nível</TableHead>
-                  <TableHead className="w-[50px]">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {users.map((user) => {
-                  const displayName =
-                    user.employee?.name ?? user.email.split('@')[0];
-                  const avatarInitials = displayName
-                    .substring(0, 2)
-                    .toUpperCase();
+    <Card className="overflow-hidden rounded-md">
+      <ScrollArea className="w-full">
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Usuário</TableHead>
+                <TableHead>Cargo</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Último acesso</TableHead>
+                <TableHead className="w-[50px]">
+                  <span className="sr-only">Ações</span>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {users.map((user) => {
+                const displayName =
+                  user.employee?.name ?? user.email.split('@')[0] ?? 'Usuário';
 
-                  return (
-                    <TableRow
-                      key={user.id}
-                      onClick={() => onEdit?.(user)}
-                      className="hover:bg-muted/20 cursor-pointer transition-colors"
-                    >
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <div className="bg-primary/10 text-primary flex size-9 items-center justify-center rounded-full text-xs font-bold">
-                            {avatarInitials}
-                          </div>
-                          <div>
-                            <p className="font-semibold">{displayName}</p>
-                          </div>
+                return (
+                  <TableRow
+                    key={user.id}
+                    onClick={() => onEdit?.(user)}
+                    onKeyDown={(event) => {
+                      if (
+                        event.key === 'Enter' &&
+                        event.target === event.currentTarget
+                      )
+                        onEdit?.(user);
+                    }}
+                    tabIndex={onEdit ? 0 : undefined}
+                    className="hover:bg-muted/20 cursor-pointer transition-colors"
+                  >
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-bold">
+                          {userInitials(displayName)}
                         </div>
-                      </TableCell>
-                      <TableCell className="font-mono text-xs">
-                        {user.email}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-xs">
-                        {user.employee?.name ? (
-                          <span className="text-foreground flex items-center gap-1.5 font-medium">
-                            <UserCheck className="size-3.5 text-emerald-500" />
-                            {user.employee.name}
-                          </span>
-                        ) : (
-                          <span className="text-muted-foreground/60">
-                            — Sem Vínculo —
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            user.role?.name?.toLowerCase() === 'admin'
-                              ? 'default'
-                              : 'secondary'
-                          }
-                          className="rounded-md"
-                        >
-                          {user.role?.name ?? 'Sem Perfil'}
+                        <div className="min-w-0">
+                          <p className="truncate font-semibold">
+                            {displayName}
+                          </p>
+                          <p className="text-muted-foreground truncate font-mono text-xs">
+                            {user.email}
+                          </p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <Badge variant="secondary">
+                          {user.role?.name ?? 'Sem cargo'}
                         </Badge>
-                      </TableCell>
-                      <TableCell onClick={(e) => e.stopPropagation()}>
-                        {(onEdit ?? onDelete) && (
-                          <DropdownMenu>
-                            <DropdownMenuTrigger className="hover:bg-accent hover:text-accent-foreground text-muted-foreground inline-flex size-8 items-center justify-center rounded-md transition-colors">
-                              <MoreHorizontal className="size-4" />
-                              <span className="sr-only">Abrir menu</span>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              {onEdit && (
-                                <DropdownMenuItem onClick={() => onEdit(user)}>
-                                  <Eye className="mr-2 size-4" /> Visualizar
-                                </DropdownMenuItem>
-                              )}
-                              {onDelete && (
-                                <DropdownMenuItem
-                                  onClick={() => onDelete(user)}
-                                  className="text-destructive focus:text-destructive"
-                                >
-                                  <Trash2 className="mr-2 size-4" /> Excluir
-                                </DropdownMenuItem>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-                {users.length === 0 && (
-                  <TableRow>
-                    <TableCell
-                      colSpan={5}
-                      className="text-muted-foreground py-10 text-center"
-                    >
-                      Nenhum usuário encontrado.
+                        <UserAdminBadge isAdmin={user.isAdmin} />
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <UserStatusBadge status={user.status} />
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-xs">
+                      {user.lastLoginAt
+                        ? formatDateTime(user.lastLoginAt)
+                        : 'Nunca acessou'}
+                    </TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      <UserActions user={user} onEdit={onEdit} {...actions} />
                     </TableCell>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </ScrollArea>
-      </Card>
-    </>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </ScrollArea>
+    </Card>
   );
 }

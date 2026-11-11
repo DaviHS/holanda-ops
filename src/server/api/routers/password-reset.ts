@@ -1,4 +1,3 @@
-import { createHash, randomBytes } from 'node:crypto';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { and, eq, gt, isNull } from 'drizzle-orm';
@@ -7,35 +6,12 @@ import { createTRPCRouter, publicProcedure } from '@/server/api/trpc';
 import { recordAudit } from '@/server/audit';
 import { db } from '@/server/db';
 import { users } from '@/server/db/schema/users';
-import { escapeHtml, sendEmail } from '@/server/email';
-
-const TOKEN_TTL_MS = 60 * 60 * 1000;
-const RESEND_COOLDOWN_MS = 60 * 1000;
-
-const hashToken = (token: string) =>
-  createHash('sha256').update(token).digest('hex');
-
-const appUrl = () =>
-  process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/+$/, '');
-
-function resetEmail(link: string) {
-  const text = [
-    'Recebemos um pedido para redefinir a sua senha no Holanda OPS.',
-    '',
-    'Para criar uma nova senha, acesse (o link vale por 1 hora):',
-    link,
-    '',
-    'Se você não pediu isso, ignore este e-mail. Sua senha continua a mesma.',
-  ].join('\n');
-  const safeLink = escapeHtml(link);
-  const html = `<div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;color:#111">
-<p>Recebemos um pedido para redefinir a sua senha no <strong>Holanda OPS</strong>.</p>
-<p><a href="${safeLink}" style="display:inline-block;background:#111;color:#fff;padding:12px 20px;border-radius:6px;text-decoration:none">Criar nova senha</a></p>
-<p style="font-size:13px;color:#555">O link vale por 1 hora. Se o botão não funcionar, copie este endereço no navegador:<br>${safeLink}</p>
-<p style="font-size:13px;color:#555">Se você não pediu isso, ignore este e-mail. Sua senha continua a mesma.</p>
-</div>`;
-  return { subject: 'Redefinição de senha', text, html };
-}
+import {
+  RESET_RESEND_COOLDOWN_MS,
+  RESET_TOKEN_TTL_MS,
+  hashResetToken,
+  sendPasswordResetLink,
+} from '@/server/password-reset';
 
 export const passwordResetRouter = createTRPCRouter({
   /** Sempre responde sucesso, para não revelar quais e-mails existem. */
@@ -58,30 +34,12 @@ export const passwordResetRouter = createTRPCRouter({
       if (user?.status !== 'active') return { success: true };
 
       const sentAt = user.resetTokenExpires
-        ? user.resetTokenExpires.getTime() - TOKEN_TTL_MS
+        ? user.resetTokenExpires.getTime() - RESET_TOKEN_TTL_MS
         : 0;
-      if (Date.now() - sentAt < RESEND_COOLDOWN_MS) return { success: true };
-
-      const base = appUrl();
-      if (!base) {
-        console.error('[password-reset] NEXT_PUBLIC_APP_URL não configurada.');
+      if (Date.now() - sentAt < RESET_RESEND_COOLDOWN_MS)
         return { success: true };
-      }
 
-      const token = randomBytes(32).toString('base64url');
-      await db
-        .update(users)
-        .set({
-          resetToken: hashToken(token),
-          resetTokenExpires: new Date(Date.now() + TOKEN_TTL_MS),
-          updatedAt: new Date(),
-        })
-        .where(eq(users.id, user.id));
-
-      const link = `${base}/reset-password?token=${token}`;
-      const sent = await sendEmail({ to: user.email, ...resetEmail(link) });
-      if (!sent && process.env.NODE_ENV !== 'production')
-        console.info('[password-reset] link (dev):', link);
+      const sent = await sendPasswordResetLink(user);
 
       await recordAudit({
         userId: user.id,
@@ -113,7 +71,7 @@ export const passwordResetRouter = createTRPCRouter({
         })
         .where(
           and(
-            eq(users.resetToken, hashToken(input.token)),
+            eq(users.resetToken, hashResetToken(input.token)),
             gt(users.resetTokenExpires, now),
             eq(users.status, 'active'),
             isNull(users.deletedAt),

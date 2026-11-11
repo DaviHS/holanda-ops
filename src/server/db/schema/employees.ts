@@ -9,7 +9,9 @@ import {
   pgEnum,
   primaryKey,
   index,
+  uniqueIndex,
 } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { users } from './users';
 import { sectors } from './sectors';
 import { shifts } from './shifts';
@@ -42,14 +44,14 @@ export const employees = pgTable(
   'employees',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    userId: uuid('user_id')
-      .unique()
-      .references(() => users.id, { onDelete: 'set null' }),
+    userId: uuid('user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
     shiftId: uuid('shift_id').references(() => shifts.id, {
       onDelete: 'set null',
     }),
     name: varchar('name', { length: 255 }).notNull(),
-    cpf: varchar('cpf', { length: 14 }).notNull().unique(),
+    cpf: varchar('cpf', { length: 14 }).notNull(),
     rg: varchar('rg', { length: 20 }),
     pixKey: varchar('pix_key', { length: 255 }),
     address: text('address'),
@@ -65,7 +67,12 @@ export const employees = pgTable(
   },
 
   (table) => [
-    index('idx_employees_cpf').on(table.cpf),
+    uniqueIndex('employees_cpf_active_uniq')
+      .on(table.cpf)
+      .where(sql`${table.deletedAt} is null`),
+    uniqueIndex('employees_user_id_active_uniq')
+      .on(table.userId)
+      .where(sql`${table.deletedAt} is null`),
     index('idx_employees_name').on(table.name),
     index('idx_employees_status').on(table.status),
     index('idx_employees_user_id').on(table.userId),

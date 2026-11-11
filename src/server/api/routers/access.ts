@@ -34,7 +34,20 @@ export const accessRouter = createTRPCRouter({
         ),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.access.isAdmin) {
+        const excess = input.permissions.filter(
+          (permission) =>
+            isPermission(permission) && !ctx.access.permissions.has(permission),
+        );
+        if (excess.length > 0) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: 'Você só pode conceder permissões que você mesmo possui.',
+          });
+        }
+      }
+
       const [found] = await db
         .select({ id: roles.id })
         .from(roles)

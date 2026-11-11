@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useForm } from 'react-hook-form';
@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
+import { signIn, signOut } from 'next-auth/react';
 import { toast } from 'sonner';
 import { toastError } from '@/lib/toast';
 import { PasswordInput } from '@/components/password-input';
@@ -38,6 +38,14 @@ export default function SignInPage() {
   const router = useRouter();
 
   const [authError, setAuthError] = useState<string | null>(null);
+
+  // Veio redirecionado porque a conta foi inativada ou removida: limpa o cookie antigo.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('session') !== 'ended') return;
+    void signOut({ redirect: false });
+    toastError('Sua sessão foi encerrada. Entre novamente.');
+  }, []);
 
   const {
     register,

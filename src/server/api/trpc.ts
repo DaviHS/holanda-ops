@@ -15,6 +15,7 @@ import { auth } from '@/server/auth';
 import { db } from '@/server/db';
 import { loadAccess } from '@/server/access';
 import { recordAudit, resolveAuditTarget } from '@/server/audit';
+import { uniqueViolationMessage } from '@/server/db/errors';
 import type { Permission } from '@/lib/permissions';
 
 /**
@@ -124,14 +125,23 @@ export const publicProcedure = t.procedure.use(timingMiddleware);
  */
 export const protectedProcedure = t.procedure
   .use(timingMiddleware)
-  .use(({ ctx, next }) => {
+  .use(async ({ ctx, next }) => {
     if (!ctx.session?.user) {
       throw new TRPCError({ code: 'UNAUTHORIZED' });
+    }
+    // A sessão (JWT) dura 7 dias; conta inativa, suspensa ou removida perde o acesso na hora.
+    const access = await loadAccess(ctx.session.user.id);
+    if (!access.active) {
+      throw new TRPCError({
+        code: 'UNAUTHORIZED',
+        message: 'Sua conta está inativa ou foi removida.',
+      });
     }
     return next({
       ctx: {
         // infers the `session` as non-nullable
         session: { ...ctx.session, user: ctx.session.user },
+        access,
       },
     });
   });
@@ -143,7 +153,7 @@ export const protectedProcedure = t.procedure
 export const can = (...permissions: [Permission, ...Permission[]]) =>
   protectedProcedure.use(async ({ ctx, next, type, path, getRawInput }) => {
     const userId = ctx.session.user.id;
-    const access = await loadAccess(userId);
+    const { access } = ctx;
     if (!permissions.some((permission) => access.permissions.has(permission))) {
       throw new TRPCError({
         code: 'FORBIDDEN',
@@ -159,7 +169,14 @@ export const can = (...permissions: [Permission, ...Permission[]]) =>
         : {};
     const target =
       type === 'mutation' ? await resolveAuditTarget(path, fields) : null;
-    const result = await next({ ctx: { ...ctx, access } });
+    const result = await next({ ctx });
+
+    if (!result.ok) {
+      const message = uniqueViolationMessage(
+        result.error.cause ?? result.error,
+      );
+      if (message) throw new TRPCError({ code: 'CONFLICT', message });
+    }
 
     if (type === 'mutation' && result.ok) {
       await recordAudit({

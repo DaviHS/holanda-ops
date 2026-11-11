@@ -28,6 +28,7 @@ const ACTIONS: Record<string, string> = {
   'user.create': 'Criou usuário',
   'user.update': 'Editou usuário',
   'user.delete': 'Removeu usuário',
+  'user.sendPasswordReset': 'Enviou link de redefinição de senha',
 
   'auth.requestPasswordReset': 'Pediu redefinição de senha',
   'auth.confirmPasswordReset': 'Redefiniu a própria senha',

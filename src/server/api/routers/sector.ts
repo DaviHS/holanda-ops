@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { can, createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
 
-import { sectors } from '@/server/db/schema';
+import { employeeSectors, sectors } from '@/server/db/schema';
 import { and, eq, isNull } from 'drizzle-orm';
 
 const manageSectors = can('sectors.manage');
@@ -70,15 +70,23 @@ export const sectorRouter = createTRPCRouter({
   delete: manageSectors
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
-      const [softDeletedSector] = await ctx.db
-        .update(sectors)
-        .set({
-          deletedAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .where(and(eq(sectors.id, input.id), isNull(sectors.deletedAt)))
-        .returning();
+      return await ctx.db.transaction(async (tx) => {
+        const [softDeletedSector] = await tx
+          .update(sectors)
+          .set({
+            deletedAt: new Date(),
+            updatedAt: new Date(),
+          })
+          .where(and(eq(sectors.id, input.id), isNull(sectors.deletedAt)))
+          .returning();
 
-      return softDeletedSector ?? null;
+        if (softDeletedSector) {
+          await tx
+            .delete(employeeSectors)
+            .where(eq(employeeSectors.sectorId, input.id));
+        }
+
+        return softDeletedSector ?? null;
+      });
     }),
 });

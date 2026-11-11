@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { can, createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
 
-import { shifts } from '@/server/db/schema';
+import { employees, shifts } from '@/server/db/schema';
 import { shiftSchema } from '@/validators/shift';
 import { and, eq, isNull } from 'drizzle-orm';
 
@@ -66,15 +66,24 @@ export const shiftRouter = createTRPCRouter({
   delete: manageShifts
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
-      const [softDeletedShift] = await ctx.db
-        .update(shifts)
-        .set({
-          deletedAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .where(and(eq(shifts.id, input.id), isNull(shifts.deletedAt)))
-        .returning();
+      return await ctx.db.transaction(async (tx) => {
+        const [softDeletedShift] = await tx
+          .update(shifts)
+          .set({
+            deletedAt: new Date(),
+            updatedAt: new Date(),
+          })
+          .where(and(eq(shifts.id, input.id), isNull(shifts.deletedAt)))
+          .returning();
 
-      return softDeletedShift ?? null;
+        if (softDeletedShift) {
+          await tx
+            .update(employees)
+            .set({ shiftId: null, updatedAt: new Date() })
+            .where(eq(employees.shiftId, input.id));
+        }
+
+        return softDeletedShift ?? null;
+      });
     }),
 });

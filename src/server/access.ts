@@ -4,11 +4,17 @@ import { rolePermissions, roles, users } from '@/server/db/schema';
 import { isPermission, PERMISSIONS, type Permission } from '@/lib/permissions';
 
 export interface Access {
+  /** Usuário existe, não foi removido e está com status ativo. */
+  active: boolean;
   isAdmin: boolean;
   permissions: Set<Permission>;
 }
 
-const NO_ACCESS: Access = { isAdmin: false, permissions: new Set() };
+const NO_ACCESS: Access = {
+  active: false,
+  isAdmin: false,
+  permissions: new Set(),
+};
 
 export async function loadAccess(userId: string): Promise<Access> {
   const [user] = await db
@@ -24,8 +30,9 @@ export async function loadAccess(userId: string): Promise<Access> {
     .limit(1);
 
   if (user?.status !== 'active') return NO_ACCESS;
-  if (user.isAdmin) return { isAdmin: true, permissions: new Set(PERMISSIONS) };
-  if (user.roleDeletedAt) return NO_ACCESS;
+  if (user.isAdmin)
+    return { active: true, isAdmin: true, permissions: new Set(PERMISSIONS) };
+  if (user.roleDeletedAt) return { ...NO_ACCESS, active: true };
 
   const rows = await db
     .select({ permission: rolePermissions.permission })
@@ -35,5 +42,5 @@ export async function loadAccess(userId: string): Promise<Access> {
   const permissions = new Set<Permission>();
   for (const row of rows)
     if (isPermission(row.permission)) permissions.add(row.permission);
-  return { isAdmin: false, permissions };
+  return { active: true, isAdmin: false, permissions };
 }

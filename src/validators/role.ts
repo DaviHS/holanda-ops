@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const roleSchema = z.object({
-  name: z.string().min(2, 'Nome do perfil é obrigatório'),
+  name: z.string().min(2, 'Nome do cargo é obrigatório'),
   description: z.string().optional().nullable(),
 });
 

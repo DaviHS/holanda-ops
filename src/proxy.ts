@@ -11,7 +11,8 @@ export default authProxy((request) => {
   const isLoggedIn = !!session?.user;
 
   if (pathname.startsWith(SIGN_IN)) {
-    if (isLoggedIn) return NextResponse.redirect(new URL(HOME, nextUrl));
+    if (isLoggedIn && !nextUrl.searchParams.has('session'))
+      return NextResponse.redirect(new URL(HOME, nextUrl));
     return NextResponse.next();
   }
 

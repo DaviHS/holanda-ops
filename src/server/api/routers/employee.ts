@@ -1,8 +1,8 @@
-import { and, eq, isNull } from 'drizzle-orm';
+import { and, count, eq, isNull, ne } from 'drizzle-orm';
 import { z } from 'zod';
 import { can, createTRPCRouter, publicProcedure } from '@/server/api/trpc';
 
-import { employees, employeeSectors } from '@/server/db/schema';
+import { employees, employeeSectors, users } from '@/server/db/schema';
 import { employeeSchema, employeeUpdateSchema } from '@/validators/employee';
 import { TRPCError } from '@trpc/server';
 import { publicEmployeeRegisterSchema } from '@/validators/register';
@@ -125,16 +125,73 @@ export const employeeRouter = createTRPCRouter({
   delete: manageEmployees
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
-      const [softDeletedEmployee] = await ctx.db
-        .update(employees)
-        .set({
-          deletedAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .where(and(eq(employees.id, input.id), isNull(employees.deletedAt)))
-        .returning();
+      const existing = await ctx.db.query.employees.findFirst({
+        where: and(eq(employees.id, input.id), isNull(employees.deletedAt)),
+      });
+      if (!existing) return null;
 
-      return softDeletedEmployee ?? null;
+      const linked = existing.userId
+        ? await ctx.db.query.users.findFirst({
+            where: and(eq(users.id, existing.userId), isNull(users.deletedAt)),
+          })
+        : undefined;
+      if (linked) {
+        if (linked.id === ctx.session.user.id) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message:
+              'Você não pode remover o funcionário da sua própria conta.',
+          });
+        }
+        if (linked.isAdmin && !ctx.access.isAdmin) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: 'Somente administradores podem remover um administrador.',
+          });
+        }
+        if (linked.isAdmin && linked.status === 'active') {
+          const [others] = await ctx.db
+            .select({ value: count() })
+            .from(users)
+            .where(
+              and(
+                eq(users.isAdmin, true),
+                eq(users.status, 'active'),
+                isNull(users.deletedAt),
+                ne(users.id, linked.id),
+              ),
+            );
+          if (!others || others.value === 0) {
+            throw new TRPCError({
+              code: 'BAD_REQUEST',
+              message:
+                'Deve existir ao menos um administrador ativo no sistema.',
+            });
+          }
+        }
+      }
+
+      return await ctx.db.transaction(async (tx) => {
+        // Sem o funcionário, a conta de acesso dele deixa de valer.
+        if (linked) {
+          await tx
+            .update(users)
+            .set({ status: 'inactive', updatedAt: new Date() })
+            .where(eq(users.id, linked.id));
+        }
+
+        const [softDeletedEmployee] = await tx
+          .update(employees)
+          .set({
+            deletedAt: new Date(),
+            updatedAt: new Date(),
+            userId: null,
+          })
+          .where(and(eq(employees.id, input.id), isNull(employees.deletedAt)))
+          .returning();
+
+        return softDeletedEmployee ?? null;
+      });
     }),
 
   publicRegister: publicProcedure

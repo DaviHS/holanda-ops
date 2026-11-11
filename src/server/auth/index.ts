@@ -3,7 +3,7 @@ import { cache } from 'react';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { compare } from 'bcryptjs';
 import { z } from 'zod';
-import { eq } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
 
 import { db } from '@/server/db';
 import { users } from '@/server/db/schema/users';
@@ -38,7 +38,10 @@ const {
         const { email, password } = parsedCredentials.data;
 
         const user = await db.query.users.findFirst({
-          where: eq(users.email, email),
+          where: and(
+            eq(users.email, email.trim().toLowerCase()),
+            isNull(users.deletedAt),
+          ),
           with: {
             employee: true,
           },
@@ -57,6 +60,11 @@ const {
         if (!isValidPassword) {
           return null;
         }
+
+        await db
+          .update(users)
+          .set({ lastLoginAt: new Date() })
+          .where(eq(users.id, user.id));
 
         return {
           id: user.id,
