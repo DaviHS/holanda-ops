@@ -205,6 +205,7 @@ export default function SignInPage() {
                 </Label>
                 <Link
                   href="/forgot-password"
+                  tabIndex={-1}
                   className="text-primary text-xs font-medium hover:underline"
                 >
                   Esqueceu a senha?
