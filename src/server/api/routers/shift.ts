@@ -7,6 +7,8 @@ import { employees, shifts } from '@/server/db/schema';
 import { shiftSchema, shiftUpdateSchema } from '@/validators/shift';
 
 const manageShifts = can('shifts.manage');
+/** Mudar o turno de um funcionário vale para quem gerencia turnos OU funcionários. */
+const assignShift = can('shifts.manage', 'employees.manage');
 
 export const shiftRouter = createTRPCRouter({
   /** Ordenados pelo horário de entrada (sem horário ficam no fim) e, depois, pelo nome. */
@@ -63,6 +65,45 @@ export const shiftRouter = createTRPCRouter({
       }
 
       return updatedShift;
+    }),
+
+  /** Coloca o funcionário no turno (ou tira, com shiftId nulo). */
+  setEmployeeShift: assignShift
+    .input(
+      z.object({
+        employeeId: z.string().uuid(),
+        shiftId: z.string().uuid().nullable(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (input.shiftId) {
+        const [shift] = await ctx.db
+          .select({ id: shifts.id })
+          .from(shifts)
+          .where(and(eq(shifts.id, input.shiftId), isNull(shifts.deletedAt)))
+          .limit(1);
+        if (!shift) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Turno não encontrado ou já removido.',
+          });
+        }
+      }
+
+      const [updated] = await ctx.db
+        .update(employees)
+        .set({ shiftId: input.shiftId, updatedAt: new Date() })
+        .where(
+          and(eq(employees.id, input.employeeId), isNull(employees.deletedAt)),
+        )
+        .returning({ id: employees.id });
+      if (!updated) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Funcionário não encontrado ou já removido.',
+        });
+      }
+      return updated;
     }),
 
   delete: manageShifts

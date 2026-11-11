@@ -82,6 +82,18 @@ export async function resolveAuditTarget(
   if (typeof direct === 'string') return direct;
 
   const area = path.split('.')[0];
+  // Ex.: shift.setEmployeeShift identifica o funcionário afetado.
+  if (
+    path === 'shift.setEmployeeShift' &&
+    typeof input.employeeId === 'string'
+  ) {
+    const [row] = await db
+      .select({ v: employees.name })
+      .from(employees)
+      .where(eq(employees.id, input.employeeId))
+      .limit(1);
+    return row?.v ?? null;
+  }
   const id = typeof input.id === 'string' ? input.id : input.roleId;
   if (typeof id !== 'string') return null;
 

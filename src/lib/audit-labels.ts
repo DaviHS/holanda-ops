@@ -20,6 +20,7 @@ const ACTIONS: Record<string, string> = {
   'shift.create': 'Criou turno',
   'shift.update': 'Editou turno',
   'shift.delete': 'Removeu turno',
+  'shift.setEmployeeShift': 'Alterou o turno de um funcionário',
 
   'role.create': 'Criou cargo',
   'role.update': 'Editou cargo',

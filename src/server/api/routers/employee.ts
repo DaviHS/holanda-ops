@@ -11,26 +11,32 @@ const viewEmployees = can('employees.view', 'employees.manage', 'users.manage');
 const manageEmployees = can('employees.manage');
 
 export const employeeRouter = createTRPCRouter({
-  list: viewEmployees.query(async ({ ctx }) => {
-    const result = await ctx.db.query.employees.findMany({
-      where: isNull(employees.deletedAt),
-      with: {
-        shift: true,
-        sectors: {
-          with: {
-            sector: true,
+  /** Opcionalmente só os funcionários de um turno. */
+  list: viewEmployees
+    .input(z.object({ shiftId: z.string().uuid().optional() }).optional())
+    .query(async ({ ctx, input }) => {
+      const result = await ctx.db.query.employees.findMany({
+        where: and(
+          isNull(employees.deletedAt),
+          input?.shiftId ? eq(employees.shiftId, input.shiftId) : undefined,
+        ),
+        with: {
+          shift: true,
+          sectors: {
+            with: {
+              sector: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    return result.map(({ sectors, shift, ...emp }) => ({
-      ...emp,
-      shift,
-      sectorIds: sectors.map((s) => s.sectorId),
-      sector: sectors.map((s) => s.sector.name).join(', '),
-    }));
-  }),
+      return result.map(({ sectors, shift, ...emp }) => ({
+        ...emp,
+        shift,
+        sectorIds: sectors.map((s) => s.sectorId),
+        sector: sectors.map((s) => s.sector.name).join(', '),
+      }));
+    }),
 
   getById: viewEmployees
     .input(z.object({ id: z.string().uuid() }))
