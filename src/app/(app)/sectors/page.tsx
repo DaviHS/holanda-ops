@@ -6,6 +6,13 @@ import { api, type RouterOutputs } from '@/trpc/react';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { LoadingState } from '@/components/ui/loading-state';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { PageContainer, PageHeader } from '@/components/page-header';
 import { SearchInput } from '@/components/search-input';
 import { useConfirm } from '@/components/confirm-dialog';
@@ -13,12 +20,22 @@ import { useEntityDialog } from '@/hooks/use-entity-dialog';
 import { usePermissions } from '@/hooks/use-permissions';
 import { mutationFeedback } from '@/lib/mutation-feedback';
 import { SectorCard } from './_components/sector-card';
+import { SectorEmployeesDialog } from './_components/sector-employees-dialog';
 import {
   SectorFormDialog,
   type SectorFormValues,
 } from './_components/sector-form-dialog';
 
 type Sector = RouterOutputs['sector']['list'][number];
+
+const ALL = 'all';
+const WITH = 'with';
+const WITHOUT = 'without';
+const OCCUPANCY_LABELS: Record<string, string> = {
+  [ALL]: 'Todos os setores',
+  [WITH]: 'Com funcionários',
+  [WITHOUT]: 'Sem funcionários',
+};
 
 const plain = (value: string) =>
   value
@@ -32,9 +49,14 @@ export default function SectorsPage() {
   const dialog = useEntityDialog<Sector>({ fromUrl: true });
   const confirm = useConfirm();
   const [search, setSearch] = useState('');
+  const [occupancy, setOccupancy] = useState(ALL);
+  const [viewing, setViewing] = useState<Sector | null>(null);
+  const canSeeEmployees = can('employees.view', 'employees.manage');
 
   const utils = api.useUtils();
-  const { data: items = [], isLoading } = api.sector.list.useQuery();
+  const { data: items = [], isLoading } = api.sector.list.useQuery(undefined, {
+    refetchOnMount: 'always',
+  });
 
   const refresh = () => utils.sector.list.invalidate();
 
@@ -61,8 +83,13 @@ export default function SectorsPage() {
   );
 
   const query = plain(search.trim());
-  const filtered = items.filter((item) =>
-    plain(`${item.name} ${item.description ?? ''}`).includes(query),
+  const filtered = items.filter(
+    (item) =>
+      plain(`${item.name} ${item.description ?? ''}`).includes(query) &&
+      (occupancy === ALL ||
+        (occupancy === WITH
+          ? item.employeeCount > 0
+          : item.employeeCount === 0)),
   );
 
   const handleSubmit = async (data: SectorFormValues) => {
@@ -76,7 +103,14 @@ export default function SectorsPage() {
   const handleDelete = async (item: Sector) => {
     const confirmed = await confirm({
       title: 'Remover setor',
-      description: `Tem certeza de que deseja remover o setor "${item.name}"? Esta ação não poderá ser desfeita.`,
+      description:
+        `Tem certeza de que deseja remover o setor "${item.name}"? Esta ação não poderá ser desfeita.` +
+        (item.employeeCount > 0
+          ? ` ${item.employeeCount} funcionário(s) perderão este setor` +
+            (item.soleCount > 0
+              ? `, e ${item.soleCount} ficarão sem nenhum setor.`
+              : '.')
+          : ''),
       confirmLabel: 'Remover',
       destructive: true,
     });
@@ -99,12 +133,29 @@ export default function SectorsPage() {
         }
       />
 
-      <SearchInput
-        value={search}
-        onChange={setSearch}
-        placeholder="Buscar setor..."
-        aria-label="Buscar setor"
-      />
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <SearchInput
+          value={search}
+          onChange={setSearch}
+          placeholder="Buscar setor..."
+          aria-label="Buscar setor"
+        />
+        <Select
+          value={occupancy}
+          onValueChange={(value) => setOccupancy(value ?? ALL)}
+        >
+          <SelectTrigger className="w-full sm:w-52" aria-label="Funcionários">
+            <SelectValue>{OCCUPANCY_LABELS[occupancy]}</SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {Object.entries(OCCUPANCY_LABELS).map(([value, label]) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
       {isLoading ? (
         <LoadingState />
@@ -120,6 +171,7 @@ export default function SectorsPage() {
             <SectorCard
               key={item.id}
               sector={item}
+              onViewEmployees={canSeeEmployees ? setViewing : undefined}
               onEdit={canManage ? dialog.openEdit : undefined}
               onDelete={canManage ? handleDelete : undefined}
             />
@@ -133,6 +185,14 @@ export default function SectorsPage() {
           onOpenChange={dialog.onOpenChange}
           editing={dialog.editing}
           onSubmit={handleSubmit}
+        />
+      )}
+      {canSeeEmployees && (
+        <SectorEmployeesDialog
+          sector={viewing}
+          onOpenChange={(open) => !open && setViewing(null)}
+          canAssign={can('sectors.manage', 'employees.manage')}
+          canOpenEmployee={can('employees.manage')}
         />
       )}
     </PageContainer>
