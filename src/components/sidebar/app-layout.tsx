@@ -49,7 +49,6 @@ export default function AppLayout({ children, pageTitle }: AppLayoutProps) {
           setTheme={setTheme}
           onLogout={handleLogout}
           homeUrl="/"
-          homeLabel="Dashboard"
           pageTitle={pageTitle}
         />
 

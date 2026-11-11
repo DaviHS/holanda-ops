@@ -1,6 +1,7 @@
 import { Home, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { ThemeToggle, type Theme } from '@/components/theme-toggle';
+import { Separator } from '@/components/ui/separator';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import {
   Breadcrumb,
@@ -13,7 +14,6 @@ type AppHeaderProps = {
   setTheme: (theme: Theme) => void;
   onLogout: () => void;
   homeUrl?: string;
-  homeLabel?: string;
   pageTitle?: string;
 };
 
@@ -22,22 +22,22 @@ export function AppHeader({
   setTheme,
   onLogout,
   homeUrl = '/',
-  homeLabel = 'Início',
   pageTitle,
 }: AppHeaderProps) {
   return (
     <header className="border-border/80 bg-card/95 z-10 mx-4 my-2 flex h-14 shrink-0 items-center gap-2 rounded-md border px-4 shadow-sm backdrop-blur-md transition-all">
       <SidebarTrigger className="border-border bg-background text-muted-foreground hover:border-primary/50 hover:bg-primary/10 hover:text-primary flex size-9 shrink-0 items-center justify-center rounded-md border transition-colors [&_svg]:size-4" />
+      <Separator orientation="vertical" className="mx-1 h-5" />
 
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
             <Link
               href={homeUrl}
+              aria-label="Início"
               className="text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
             >
               <Home className="size-4" />
-              <span className="text-sm">{homeLabel}</span>
             </Link>
           </BreadcrumbItem>
           {pageTitle && (
