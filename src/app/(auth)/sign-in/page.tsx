@@ -195,7 +195,7 @@ export default function SignInPage() {
                   type="email"
                   placeholder="seu@email.com"
                   autoComplete="email"
-                  className="!h-10 rounded-md pl-9 text-sm"
+                  className="rounded-md pl-9 text-sm"
                   {...register('email')}
                 />
               </div>
@@ -225,7 +225,7 @@ export default function SignInPage() {
                   id="password"
                   placeholder="••••••••"
                   autoComplete="current-password"
-                  className="!h-10 rounded-md pl-9 text-sm"
+                  className="rounded-md pl-9 text-sm"
                   {...register('password')}
                 />
               </div>
@@ -239,7 +239,7 @@ export default function SignInPage() {
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="!h-10 w-full rounded-md text-sm font-medium shadow-sm transition-all"
+              className="w-full rounded-md text-sm font-medium shadow-sm transition-all"
             >
               {isSubmitting ? (
                 <>

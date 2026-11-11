@@ -116,7 +116,7 @@ export default function EmployeeRegisterPage() {
                 <Input
                   id="name"
                   placeholder="Seu nome completo"
-                  className="!h-10 rounded-md pl-9 text-sm"
+                  className="rounded-md pl-9 text-sm"
                   {...register('name')}
                 />
               </div>
@@ -138,7 +138,7 @@ export default function EmployeeRegisterPage() {
                   <Input
                     id="cpf"
                     placeholder="000.000.000-00"
-                    className="!h-10 w-full rounded-md pl-9 text-sm"
+                    className="w-full rounded-md pl-9 text-sm"
                     {...register('cpf')}
                   />
                 </div>
@@ -158,7 +158,7 @@ export default function EmployeeRegisterPage() {
                   <Input
                     id="rg"
                     placeholder="00.000.000-0"
-                    className="!h-10 w-full rounded-md pl-9 text-sm"
+                    className="w-full rounded-md pl-9 text-sm"
                     {...register('rg')}
                   />
                 </div>
@@ -174,7 +174,7 @@ export default function EmployeeRegisterPage() {
                 <Input
                   id="pixKey"
                   placeholder="CPF, E-mail ou Telefone"
-                  className="!h-10 w-full rounded-md text-sm"
+                  className="w-full rounded-md text-sm"
                   {...register('pixKey')}
                 />
               </div>
@@ -188,7 +188,7 @@ export default function EmployeeRegisterPage() {
                   <Input
                     id="address"
                     placeholder="Rua, Nº, Bairro"
-                    className="!h-10 w-full rounded-md pl-9 text-sm"
+                    className="w-full rounded-md pl-9 text-sm"
                     {...register('address')}
                   />
                 </div>
@@ -217,7 +217,7 @@ export default function EmployeeRegisterPage() {
                       )
                     }
                   >
-                    <SelectTrigger className="!h-10 w-full rounded-md text-sm">
+                    <SelectTrigger className="w-full rounded-md text-sm">
                       <SelectValue placeholder="Tamanho" />
                     </SelectTrigger>
                     <SelectContent>
@@ -240,7 +240,7 @@ export default function EmployeeRegisterPage() {
                   <Input
                     id="pantsSize"
                     placeholder="Ex: 42"
-                    className="!h-10 w-full rounded-md text-sm"
+                    className="w-full rounded-md text-sm"
                     {...register('pantsSize')}
                   />
                 </div>
@@ -257,7 +257,7 @@ export default function EmployeeRegisterPage() {
                     id="shoeSize"
                     type="number"
                     placeholder="Ex: 40"
-                    className="!h-10 w-full rounded-md text-sm"
+                    className="w-full rounded-md text-sm"
                     {...register('shoeSize', {
                       setValueAs: (v: string) =>
                         v === '' ? undefined : Number(v),
@@ -270,7 +270,7 @@ export default function EmployeeRegisterPage() {
             <Button
               type="submit"
               disabled={isSubmitting || registerMutation.isPending}
-              className="mt-4 !h-10 w-full rounded-md text-sm font-medium"
+              className="mt-4 w-full rounded-md text-sm font-medium"
             >
               {isSubmitting || registerMutation.isPending ? (
                 <>

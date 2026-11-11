@@ -66,7 +66,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
               </AlertDialogDescription>
             )}
           </AlertDialogHeader>
-          <AlertDialogFooter className="gap-2 sm:gap-0">
+          <AlertDialogFooter>
             <AlertDialogCancel onClick={() => settle(false)}>
               {options?.cancelLabel ?? 'Cancelar'}
             </AlertDialogCancel>

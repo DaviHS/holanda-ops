@@ -48,9 +48,9 @@ export default function AuditPage() {
   return (
     <PageContainer>
       <PageHeader
-        title="Histórico de alterações"
+        title="Histórico"
         icon={History}
-        description="Quem alterou o quê no sistema."
+        description="Quem alterou o quê, e quando."
       />
 
       <div className="flex flex-col gap-2 sm:flex-row">
@@ -105,7 +105,7 @@ export default function AuditPage() {
                 <Card key={entry.id}>
                   <CardContent className="space-y-1 p-3">
                     <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-                      <p className="font-medium">
+                      <p className="text-sm font-medium">
                         {auditActionLabel(entry.action)}
                       </p>
                       <span className="text-muted-foreground text-xs">
