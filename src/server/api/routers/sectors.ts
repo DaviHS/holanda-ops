@@ -1,7 +1,10 @@
 import { z } from 'zod';
-import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
+import { can, createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+
 import { sectors } from '@/server/db/schema';
 import { and, eq, isNull } from 'drizzle-orm';
+
+const manageSectors = can("sectors.manage");
 
 export const sectorsRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async ({ ctx }) => {
@@ -22,7 +25,7 @@ export const sectorsRouter = createTRPCRouter({
       });
     }),
 
-  create: protectedProcedure
+  create: manageSectors
     .input(
       z.object({
         name: z.string().min(1, 'Nome do setor é obrigatório'),
@@ -41,7 +44,7 @@ export const sectorsRouter = createTRPCRouter({
       return newSector;
     }),
 
-  update: protectedProcedure
+  update: manageSectors
     .input(
       z.object({
         id: z.string().uuid(),
@@ -67,7 +70,7 @@ export const sectorsRouter = createTRPCRouter({
       return updatedSector;
     }),
 
-  delete: protectedProcedure
+  delete: manageSectors
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
       const [softDeletedSector] = await ctx.db

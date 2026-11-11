@@ -5,6 +5,8 @@ import { sectorsRouter } from "./routers/sectors";
 import { shiftsRouter } from "./routers/shifts";
 import { rolesRouter } from "./routers/roles";
 import { usersRouter } from "./routers/users";
+import { accessRouter } from "./routers/access";
+import { auditRouter } from "./routers/audit";
 
 /**
  * This is the primary router for your server.
@@ -18,6 +20,8 @@ export const appRouter = createTRPCRouter({
   shifts: shiftsRouter,
   roles: rolesRouter,
   users: usersRouter,
+  access: accessRouter,
+  audit: auditRouter,
 });
 
 // export type definition of API

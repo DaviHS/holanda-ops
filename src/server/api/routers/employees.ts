@@ -1,10 +1,7 @@
 import { and, eq, isNull } from "drizzle-orm";
 import { z } from "zod";
-import { 
-  createTRPCRouter,   
-  protectedProcedure,
-  publicProcedure,
-} from "@/server/api/trpc";
+import { can, createTRPCRouter, publicProcedure } from "@/server/api/trpc";
+
 import {
   employees,
   employeeSectors,
@@ -14,8 +11,11 @@ import {
 import { TRPCError } from "@trpc/server";
 import { publicEmployeeRegisterSchema } from "@/lib/validations/employee-register";
 
+const viewEmployees = can("employees.view", "employees.manage", "users.manage");
+const manageEmployees = can("employees.manage");
+
 export const employeesRouter = createTRPCRouter({
-  getAll: protectedProcedure.query(async ({ ctx }) => {
+  getAll: viewEmployees.query(async ({ ctx }) => {
     const result = await ctx.db.query.employees.findMany({
       where: isNull(employees.deletedAt),
       with: {
@@ -36,7 +36,7 @@ export const employeesRouter = createTRPCRouter({
     }));
   }),
 
-  getById: protectedProcedure
+  getById: viewEmployees
     .input(z.object({ id: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
       const employee = await ctx.db.query.employees.findFirst({
@@ -66,7 +66,7 @@ export const employeesRouter = createTRPCRouter({
       };
     }),
 
-  create: protectedProcedure
+  create: manageEmployees
     .input(insertEmployeeSchema)
     .mutation(async ({ ctx, input }) => {
       const { sectorIds, ...employeeData } = input;
@@ -94,7 +94,7 @@ export const employeesRouter = createTRPCRouter({
       });
     }),
 
-  update: protectedProcedure
+  update: manageEmployees
     .input(updateEmployeeSchema)
     .mutation(async ({ ctx, input }) => {
       const { id, sectorIds, ...employeeData } = input;
@@ -129,7 +129,7 @@ export const employeesRouter = createTRPCRouter({
       });
     }),
 
-  delete: protectedProcedure
+  delete: manageEmployees
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
       const [softDeletedEmployee] = await ctx.db

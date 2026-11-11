@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, pgEnum, index } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, boolean, pgEnum, index } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { z } from 'zod';
 import { roles } from './roles';
@@ -14,6 +14,7 @@ export const users = pgTable(
     email: varchar('email', { length: 255 }).notNull().unique(),
     passwordHash: varchar('password_hash', { length: 255 }).notNull(),
     status: userStatusEnum('status').default('active').notNull(),
+    isAdmin: boolean('is_admin').default(false).notNull(),
     roleId: uuid('role_id')
       .notNull()
       .references(() => roles.id, { onDelete: 'restrict' }),

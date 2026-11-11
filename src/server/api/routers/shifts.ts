@@ -1,7 +1,10 @@
 import { z } from 'zod';
-import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
+import { can, createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+
 import { shifts, insertShiftSchema } from '@/server/db/schema';
 import { and, eq, isNull } from 'drizzle-orm';
+
+const manageShifts = can("shifts.manage");
 
 export const shiftsRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async ({ ctx }) => {
@@ -22,7 +25,7 @@ export const shiftsRouter = createTRPCRouter({
       });
     }),
 
-  create: protectedProcedure
+  create: manageShifts
     .input(insertShiftSchema)
     .mutation(async ({ ctx, input }) => {
       const [newShift] = await ctx.db
@@ -38,7 +41,7 @@ export const shiftsRouter = createTRPCRouter({
       return newShift;
     }),
 
-  update: protectedProcedure
+  update: manageShifts
     .input(
       insertShiftSchema.extend({
         id: z.string().uuid(),
@@ -64,7 +67,7 @@ export const shiftsRouter = createTRPCRouter({
       return updatedShift;
     }),
 
-  delete: protectedProcedure
+  delete: manageShifts
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
       const [softDeletedShift] = await ctx.db

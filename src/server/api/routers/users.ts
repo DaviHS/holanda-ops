@@ -2,10 +2,8 @@ import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { eq, and, ne, isNull } from 'drizzle-orm';
 import { hash } from 'bcryptjs';
-import {
-  createTRPCRouter,
-  protectedProcedure,
-} from '@/server/api/trpc';
+import { can, createTRPCRouter } from "@/server/api/trpc";
+
 import {
   users,
   insertUserSchema,
@@ -13,10 +11,19 @@ import {
 } from '@/server/db/schema/users';
 import { employees } from '@/server/db/schema/employees';
 
+const manageUsers = can("users.manage");
+
+function assertCanTouch(target: { isAdmin: boolean }, actorIsAdmin: boolean) {
+  if (target.isAdmin && !actorIsAdmin) {
+    throw new TRPCError({ code: 'FORBIDDEN', message: 'Somente administradores podem alterar outro administrador.' });
+  }
+}
+
 export const usersRouter = createTRPCRouter({
-  getAll: protectedProcedure.query(async ({ ctx }) => {
+  getAll: manageUsers.query(async ({ ctx }) => {
     return await ctx.db.query.users.findMany({
       where: isNull(users.deletedAt),
+      columns: { passwordHash: false },
       with: {
         role: true,
         employee: true,
@@ -25,7 +32,7 @@ export const usersRouter = createTRPCRouter({
     });
   }),
 
-  getById: protectedProcedure
+  getById: manageUsers
     .input(z.object({ id: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
       const user = await ctx.db.query.users.findFirst({
@@ -33,6 +40,7 @@ export const usersRouter = createTRPCRouter({
           eq(users.id, input.id),
           isNull(users.deletedAt)
         ),
+        columns: { passwordHash: false },
         with: {
           role: true,
           employee: true,
@@ -49,7 +57,7 @@ export const usersRouter = createTRPCRouter({
       return user;
     }),
 
-  create: protectedProcedure
+  create: manageUsers
     .input(insertUserSchema)
     .mutation(async ({ ctx, input }) => {
       const existingEmail = await ctx.db.query.users.findFirst({
@@ -117,7 +125,7 @@ export const usersRouter = createTRPCRouter({
       });
     }),
 
-  update: protectedProcedure
+  update: manageUsers
     .input(updateUserSchema)
     .mutation(async ({ ctx, input }) => {
       const existingUser = await ctx.db.query.users.findFirst({
@@ -133,6 +141,8 @@ export const usersRouter = createTRPCRouter({
           message: 'Usuário não encontrado.',
         });
       }
+
+      assertCanTouch(existingUser, ctx.access.isAdmin);
 
       if (input.email && input.email !== existingUser.email) {
         const emailInUse = await ctx.db.query.users.findFirst({
@@ -217,7 +227,7 @@ export const usersRouter = createTRPCRouter({
       });
     }),
 
-  delete: protectedProcedure
+  delete: manageUsers
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
       const existingUser = await ctx.db.query.users.findFirst({
@@ -232,6 +242,11 @@ export const usersRouter = createTRPCRouter({
           code: 'NOT_FOUND',
           message: 'Usuário não encontrado.',
         });
+      }
+
+      assertCanTouch(existingUser, ctx.access.isAdmin);
+      if (existingUser.id === ctx.session.user.id) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'Você não pode remover a sua própria conta.' });
       }
 
       return await ctx.db.transaction(async (tx) => {
