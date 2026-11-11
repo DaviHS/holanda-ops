@@ -1,27 +1,28 @@
 import { z } from 'zod';
+import { TRPCError } from '@trpc/server';
+import { and, eq, getTableColumns, isNull, sql } from 'drizzle-orm';
 import { can, createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
 
 import { employees, shifts } from '@/server/db/schema';
-import { shiftSchema } from '@/validators/shift';
-import { and, eq, isNull } from 'drizzle-orm';
+import { shiftSchema, shiftUpdateSchema } from '@/validators/shift';
 
 const manageShifts = can('shifts.manage');
 
 export const shiftRouter = createTRPCRouter({
+  /** Ordenados pelo horário de entrada (sem horário ficam no fim) e, depois, pelo nome. */
   list: protectedProcedure.query(async ({ ctx }) => {
-    return ctx.db.query.shifts.findMany({
-      where: isNull(shifts.deletedAt),
-      orderBy: (shifts, { asc }) => [asc(shifts.name)],
-    });
+    return ctx.db
+      .select({
+        ...getTableColumns(shifts),
+        employeeCount: sql<number>`(
+          select count(*)::int from ${employees}
+          where ${employees.shiftId} = ${shifts.id} and ${employees.deletedAt} is null
+        )`,
+      })
+      .from(shifts)
+      .where(isNull(shifts.deletedAt))
+      .orderBy(sql`${shifts.startTime} asc nulls last`, shifts.name);
   }),
-
-  getById: protectedProcedure
-    .input(z.object({ id: z.string().uuid() }))
-    .query(async ({ ctx, input }) => {
-      return ctx.db.query.shifts.findFirst({
-        where: and(eq(shifts.id, input.id), isNull(shifts.deletedAt)),
-      });
-    }),
 
   create: manageShifts.input(shiftSchema).mutation(async ({ ctx, input }) => {
     const [newShift] = await ctx.db
@@ -38,11 +39,7 @@ export const shiftRouter = createTRPCRouter({
   }),
 
   update: manageShifts
-    .input(
-      shiftSchema.extend({
-        id: z.string().uuid(),
-      }),
-    )
+    .input(shiftUpdateSchema)
     .mutation(async ({ ctx, input }) => {
       const [updatedShift] = await ctx.db
         .update(shifts)
@@ -57,7 +54,10 @@ export const shiftRouter = createTRPCRouter({
         .returning();
 
       if (!updatedShift) {
-        throw new Error('Turno não encontrado ou já removido');
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Turno não encontrado ou já removido.',
+        });
       }
 
       return updatedShift;

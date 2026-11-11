@@ -16,7 +16,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Loader2, Clock } from 'lucide-react';
+import { Loader2, CalendarClock } from 'lucide-react';
+import { trimTime } from '@/lib/formatters';
 
 type Shift = RouterOutputs['shift']['list'][number];
 
@@ -56,8 +57,8 @@ export function ShiftFormDialog({
     if (editing) {
       reset({
         name: editing.name,
-        startTime: editing.startTime,
-        endTime: editing.endTime,
+        startTime: trimTime(editing.startTime),
+        endTime: trimTime(editing.endTime),
         description: editing.description ?? '',
       });
     } else {
@@ -73,6 +74,8 @@ export function ShiftFormDialog({
   const handleFormSubmit = async (data: ShiftFormValues) => {
     const payload = {
       ...data,
+      startTime: data.startTime || null,
+      endTime: data.endTime || null,
       description: data.description || null,
     };
 
@@ -91,7 +94,7 @@ export function ShiftFormDialog({
       <DialogContent className="flex flex-col gap-0 overflow-hidden rounded-md p-0 sm:max-w-[500px]">
         <DialogHeader className="bg-background shrink-0 border-b px-6 py-4">
           <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
-            <Clock className="text-muted-foreground size-5" />
+            <CalendarClock className="text-muted-foreground size-5" />
             {isEditing ? 'Editar Turno' : 'Novo Turno'}
           </DialogTitle>
         </DialogHeader>
@@ -109,7 +112,7 @@ export function ShiftFormDialog({
                 id="name"
                 placeholder="Ex: Turno Matutino, Manhã 12x36"
                 {...register('name')}
-                className="!h-10 w-full rounded-md text-sm"
+                className="w-full rounded-md text-sm"
               />
               {errors.name && (
                 <p className="text-destructive mt-1 text-[11px]">
@@ -121,13 +124,13 @@ export function ShiftFormDialog({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="startTime" className="text-xs font-medium">
-                  Horário de Entrada
+                  Entrada
                 </Label>
                 <Input
                   id="startTime"
                   type="time"
                   {...register('startTime')}
-                  className="!h-10 w-full rounded-md text-sm"
+                  className="w-full rounded-md text-sm"
                 />
                 {errors.startTime && (
                   <p className="text-destructive mt-1 text-[11px]">
@@ -138,13 +141,13 @@ export function ShiftFormDialog({
 
               <div className="space-y-1.5">
                 <Label htmlFor="endTime" className="text-xs font-medium">
-                  Horário de Saída
+                  Saída
                 </Label>
                 <Input
                   id="endTime"
                   type="time"
                   {...register('endTime')}
-                  className="!h-10 w-full rounded-md text-sm"
+                  className="w-full rounded-md text-sm"
                 />
                 {errors.endTime && (
                   <p className="text-destructive mt-1 text-[11px]">
@@ -172,7 +175,7 @@ export function ShiftFormDialog({
             </div>
           </div>
 
-          <DialogFooter className="bg-muted/20 shrink-0 gap-2 border-t px-6 py-3 sm:gap-0">
+          <DialogFooter className="bg-muted/20 shrink-0 gap-2 border-t px-6 py-3">
             <Button
               type="button"
               variant="ghost"

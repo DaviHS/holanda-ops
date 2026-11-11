@@ -30,6 +30,9 @@ const plain = (value: string) =>
 export default function ShiftsPage() {
   const { can } = usePermissions();
   const canManage = can('shifts.manage');
+  const employeesHref = can('employees.view', 'employees.manage')
+    ? (shift: Shift) => `/employees?turno=${shift.id}`
+    : undefined;
   const dialog = useEntityDialog<Shift>({ fromUrl: true });
   const confirm = useConfirm();
   const [search, setSearch] = useState('');
@@ -77,7 +80,11 @@ export default function ShiftsPage() {
   const handleDelete = async (item: Shift) => {
     const confirmed = await confirm({
       title: 'Remover turno',
-      description: `Tem certeza de que deseja remover o turno "${item.name}"? Esta ação não poderá ser desfeita.`,
+      description:
+        `Tem certeza de que deseja remover o turno "${item.name}"? Esta ação não poderá ser desfeita.` +
+        (item.employeeCount > 0
+          ? ` ${item.employeeCount} funcionário(s) ficarão sem turno.`
+          : ''),
       confirmLabel: 'Remover',
       destructive: true,
     });
@@ -92,7 +99,7 @@ export default function ShiftsPage() {
         description="Gerencie os turnos e horários de trabalho dos colaboradores."
         actions={
           canManage && (
-            <Button onClick={dialog.openCreate} className="h-10">
+            <Button onClick={dialog.openCreate}>
               <Plus className="mr-2 size-4" />
               Novo
             </Button>
@@ -121,6 +128,7 @@ export default function ShiftsPage() {
             {filtered.map((item) => (
               <ShiftCard
                 key={item.id}
+                employeesHref={employeesHref}
                 shift={item}
                 onEdit={canManage ? dialog.openEdit : undefined}
                 onDelete={canManage ? handleDelete : undefined}
@@ -131,6 +139,7 @@ export default function ShiftsPage() {
           <div className="hidden sm:block">
             <ShiftTable
               shifts={filtered}
+              employeesHref={employeesHref}
               onEdit={canManage ? dialog.openEdit : undefined}
               onDelete={canManage ? handleDelete : undefined}
             />

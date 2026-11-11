@@ -1,11 +1,19 @@
 'use client';
 
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Plus, Users } from 'lucide-react';
 import { api, type RouterOutputs } from '@/trpc/react';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { LoadingState } from '@/components/ui/loading-state';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { PageContainer, PageHeader } from '@/components/page-header';
 import { SearchInput } from '@/components/search-input';
 import { useConfirm } from '@/components/confirm-dialog';
@@ -21,6 +29,9 @@ import {
 
 type Employee = RouterOutputs['employee']['list'][number];
 
+const ALL = 'all';
+const NONE = 'none';
+
 const plain = (value: string) =>
   value
     .normalize('NFD')
@@ -33,6 +44,10 @@ export default function EmployeesPage() {
   const dialog = useEntityDialog<Employee>({ fromUrl: true });
   const confirm = useConfirm();
   const [search, setSearch] = useState('');
+  // Vem preenchido quando se chega por um atalho, ex.: /employees?turno=<id> (tela de turnos).
+  const params = useSearchParams();
+  const [shiftFilter, setShiftFilter] = useState(params.get('turno') ?? ALL);
+  const [sectorFilter, setSectorFilter] = useState(params.get('setor') ?? ALL);
 
   const utils = api.useUtils();
   const { data: items = [], isLoading } = api.employee.list.useQuery();
@@ -66,7 +81,15 @@ export default function EmployeesPage() {
   const query = plain(search.trim());
   const filtered = items.filter(
     (item) =>
-      plain(item.name).includes(query) || item.cpf.includes(search.trim()),
+      (plain(item.name).includes(query) || item.cpf.includes(search.trim())) &&
+      (shiftFilter === ALL ||
+        (shiftFilter === NONE
+          ? !item.shiftId
+          : item.shiftId === shiftFilter)) &&
+      (sectorFilter === ALL ||
+        (sectorFilter === NONE
+          ? item.sectorIds.length === 0
+          : item.sectorIds.includes(sectorFilter))),
   );
 
   const handleSubmit = async (data: EmployeeFormValues) => {
@@ -95,7 +118,7 @@ export default function EmployeesPage() {
         description="Gerencie todos os colaboradores, uniformes e dados pessoais."
         actions={
           canManage && (
-            <Button onClick={dialog.openCreate} className="h-10">
+            <Button onClick={dialog.openCreate}>
               <Plus className="mr-2 size-4" />
               Novo
             </Button>
@@ -103,12 +126,62 @@ export default function EmployeesPage() {
         }
       />
 
-      <SearchInput
-        value={search}
-        onChange={setSearch}
-        placeholder="Buscar por nome ou CPF..."
-        aria-label="Buscar por nome ou CPF"
-      />
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <SearchInput
+          value={search}
+          onChange={setSearch}
+          placeholder="Buscar por nome ou CPF..."
+          aria-label="Buscar por nome ou CPF"
+        />
+        <Select
+          value={shiftFilter}
+          onValueChange={(value) => setShiftFilter(value ?? ALL)}
+        >
+          <SelectTrigger className="w-full sm:w-48" aria-label="Turno">
+            <SelectValue>
+              {shiftFilter === ALL
+                ? 'Todos os turnos'
+                : shiftFilter === NONE
+                  ? 'Sem turno'
+                  : (shifts.find((shift) => shift.id === shiftFilter)?.name ??
+                    'Turno')}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>Todos os turnos</SelectItem>
+            <SelectItem value={NONE}>Sem turno</SelectItem>
+            {shifts.map((shift) => (
+              <SelectItem key={shift.id} value={shift.id}>
+                {shift.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select
+          value={sectorFilter}
+          onValueChange={(value) => setSectorFilter(value ?? ALL)}
+        >
+          <SelectTrigger className="w-full sm:w-48" aria-label="Setor">
+            <SelectValue>
+              {sectorFilter === ALL
+                ? 'Todos os setores'
+                : sectorFilter === NONE
+                  ? 'Sem setor'
+                  : (sectors.find((sector) => sector.id === sectorFilter)
+                      ?.name ?? 'Setor')}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>Todos os setores</SelectItem>
+            <SelectItem value={NONE}>Sem setor</SelectItem>
+            {sectors.map((sector) => (
+              <SelectItem key={sector.id} value={sector.id}>
+                {sector.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
       {isLoading ? (
         <LoadingState />
@@ -116,7 +189,7 @@ export default function EmployeesPage() {
         <EmptyState
           icon={Users}
           title="Nenhum funcionário encontrado"
-          description="Cadastre o primeiro funcionário ou ajuste a busca."
+          description="Cadastre o primeiro funcionário ou ajuste a busca e os filtros."
         />
       ) : (
         <>

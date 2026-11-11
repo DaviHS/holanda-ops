@@ -103,7 +103,7 @@ export function SectorFormDialog({
                 id="name"
                 placeholder="Ex: Operacional, RH, TI"
                 {...register('name')}
-                className="!h-10 w-full rounded-md text-sm"
+                className="w-full rounded-md text-sm"
               />
               {errors.name && (
                 <p className="text-destructive mt-1 text-[11px]">
@@ -130,7 +130,7 @@ export function SectorFormDialog({
             </div>
           </div>
 
-          <DialogFooter className="bg-muted/20 shrink-0 gap-2 border-t px-6 py-3 sm:gap-0">
+          <DialogFooter className="bg-muted/20 shrink-0 gap-2 border-t px-6 py-3">
             <Button
               type="button"
               variant="ghost"

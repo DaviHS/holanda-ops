@@ -1,7 +1,11 @@
 import { type RouterOutputs } from '@/trpc/react';
-import { User, Trash2 } from 'lucide-react';
+import { User } from 'lucide-react';
+import {
+  RowActions,
+  editableRowProps,
+  stopRowEvent,
+} from '@/components/row-actions';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { EmployeeStatusBadge } from './employee-status-badge';
 
 type Employee = RouterOutputs['employee']['list'][number];
@@ -18,44 +22,38 @@ export function EmployeeCard({
   onDelete,
 }: EmployeeCardProps) {
   return (
-    <>
-      <Card
-        className="hover:bg-muted/10 group relative mb-3 cursor-pointer transition-colors"
-        onClick={() => onEdit?.(employee)}
-      >
-        <CardContent className="p-4">
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <div className="bg-primary/10 text-primary flex size-9 items-center justify-center rounded-full">
-                <User className="size-4" />
-              </div>
-              <div>
-                <p className="font-semibold">{employee.name}</p>
-                <p className="text-muted-foreground text-xs">
-                  {employee.sector || '—'}
-                </p>
-              </div>
+    <Card
+      {...editableRowProps(onEdit && (() => onEdit(employee)))}
+      className="hover:bg-muted/10 mb-2 cursor-pointer transition-colors"
+    >
+      <CardContent className="p-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="bg-primary/10 text-primary flex size-8 shrink-0 items-center justify-center rounded-full">
+              <User className="size-4" />
             </div>
-
-            <div
-              className="flex items-center gap-1"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <EmployeeStatusBadge status={employee.status} />
-              {onDelete && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-muted-foreground hover:text-destructive size-8"
-                  onClick={() => onDelete(employee)}
-                >
-                  <Trash2 className="size-4" />
-                </Button>
-              )}
+            <div className="min-w-0">
+              <p className="truncate font-semibold">{employee.name}</p>
+              <p className="text-muted-foreground truncate text-xs">
+                {employee.sector || '—'}
+              </p>
             </div>
           </div>
-        </CardContent>
-      </Card>
-    </>
+
+          <div
+            className="flex shrink-0 items-center gap-1"
+            onClick={stopRowEvent}
+          >
+            <EmployeeStatusBadge status={employee.status} />
+            <RowActions
+              compact
+              label={employee.name}
+              onEdit={onEdit && (() => onEdit(employee))}
+              onDelete={onDelete && (() => onDelete(employee))}
+            />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

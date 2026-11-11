@@ -108,7 +108,7 @@ export default function RolesPage() {
         description="Gerencie os cargos e defina o que cada um pode fazer no sistema."
         actions={
           canManage && (
-            <Button onClick={dialog.openCreate} className="h-10">
+            <Button onClick={dialog.openCreate}>
               <Plus className="mr-2 size-4" />
               Novo
             </Button>

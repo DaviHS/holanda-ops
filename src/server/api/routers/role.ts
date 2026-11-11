@@ -50,7 +50,10 @@ export const roleRouter = createTRPCRouter({
         .returning();
 
       if (!updatedRole) {
-        throw new Error('Cargo não encontrado ou já removido');
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Cargo não encontrado ou já removido.',
+        });
       }
 
       return updatedRole;

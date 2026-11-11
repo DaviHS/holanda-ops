@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { TRPCError } from '@trpc/server';
 import { can, createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
 
 import { employeeSectors, sectors } from '@/server/db/schema';
@@ -61,7 +62,10 @@ export const sectorRouter = createTRPCRouter({
         .returning();
 
       if (!updatedSector) {
-        throw new Error('Setor não encontrado ou já removido');
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Setor não encontrado ou já removido.',
+        });
       }
 
       return updatedSector;

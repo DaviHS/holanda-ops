@@ -259,7 +259,7 @@ export function EmployeeFormDialog({
                     <Input
                       {...register('name')}
                       placeholder="Ex: João da Silva"
-                      className="mt-1 !h-10 w-full rounded-md text-sm"
+                      className="mt-1 w-full rounded-md text-sm"
                     />
                     {errors.name && (
                       <p className="text-destructive mt-1 text-[11px]">
@@ -273,7 +273,7 @@ export function EmployeeFormDialog({
                     <Input
                       {...register('cpf')}
                       placeholder="000.000.000-00"
-                      className="mt-1 !h-10 w-full rounded-md font-mono text-sm"
+                      className="mt-1 w-full rounded-md font-mono text-sm"
                     />
                     {errors.cpf && (
                       <p className="text-destructive mt-1 text-[11px]">
@@ -287,7 +287,7 @@ export function EmployeeFormDialog({
                     <Input
                       {...register('rg')}
                       placeholder="00.000.000-0"
-                      className="mt-1 !h-10 w-full rounded-md font-mono text-sm"
+                      className="mt-1 w-full rounded-md font-mono text-sm"
                     />
                   </div>
 
@@ -296,7 +296,7 @@ export function EmployeeFormDialog({
                     <Input
                       {...register('pixKey')}
                       placeholder="E-mail, CPF, telefone ou chave aleatória"
-                      className="mt-1 !h-10 w-full rounded-md text-sm"
+                      className="mt-1 w-full rounded-md text-sm"
                     />
                   </div>
 
@@ -307,7 +307,7 @@ export function EmployeeFormDialog({
                     <Input
                       {...register('address')}
                       placeholder="Rua, número, complemento e bairro"
-                      className="mt-1 !h-10 w-full rounded-md text-sm"
+                      className="mt-1 w-full rounded-md text-sm"
                     />
                   </div>
                 </div>
@@ -337,7 +337,7 @@ export function EmployeeFormDialog({
                               variant="outline"
                               role="combobox"
                               aria-expanded={openCombobox}
-                              className="text-muted-foreground !h-10 w-full justify-between rounded-md text-sm font-normal"
+                              className="text-muted-foreground w-full justify-between rounded-md text-sm font-normal"
                             />
                           }
                         >
@@ -399,7 +399,7 @@ export function EmployeeFormDialog({
                           setValue('status', val as 'active' | 'inactive')
                         }
                       >
-                        <SelectTrigger className="mt-1 !h-10 w-full rounded-md text-sm">
+                        <SelectTrigger className="mt-1 w-full rounded-md text-sm">
                           <SelectValue placeholder="Selecione">
                             {currentStatus === 'inactive' ? 'Inativo' : 'Ativo'}
                           </SelectValue>
@@ -475,7 +475,7 @@ export function EmployeeFormDialog({
                         value={currentShiftId ?? ''}
                         onValueChange={handleShiftSelect}
                       >
-                        <SelectTrigger className="mt-1 !h-10 w-full rounded-md text-sm">
+                        <SelectTrigger className="mt-1 w-full rounded-md text-sm">
                           <SelectValue placeholder="Selecione o turno de trabalho">
                             {(() => {
                               const selected = shifts.find(
@@ -522,7 +522,7 @@ export function EmployeeFormDialog({
                           val && setValue('shirtSize', val)
                         }
                       >
-                        <SelectTrigger className="mt-1 !h-10 w-full rounded-md text-sm">
+                        <SelectTrigger className="mt-1 w-full rounded-md text-sm">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent className="rounded-md">
@@ -546,7 +546,7 @@ export function EmployeeFormDialog({
                       <Input
                         {...register('pantsSize')}
                         placeholder="Ex: 42"
-                        className="mt-1 !h-10 w-full rounded-md text-sm"
+                        className="mt-1 w-full rounded-md text-sm"
                       />
                     </div>
 
@@ -558,7 +558,7 @@ export function EmployeeFormDialog({
                         type="number"
                         {...register('shoeSize', { valueAsNumber: true })}
                         placeholder="Ex: 40"
-                        className="mt-1 !h-10 w-full rounded-md font-mono text-sm"
+                        className="mt-1 w-full rounded-md font-mono text-sm"
                       />
                       {errors.shoeSize && (
                         <p className="text-destructive mt-1 text-[11px]">
@@ -588,7 +588,7 @@ export function EmployeeFormDialog({
                           type="button"
                           key={item.key}
                           onClick={() => toggleUniformItem(item.key)}
-                          className={`flex !h-10 items-center justify-between rounded-md border px-3 text-left transition-all ${
+                          className={`flex items-center justify-between rounded-md border px-3 text-left transition-all ${
                             isDelivered
                               ? 'bg-primary/10 border-primary/40 text-primary font-medium'
                               : 'bg-card border-border hover:border-muted-foreground/30 text-muted-foreground'
@@ -618,7 +618,7 @@ export function EmployeeFormDialog({
             </div>
           </Tabs>
 
-          <DialogFooter className="bg-muted/20 shrink-0 gap-2 border-t px-6 py-3 sm:gap-0">
+          <DialogFooter className="bg-muted/20 shrink-0 gap-2 border-t px-6 py-3">
             <Button
               type="button"
               variant="ghost"
