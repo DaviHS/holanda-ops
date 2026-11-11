@@ -67,7 +67,10 @@ export function ShiftEmployeesDialog({
 
   const addMutation = api.shift.setEmployeeShift.useMutation(
     mutationFeedback({
-      success: 'Funcionário adicionado ao turno!',
+      success: (data) =>
+        data.previousShift
+          ? `Movido de "${data.previousShift}" para "${shift?.name ?? 'este turno'}"!`
+          : 'Funcionário adicionado ao turno!',
       error: 'Erro ao adicionar ao turno',
       onSuccess: refresh,
     }),

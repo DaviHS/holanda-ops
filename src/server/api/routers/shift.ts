@@ -90,6 +90,16 @@ export const shiftRouter = createTRPCRouter({
         }
       }
 
+      // Turno em que o funcionário estava (para avisar quando ele é movido).
+      const [before] = await ctx.db
+        .select({ shiftId: employees.shiftId, shiftName: shifts.name })
+        .from(employees)
+        .leftJoin(shifts, eq(employees.shiftId, shifts.id))
+        .where(
+          and(eq(employees.id, input.employeeId), isNull(employees.deletedAt)),
+        )
+        .limit(1);
+
       const [updated] = await ctx.db
         .update(employees)
         .set({ shiftId: input.shiftId, updatedAt: new Date() })
@@ -103,7 +113,13 @@ export const shiftRouter = createTRPCRouter({
           message: 'Funcionário não encontrado ou já removido.',
         });
       }
-      return updated;
+      return {
+        ...updated,
+        previousShift:
+          before?.shiftId && before.shiftId !== input.shiftId
+            ? (before.shiftName ?? null)
+            : null,
+      };
     }),
 
   delete: manageShifts

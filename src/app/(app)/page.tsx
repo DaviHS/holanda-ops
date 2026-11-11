@@ -152,7 +152,7 @@ export default function DashboardPage() {
                   className="flex items-center justify-between border-b pb-2 text-sm last:border-0"
                 >
                   <span className="font-medium">
-                    {item.shift ?? 'Não definido'}
+                    {item.shift ?? 'Sem turno'}
                   </span>
                   <Badge variant="secondary">
                     {item.total} {item.total === 1 ? 'pessoa' : 'pessoas'}

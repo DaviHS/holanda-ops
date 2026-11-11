@@ -32,7 +32,10 @@ export const dashboardRouter = createTRPCRouter({
     const shiftDistribution = await ctx.db
       .select({ shift: shifts.name, total: count() })
       .from(employees)
-      .innerJoin(shifts, eq(employees.shiftId, shifts.id))
+      .leftJoin(
+        shifts,
+        and(eq(employees.shiftId, shifts.id), isNull(shifts.deletedAt)),
+      )
       .where(activeEmployeeFilter)
       .groupBy(shifts.name)
       .orderBy(desc(count()), shifts.name);
