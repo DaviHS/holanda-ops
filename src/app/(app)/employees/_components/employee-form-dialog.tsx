@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { formatShiftTime } from '@/lib/formatters';
 import {
   Dialog,
   DialogContent,
@@ -482,7 +483,10 @@ export function EmployeeFormDialog({
                                 (s) => s.id === currentShiftId,
                               );
                               if (!selected) return null;
-                              return `${selected.name}${selected.startTime && selected.endTime ? ` (${selected.startTime} - ${selected.endTime})` : ''}`;
+                              const time = formatShiftTime(selected);
+                              return time === '—'
+                                ? selected.name
+                                : `${selected.name} (${time})`;
                             })()}
                           </SelectValue>
                         </SelectTrigger>
@@ -493,10 +497,9 @@ export function EmployeeFormDialog({
                               value={item.id}
                               className="rounded-none py-2 text-sm"
                             >
-                              {item.name}{' '}
-                              {item.startTime && item.endTime
-                                ? `(${item.startTime} - ${item.endTime})`
-                                : ''}
+                              {item.name}
+                              {formatShiftTime(item) !== '—' &&
+                                ` (${formatShiftTime(item)})`}
                             </SelectItem>
                           ))}
                         </SelectContent>

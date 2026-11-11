@@ -49,13 +49,6 @@ export default function DashboardPage() {
     );
   }
 
-  const shiftLabels: Record<string, string> = {
-    MORNING: 'Manhã',
-    AFTERNOON: 'Tarde',
-    NIGHT: 'Noite',
-    FLEXIBLE: 'Flexível',
-  };
-
   return (
     <PageContainer>
       <PageHeader
@@ -159,11 +152,11 @@ export default function DashboardPage() {
                   className="flex items-center justify-between border-b pb-2 text-sm last:border-0"
                 >
                   <span className="font-medium">
-                    {shiftLabels[item.shift ?? ''] ??
-                      item.shift ??
-                      'Não definido'}
+                    {item.shift ?? 'Não definido'}
                   </span>
-                  <Badge variant="secondary">{item.total} pessoas</Badge>
+                  <Badge variant="secondary">
+                    {item.total} {item.total === 1 ? 'pessoa' : 'pessoas'}
+                  </Badge>
                 </div>
               ))}
             </div>

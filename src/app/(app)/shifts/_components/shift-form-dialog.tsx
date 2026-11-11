@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type RouterOutputs } from '@/trpc/react';
 import { shiftSchema, type ShiftInput } from '@/validators/shift';
@@ -17,7 +17,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Loader2, CalendarClock } from 'lucide-react';
-import { trimTime } from '@/lib/formatters';
+import {
+  formatShiftDuration,
+  isOvernightShift,
+  trimTime,
+} from '@/lib/formatters';
 
 type Shift = RouterOutputs['shift']['list'][number];
 
@@ -42,6 +46,7 @@ export function ShiftFormDialog({
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<ShiftFormValues>({
     resolver: zodResolver(shiftSchema),
@@ -52,6 +57,13 @@ export function ShiftFormDialog({
       description: '',
     },
   });
+
+  const [startTime, endTime] = useWatch({
+    control,
+    name: ['startTime', 'endTime'],
+  });
+  const preview = { startTime, endTime };
+  const duration = formatShiftDuration(preview);
 
   useEffect(() => {
     if (editing) {
@@ -156,6 +168,13 @@ export function ShiftFormDialog({
                 )}
               </div>
             </div>
+
+            {duration && (
+              <p className="text-muted-foreground -mt-2 text-xs">
+                Duração: {duration}
+                {isOvernightShift(preview) && ' · termina no dia seguinte'}
+              </p>
+            )}
 
             <div className="space-y-1.5">
               <Label htmlFor="description" className="text-xs font-medium">
