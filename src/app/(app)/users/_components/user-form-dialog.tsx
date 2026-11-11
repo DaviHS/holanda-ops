@@ -46,7 +46,7 @@ interface UserFormDialogProps {
   onSubmit: (data: UserFormValues) => Promise<void>;
 }
 
-const fieldClass = '!h-10 w-full rounded-md text-sm';
+const fieldClass = ' w-full rounded-md text-sm';
 const errorClass = 'text-destructive mt-1 text-[11px]';
 
 export function UserFormDialog({
@@ -101,12 +101,12 @@ export function UserFormDialog({
         email: '',
         password: '',
         status: 'active',
-        roleId: roles[0]?.id ?? '',
+        roleId: '',
         employeeId: '',
         isAdmin: false,
       });
     }
-  }, [editing, reset, open, roles]);
+  }, [editing, reset, open]);
 
   const handleFormSubmit = async (data: UserFormValues) => {
     try {
@@ -340,7 +340,7 @@ export function UserFormDialog({
             )}
           </div>
 
-          <DialogFooter className="bg-muted/20 shrink-0 gap-2 border-t px-6 py-3 sm:gap-0">
+          <DialogFooter className="bg-muted/20 shrink-0 gap-2 border-t px-6 py-3">
             <Button
               type="button"
               variant="ghost"

@@ -138,7 +138,7 @@ export default function UsersPage() {
         description="Gerencie os acessos de usuários vinculados aos funcionários da organização."
         actions={
           canManage && (
-            <Button onClick={dialog.openCreate} className="h-10">
+            <Button onClick={dialog.openCreate}>
               <Plus className="mr-2 size-4" />
               Novo
             </Button>
