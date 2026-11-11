@@ -182,7 +182,7 @@ export function EmployeesDialog({
           {listHref && members.length > 0 && (
             <Button
               variant="outline"
-              className="flex-1"
+              className="flex-1!"
               nativeButton={false}
               render={<Link href={listHref} />}
             >
@@ -191,7 +191,7 @@ export function EmployeesDialog({
           )}
           <Button
             type="button"
-            className="flex-1"
+            className="flex-1!"
             onClick={() => onOpenChange(false)}
           >
             Fechar
