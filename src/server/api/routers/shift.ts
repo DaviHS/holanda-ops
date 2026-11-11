@@ -14,9 +14,11 @@ export const shiftRouter = createTRPCRouter({
     return ctx.db
       .select({
         ...getTableColumns(shifts),
+        // Colunas escritas por extenso: numa consulta de uma tabela só o Drizzle omite o nome da
+        // tabela, e o "id" acabaria sendo o do funcionário (contagem sempre 0).
         employeeCount: sql<number>`(
-          select count(*)::int from ${employees}
-          where ${employees.shiftId} = ${shifts.id} and ${employees.deletedAt} is null
+          select count(*)::int from employees e
+          where e.shift_id = "shifts"."id" and e.deleted_at is null
         )`,
       })
       .from(shifts)
