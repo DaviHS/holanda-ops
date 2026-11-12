@@ -1,6 +1,6 @@
 'use client';
 
-import { ShieldCheck, Users } from 'lucide-react';
+import { KeyRound, ShieldCheck, Users } from 'lucide-react';
 import { type RouterOutputs } from '@/trpc/react';
 import { EntityCard } from '@/components/entity-card';
 import { RowActions } from '@/components/row-actions';
@@ -28,7 +28,30 @@ export function RoleCard({
     <EntityCard
       icon={ShieldCheck}
       title={role.name}
-      subtitle={`${role.userCount} usuário(s) · ${role.permissionCount} permissão(ões)`}
+      subtitle={
+        <span className="inline-flex items-center gap-3">
+          <span
+            className="inline-flex items-center gap-1"
+            title="Usuários com este cargo"
+          >
+            <Users className="size-3" aria-hidden />
+            {role.userCount}
+            <span className="sr-only">
+              {role.userCount === 1 ? 'usuário' : 'usuários'}
+            </span>
+          </span>
+          <span
+            className="inline-flex items-center gap-1"
+            title="Permissões do cargo"
+          >
+            <KeyRound className="size-3" aria-hidden />
+            {role.permissionCount}
+            <span className="sr-only">
+              {role.permissionCount === 1 ? 'permissão' : 'permissões'}
+            </span>
+          </span>
+        </span>
+      }
       onOpen={onEdit && (() => onEdit(role))}
       actions={
         <RowActions

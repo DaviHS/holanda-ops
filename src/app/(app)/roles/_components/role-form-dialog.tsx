@@ -18,6 +18,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Loader2, ShieldCheck } from 'lucide-react';
 import { PermissionChecklist } from '@/components/permission-checklist';
+import { LoadingState } from '@/components/ui/loading-state';
 import type { Permission } from '@/lib/permissions';
 
 type Role = RouterOutputs['role']['list'][number];
@@ -30,6 +31,8 @@ interface RoleFormDialogProps {
   editing?: Role | null;
   /** Permissões atuais do cargo em edição. */
   permissions?: Permission[];
+  /** As permissões do cargo já chegaram do servidor (sem isso, salvar apagaria tudo). */
+  permissionsReady?: boolean;
   onSubmit: (data: RoleFormValues, permissions: Permission[]) => Promise<void>;
 }
 
@@ -38,17 +41,26 @@ export function RoleFormDialog({
   onOpenChange,
   editing,
   permissions = [],
+  permissionsReady = true,
   onSubmit,
 }: RoleFormDialogProps) {
   const isEditing = !!editing;
-  const [granted, setGranted] = useState<Set<Permission>>(new Set());
+  const [granted, setGranted] = useState<Set<Permission>>(
+    () => new Set(permissions),
+  );
 
   // Recarrega as permissões ao abrir o diálogo ou trocar o cargo (ajuste de estado durante o render)
-  const [lastKey, setLastKey] = useState({ open, editing });
-  if (lastKey.open !== open || lastKey.editing !== editing) {
-    setLastKey({ open, editing });
+  const permissionsKey = permissions.join(',');
+  const [lastKey, setLastKey] = useState({ open, editing, permissionsKey });
+  if (
+    lastKey.open !== open ||
+    lastKey.editing !== editing ||
+    lastKey.permissionsKey !== permissionsKey
+  ) {
+    setLastKey({ open, editing, permissionsKey });
     setGranted(new Set(permissions));
   }
+  const loadingPermissions = isEditing && !permissionsReady;
 
   const {
     register,
@@ -93,7 +105,7 @@ export function RoleFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex flex-col gap-0 overflow-hidden rounded-md p-0 sm:max-w-[500px]">
+      <DialogContent className="flex flex-col gap-0 overflow-hidden rounded-md p-0 sm:max-w-[640px]">
         <DialogHeader className="bg-background shrink-0 border-b px-6 py-4">
           <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
             <ShieldCheck className="text-muted-foreground size-5" />
@@ -142,7 +154,11 @@ export function RoleFormDialog({
 
             <div className="space-y-1.5">
               <Label className="text-xs font-medium">Permissões</Label>
-              <PermissionChecklist value={granted} onChange={setGranted} />
+              {loadingPermissions ? (
+                <LoadingState />
+              ) : (
+                <PermissionChecklist value={granted} onChange={setGranted} />
+              )}
             </div>
           </div>
 
@@ -158,7 +174,7 @@ export function RoleFormDialog({
             </Button>
             <Button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || loadingPermissions}
               className="rounded-md"
             >
               {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}

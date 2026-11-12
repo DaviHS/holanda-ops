@@ -43,7 +43,7 @@ export default function RolesPage() {
     refetchOnMount: 'always',
   });
 
-  const { data: permissionsByRole = {} } =
+  const { data: permissionsByRole = {}, isFetched: permissionsFetched } =
     api.access.listRolePermissions.useQuery(undefined, { enabled: canManage });
 
   const refresh = () =>
@@ -166,6 +166,7 @@ export default function RolesPage() {
           permissions={
             dialog.editing ? (permissionsByRole[dialog.editing.id] ?? []) : []
           }
+          permissionsReady={permissionsFetched}
           onSubmit={handleSubmit}
         />
       )}

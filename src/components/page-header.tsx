@@ -20,7 +20,7 @@ export function PageHeader({
   return (
     <div
       className={cn(
-        'flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between',
+        'flex items-start justify-between gap-3 sm:gap-4',
         className,
       )}
     >
@@ -34,7 +34,7 @@ export function PageHeader({
         )}
       </div>
       {actions && (
-        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
           {actions}
         </div>
       )}

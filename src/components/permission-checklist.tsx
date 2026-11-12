@@ -54,25 +54,27 @@ export function PermissionChecklist({
           <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
             {group.title}
           </p>
-          {group.items.map((item) => (
-            <label
-              key={item.key}
-              className="flex items-start gap-3 rounded-md border p-2.5 text-sm"
-            >
-              <Checkbox
-                checked={value.has(item.key)}
-                onCheckedChange={(checked) =>
-                  toggle(item.key, checked === true)
-                }
-              />
-              <span className="min-w-0">
-                <span className="block font-medium">{item.label}</span>
-                <span className="text-muted-foreground block text-xs">
-                  {item.description}
+          <div className="grid gap-1.5 sm:grid-cols-2">
+            {group.items.map((item) => (
+              <label
+                key={item.key}
+                className="flex items-start gap-3 rounded-md border p-2.5 text-sm"
+              >
+                <Checkbox
+                  checked={value.has(item.key)}
+                  onCheckedChange={(checked) =>
+                    toggle(item.key, checked === true)
+                  }
+                />
+                <span className="min-w-0">
+                  <span className="block font-medium">{item.label}</span>
+                  <span className="text-muted-foreground block text-xs">
+                    {item.description}
+                  </span>
                 </span>
-              </span>
-            </label>
-          ))}
+              </label>
+            ))}
+          </div>
         </div>
       ))}
     </div>
