@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Plus, Users } from 'lucide-react';
+import { CheckSquare, Download, Plus, Users, X } from 'lucide-react';
 import { api, type RouterOutputs } from '@/trpc/react';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -27,6 +27,7 @@ import {
   type EmployeeStatus,
 } from '@/lib/employee-status';
 import { EmployeeCard } from './_components/employee-card';
+import { EmployeeExportDialog } from './_components/employee-export-dialog';
 import {
   EmployeeFormDialog,
   type EmployeeFormValues,
@@ -49,6 +50,10 @@ export default function EmployeesPage() {
   const dialog = useEntityDialog<Employee>({ fromUrl: true });
   const confirm = useConfirm();
   const [search, setSearch] = useState('');
+  const [exportOpen, setExportOpen] = useState(false);
+  // Seleção para exportar: continua valendo enquanto se busca e filtra.
+  const [selectMode, setSelectMode] = useState(false);
+  const [pickedIds, setPickedIds] = useState<Set<string>>(new Set());
   // Vem preenchido quando se chega por um atalho, ex.: /employees?turno=<id> (tela de turnos).
   const params = useSearchParams();
   const router = useRouter();
@@ -119,6 +124,30 @@ export default function EmployeesPage() {
           : item.sectorIds.includes(sectorFilter))),
   );
 
+  const picked = items.filter((item) => pickedIds.has(item.id));
+  const allFilteredPicked =
+    filtered.length > 0 && filtered.every((item) => pickedIds.has(item.id));
+  const setPicked = (employee: Employee, on: boolean) =>
+    setPickedIds((current) => {
+      const next = new Set(current);
+      if (on) next.add(employee.id);
+      else next.delete(employee.id);
+      return next;
+    });
+  const toggleFiltered = () =>
+    setPickedIds((current) => {
+      const next = new Set(current);
+      for (const item of filtered) {
+        if (allFilteredPicked) next.delete(item.id);
+        else next.add(item.id);
+      }
+      return next;
+    });
+  const endSelection = () => {
+    setSelectMode(false);
+    setPickedIds(new Set());
+  };
+
   const [dismissedEdit, setDismissedEdit] = useState<string | null>(null);
   const urlTarget =
     editId && editId !== dismissedEdit
@@ -170,10 +199,21 @@ export default function EmployeesPage() {
         description="Gerencie todos os colaboradores, uniformes e dados pessoais."
         actions={
           canManage && (
-            <Button onClick={dialog.openCreate}>
-              <Plus className="mr-2 size-4" />
-              Novo
-            </Button>
+            <>
+              <Button
+                variant="outline"
+                onClick={() => setExportOpen(true)}
+                disabled={items.length === 0}
+                aria-label="Exportar lista"
+              >
+                <Download className="size-4 sm:mr-2" />
+                <span className="hidden sm:inline">Exportar</span>
+              </Button>
+              <Button onClick={dialog.openCreate}>
+                <Plus className="mr-2 size-4" />
+                Novo
+              </Button>
+            </>
           )
         }
       />
@@ -261,6 +301,83 @@ export default function EmployeesPage() {
         </Select>
       </div>
 
+      {canManage && !isLoading && items.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          {selectMode ? (
+            <>
+              <div className="flex w-full items-center justify-between gap-2 sm:w-auto">
+                <span className="text-sm font-medium">
+                  {picked.length} marcado(s)
+                </span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="sm:hidden"
+                  onClick={endSelection}
+                >
+                  <X className="mr-1.5 size-3.5" />
+                  Concluir
+                </Button>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="flex-1 sm:flex-none"
+                onClick={toggleFiltered}
+                disabled={filtered.length === 0}
+              >
+                {allFilteredPicked
+                  ? `Desmarcar os ${filtered.length} da lista`
+                  : `Marcar os ${filtered.length} da lista`}
+              </Button>
+              {picked.length > 0 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="flex-1 sm:flex-none"
+                  onClick={() => setPickedIds(new Set())}
+                >
+                  Limpar marcados
+                </Button>
+              )}
+              <Button
+                type="button"
+                size="sm"
+                className="w-full sm:ml-auto sm:w-auto"
+                onClick={() => setExportOpen(true)}
+                disabled={picked.length === 0}
+              >
+                <Download className="mr-1.5 size-3.5" />
+                Exportar {picked.length}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="hidden sm:inline-flex"
+                onClick={endSelection}
+              >
+                <X className="mr-1.5 size-3.5" />
+                Concluir
+              </Button>
+            </>
+          ) : (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setSelectMode(true)}
+            >
+              <CheckSquare className="mr-1.5 size-3.5" />
+              Selecionar
+            </Button>
+          )}
+        </div>
+      )}
+
       {!isLoading && items.length > 0 && (
         <p className="text-muted-foreground text-xs">
           {filtered.length === items.length
@@ -299,9 +416,22 @@ export default function EmployeesPage() {
               onView={canManage ? undefined : dialog.openEdit}
               onDelete={canManage ? handleDelete : undefined}
               onApprove={canManage ? handleApprove : undefined}
+              selectable={selectMode}
+              selected={pickedIds.has(item.id)}
+              onSelectedChange={setPicked}
             />
           ))}
         </div>
+      )}
+
+      {canManage && (
+        <EmployeeExportDialog
+          open={exportOpen}
+          onOpenChange={setExportOpen}
+          filtered={filtered}
+          all={items}
+          picked={picked}
+        />
       )}
 
       <EmployeeFormDialog

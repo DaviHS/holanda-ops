@@ -4,6 +4,8 @@ import { Building2, CheckCircle2, Clock, User } from 'lucide-react';
 import { type RouterOutputs } from '@/trpc/react';
 import { EntityCard } from '@/components/entity-card';
 import { RowActions } from '@/components/row-actions';
+import { Checkbox } from '@/components/ui/checkbox';
+import { cn } from '@/lib/utils';
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { EmployeeStatusBadge } from './employee-status-badge';
 
@@ -17,6 +19,10 @@ interface EmployeeCardProps {
   onView?: (employee: Employee) => void;
   /** Aprova um pré-cadastro (passa o status para ativo). */
   onApprove?: (employee: Employee) => void;
+  /** Modo de seleção: mostra a caixa e o clique no card marca/desmarca. */
+  selectable?: boolean;
+  selected?: boolean;
+  onSelectedChange?: (employee: Employee, selected: boolean) => void;
 }
 
 export function EmployeeCard({
@@ -25,13 +31,19 @@ export function EmployeeCard({
   onDelete,
   onView,
   onApprove,
+  selectable = false,
+  selected = false,
+  onSelectedChange,
 }: EmployeeCardProps) {
-  const onOpen = onEdit ?? onView;
+  const onOpen = selectable
+    ? () => onSelectedChange?.(employee, !selected)
+    : (onEdit ?? onView);
   const isPending = employee.status === 'pending';
 
   return (
     <EntityCard
       icon={User}
+      imageUrl={employee.avatarUrl}
       title={employee.name.trim()}
       subtitle={
         <span className="flex min-w-0 items-center gap-3">
@@ -51,20 +63,34 @@ export function EmployeeCard({
           </span>
         </span>
       }
+      className={cn(selected && 'border-primary bg-primary/5')}
+      leading={
+        selectable && (
+          <Checkbox
+            checked={selected}
+            onCheckedChange={(checked) =>
+              onSelectedChange?.(employee, checked === true)
+            }
+            aria-label={`Selecionar ${employee.name.trim()}`}
+          />
+        )
+      }
       onOpen={onOpen && (() => onOpen(employee))}
       actions={
-        <RowActions
-          compact
-          label={employee.name}
-          onEdit={onEdit && (() => onEdit(employee))}
-          onDelete={onDelete && (() => onDelete(employee))}
-        >
-          {isPending && onApprove && (
-            <DropdownMenuItem onClick={() => onApprove(employee)}>
-              <CheckCircle2 className="mr-2 size-4" /> Aprovar cadastro
-            </DropdownMenuItem>
-          )}
-        </RowActions>
+        selectable ? undefined : (
+          <RowActions
+            compact
+            label={employee.name}
+            onEdit={onEdit && (() => onEdit(employee))}
+            onDelete={onDelete && (() => onDelete(employee))}
+          >
+            {isPending && onApprove && (
+              <DropdownMenuItem onClick={() => onApprove(employee)}>
+                <CheckCircle2 className="mr-2 size-4" /> Aprovar cadastro
+              </DropdownMenuItem>
+            )}
+          </RowActions>
+        )
       }
     >
       {employee.status !== 'active' && (

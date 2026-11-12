@@ -55,6 +55,7 @@ export const employees = pgTable(
     rg: varchar('rg', { length: 20 }),
     pixKey: varchar('pix_key', { length: 255 }),
     address: text('address'),
+    avatarUrl: text('avatar_url'),
     status: employeeStatusEnum('status').default('active').notNull(),
     shirtSize: shirtSizeEnum('shirt_size').default('M').notNull(),
     pantsSize: varchar('pants_size', { length: 10 }),
@@ -75,7 +76,6 @@ export const employees = pgTable(
       .where(sql`${table.deletedAt} is null`),
     index('idx_employees_name').on(table.name),
     index('idx_employees_status').on(table.status),
-    index('idx_employees_user_id').on(table.userId),
     index('idx_employees_shift_id').on(table.shiftId),
   ],
 );

@@ -1,29 +1,88 @@
-# Create T3 App
+# Holanda Ops
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+Sistema de gestão de pessoal: funcionários, setores, turnos, cargos com permissões,
+usuários e histórico de alterações. Funciona como PWA (instalável no celular).
 
-## What's next? How do I make an app with this?
+## Tecnologias
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+Next.js 16 (App Router) · React 19 · TypeScript · tRPC 11 · Drizzle ORM + PostgreSQL (Neon) ·
+Auth.js (next-auth v5, sessão JWT de 7 dias) · Tailwind 4 + shadcn (base-ui) · Resend (e-mails).
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+## Como rodar
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+Requisitos: Node 24+ e um banco PostgreSQL.
 
-## Learn More
+```bash
+npm install
+cp .env.example .env      # preencha os valores (veja abaixo)
+npm run db:migrate        # cria as tabelas (banco novo)
+npm run dev               # http://127.0.0.1:2000
+```
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+### Variáveis de ambiente
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+| Variável              | Para quê                                                                  |
+| --------------------- | ------------------------------------------------------------------------- |
+| `DATABASE_URL`        | Conexão PostgreSQL (com `sslmode=verify-full` no Neon)                    |
+| `AUTH_SECRET`         | Segredo das sessões. Gere com `npx auth secret` (obrigatório em produção) |
+| `NEXT_PUBLIC_APP_URL` | Endereço público do sistema, usado nos links dos e-mails                  |
+| `RESEND_API_KEY`      | Chave do Resend para enviar e-mails (opcional em desenvolvimento)         |
+| `UPLOADTHING_TOKEN`   | Envio das fotos dos funcionários ([UploadThing](https://uploadthing.com)) |
+| `EMAIL_FROM`          | Remetente dos e-mails, ex.: `Holanda Ops <no-reply@seu-dominio>`          |
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+O arquivo `.env` nunca vai para o git. Sem `RESEND_API_KEY`/`EMAIL_FROM` o sistema roda, mas
+não envia e-mails (criação de usuário e redefinição de senha avisam que o envio falhou).
 
-## How do I deploy this?
+## Banco de dados
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+- **Esquema:** `src/server/db/schema/*`. As migrações ficam em `drizzle/`.
+- **Alterou o esquema?** `npm run db:generate` e depois `npm run db:migrate`.
+- **Banco novo:** `npm run db:migrate` e, em seguida, crie os cargos e o primeiro administrador
+  (marque `users.is_admin = true`; administradores têm todas as permissões).
+- **Banco que já existia** (criado antes das migrações): rode `scripts/sql/0007_align_with_baseline.sql`
+  e depois `npm run db:baseline` uma única vez, para o Drizzle saber que a migração-base já foi aplicada.
+- `scripts/sql/0001` a `0006` são o histórico dos ajustes feitos à mão antes da migração-base.
+  Não precisam ser rodados em um banco novo.
+
+Exclusões são lógicas (`deleted_at`). CPF, e-mail e nomes de cargo, setor e turno são únicos
+apenas entre os registros não removidos.
+
+## Permissões
+
+Cada cargo tem um conjunto de permissões (`src/lib/permissions.ts`); quem tem `is_admin` passa em
+tudo. O servidor confere a permissão em cada chamada (`can(...)` em `src/server/api/trpc.ts`) e
+também bloqueia contas inativas ou removidas na hora, mesmo com a sessão ainda válida.
+Toda alteração feita por quem tem permissão vai para o histórico (`audit_logs`, guardado por
+24 meses). Dados pessoais (CPF, RG, Pix, endereço) e senhas não são gravados no histórico.
+
+## Estrutura
+
+```
+src/app/(app)        telas logadas (dashboard, funcionários, setores, turnos, cargos, usuários, histórico, perfil)
+src/app/(auth)       login, esqueci a senha, redefinir senha
+src/app/(public)     pré-cadastro público de funcionário
+src/server/api       routers tRPC (um por área)
+src/server/db        esquema e conexão
+src/components       componentes compartilhados (cards, diálogos, filtros)
+src/validators       esquemas zod usados no cliente e no servidor
+scripts              SQLs de manutenção e utilitários
+```
+
+## Scripts
+
+| Comando               | O que faz                                         |
+| --------------------- | ------------------------------------------------- |
+| `npm run dev`         | Servidor de desenvolvimento                       |
+| `npm run check`       | ESLint + checagem de tipos                        |
+| `npm run build`       | Build de produção                                 |
+| `npm run db:generate` | Gera uma migração a partir do esquema             |
+| `npm run db:migrate`  | Aplica as migrações                               |
+| `npm run db:baseline` | Registra a migração-base em um banco já existente |
+| `npm run db:studio`   | Interface do Drizzle para ver os dados            |
+
+## Segurança
+
+- Cabeçalhos de segurança em `next.config.js` (sem enquadramento, `nosniff`, HSTS em produção).
+- O pré-cadastro público tem campo-armadilha e tempo mínimo de preenchimento, e não revela se um
+  CPF já existe.
+- Troque `AUTH_SECRET` e a senha do banco se algum dia forem expostos.

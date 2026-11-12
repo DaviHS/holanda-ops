@@ -11,7 +11,12 @@ import {
 } from '@/server/db/schema';
 import { employeeSchema, employeeUpdateSchema } from '@/validators/employee';
 import { TRPCError } from '@trpc/server';
-import { publicEmployeeRegisterSchema } from '@/validators/register';
+import { recordAudit } from '@/server/audit';
+import { deleteUploadedFile } from '@/server/uploads';
+import {
+  MIN_REGISTER_FILL_MS,
+  publicEmployeeRegisterSchema,
+} from '@/validators/register';
 
 const viewEmployees = can('employees.view', 'employees.manage', 'users.manage');
 const manageEmployees = can('employees.manage');
@@ -158,7 +163,14 @@ export const employeeRouter = createTRPCRouter({
       const { id, sectorIds, ...employeeData } = input;
       await assertRefsExist(ctx.db, sectorIds, employeeData.shiftId);
 
-      return await ctx.db.transaction(async (tx) => {
+      // Estado anterior: para registrar a aprovação de um pré-cadastro e apagar a foto trocada.
+      const [before] = await ctx.db
+        .select({ status: employees.status, avatarUrl: employees.avatarUrl })
+        .from(employees)
+        .where(eq(employees.id, id))
+        .limit(1);
+
+      const saved = await ctx.db.transaction(async (tx) => {
         const [updatedEmployee] = await tx
           .update(employees)
           .set({ ...employeeData, updatedAt: new Date() })
@@ -189,7 +201,41 @@ export const employeeRouter = createTRPCRouter({
 
         return updatedEmployee;
       });
+
+      if (
+        employeeData.avatarUrl !== undefined &&
+        before?.avatarUrl &&
+        before.avatarUrl !== employeeData.avatarUrl
+      ) {
+        await deleteUploadedFile(before.avatarUrl);
+      }
+
+      if (before?.status === 'pending' && employeeData.status === 'active') {
+        await recordAudit({
+          userId: ctx.session.user.id,
+          userLabel:
+            ctx.session.user.name ??
+            ctx.session.user.email ??
+            `Usuário ${ctx.session.user.id}`,
+          action: 'employee.approve',
+          target: saved.name,
+          input: { id },
+        });
+      }
+      return saved;
     }),
+
+  /** Registra no histórico que alguém exportou ou copiou dados dos funcionários. */
+  logExport: manageEmployees
+    .input(
+      z.object({
+        count: z.number().int().min(0).max(100000),
+        scope: z.enum(['picked', 'filtered', 'all']),
+        columns: z.array(z.string().max(40)).max(40),
+        via: z.enum(['file', 'copy']),
+      }),
+    )
+    .mutation(() => ({ success: true as const })),
 
   delete: manageEmployees
     .input(z.object({ id: z.string().uuid() }))
@@ -240,7 +286,7 @@ export const employeeRouter = createTRPCRouter({
         }
       }
 
-      return await ctx.db.transaction(async (tx) => {
+      const removed = await ctx.db.transaction(async (tx) => {
         // Sem o funcionário, a conta de acesso dele deixa de valer.
         if (linked) {
           await tx
@@ -255,28 +301,48 @@ export const employeeRouter = createTRPCRouter({
             deletedAt: new Date(),
             updatedAt: new Date(),
             userId: null,
+            avatarUrl: null,
           })
           .where(and(eq(employees.id, input.id), isNull(employees.deletedAt)))
           .returning();
 
         return softDeletedEmployee ?? null;
       });
+
+      // A foto não serve mais: sai também do UploadThing.
+      if (removed) await deleteUploadedFile(existing.avatarUrl);
+      return removed;
+    }),
+
+  /** Apaga do UploadThing uma foto enviada e não salva (cancelada ou trocada). */
+  discardUpload: manageEmployees
+    .input(z.object({ url: z.string().max(500) }))
+    .mutation(async ({ ctx, input }) => {
+      // Só apaga se nenhum funcionário usa esse arquivo.
+      const inUse = await ctx.db.query.employees.findFirst({
+        where: eq(employees.avatarUrl, input.url),
+        columns: { id: true },
+      });
+      if (!inUse) await deleteUploadedFile(input.url);
+      return { success: true as const };
     }),
 
   publicRegister: publicProcedure
     .input(publicEmployeeRegisterSchema)
     .mutation(async ({ ctx, input }) => {
+      // Robôs: respondemos como se tivesse dado certo, sem gravar nada.
+      const tooFast =
+        typeof input.openedAt === 'number' &&
+        Date.now() - input.openedAt < MIN_REGISTER_FILL_MS;
+      if (input.website || tooFast) return { success: true as const };
+
       // 1. Validar se o CPF já está cadastrado
       const existingEmployee = await ctx.db.query.employees.findFirst({
         where: and(eq(employees.cpf, input.cpf), isNull(employees.deletedAt)),
       });
 
-      if (existingEmployee) {
-        throw new TRPCError({
-          code: 'CONFLICT',
-          message: 'Já existe um funcionário cadastrado com este CPF.',
-        });
-      }
+      // Mesma resposta de sucesso: a tela não pode servir para descobrir quais CPFs existem.
+      if (existingEmployee) return { success: true as const };
 
       // 2. Criar o funcionário no banco com status 'pending'
       const [newEmployee] = await ctx.db
@@ -307,9 +373,6 @@ export const employeeRouter = createTRPCRouter({
         });
       }
 
-      return {
-        success: true,
-        employee: newEmployee,
-      };
+      return { success: true as const };
     }),
 });

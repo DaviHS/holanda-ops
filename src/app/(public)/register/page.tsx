@@ -52,6 +52,8 @@ import {
 export default function EmployeeRegisterPage() {
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
   const registerMutation = api.employee.publicRegister.useMutation();
+  // Anti-robô: momento em que a tela abriu (marcado ao montar)
+  const [openedAt] = useState(() => Date.now());
 
   const {
     register,
@@ -75,7 +77,10 @@ export default function EmployeeRegisterPage() {
   const onSubmit = async (data: PublicEmployeeRegisterValues) => {
     const toastId = toast.loading('Enviando pré-cadastro...');
     try {
-      await registerMutation.mutateAsync(data);
+      await registerMutation.mutateAsync({
+        ...data,
+        openedAt,
+      });
       toast.success('Pré-cadastro realizado com sucesso!', { id: toastId });
       reset();
       setIsSuccessOpen(true);
@@ -275,6 +280,16 @@ export default function EmployeeRegisterPage() {
                 </div>
               </div>
             </div>
+
+            {/* Armadilha anti-robô: escondido de pessoas e do teclado */}
+            <input
+              type="text"
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden
+              className="absolute -left-[9999px] size-0 opacity-0"
+              {...register('website')}
+            />
 
             <Button
               type="submit"

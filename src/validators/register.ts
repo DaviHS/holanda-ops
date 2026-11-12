@@ -19,7 +19,14 @@ export const publicEmployeeRegisterSchema = z.object({
   }),
   pantsSize: z.string().optional(),
   shoeSize: z.number().optional(),
+  /** Armadilha anti-robô: campo escondido que pessoas não preenchem. */
+  website: z.string().max(200).optional(),
+  /** Quando a tela abriu (ms): preencher mais rápido que uma pessoa consegue indica robô. */
+  openedAt: z.number().optional(),
 });
+
+/** Menor tempo, em ms, para uma pessoa preencher o formulário. */
+export const MIN_REGISTER_FILL_MS = 4000;
 
 export type PublicEmployeeRegisterValues = z.infer<
   typeof publicEmployeeRegisterSchema

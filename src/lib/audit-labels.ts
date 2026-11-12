@@ -12,6 +12,8 @@ const ACTIONS: Record<string, string> = {
   'employee.create': 'Cadastrou funcionário',
   'employee.update': 'Editou funcionário',
   'employee.delete': 'Removeu funcionário',
+  'employee.approve': 'Aprovou pré-cadastro de funcionário',
+  'employee.logExport': 'Exportou ou copiou a lista de funcionários',
 
   'sector.create': 'Criou setor',
   'sector.update': 'Editou setor',
@@ -32,6 +34,9 @@ const ACTIONS: Record<string, string> = {
   'user.delete': 'Removeu usuário',
   'user.sendPasswordReset': 'Enviou link de redefinição de senha',
 
+  'auth.signIn': 'Entrou no sistema',
+  'auth.signInFailed': 'Tentativa de login recusada',
+  'auth.changePassword': 'Alterou a própria senha',
   'auth.requestPasswordReset': 'Pediu redefinição de senha',
   'auth.confirmPasswordReset': 'Redefiniu a própria senha',
 

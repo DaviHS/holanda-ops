@@ -22,7 +22,11 @@ export const auditLogs = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (table) => [index('idx_audit_logs_created_at').on(table.createdAt)],
+  (table) => [
+    index('idx_audit_logs_created_at').on(table.createdAt),
+    index('idx_audit_logs_user_id').on(table.userId),
+    index('idx_audit_logs_action').on(table.action),
+  ],
 );
 
 export type AuditLog = typeof auditLogs.$inferSelect;

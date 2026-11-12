@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { api } from '@/trpc/react';
 import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { formatCpf, formatShiftTime } from '@/lib/formatters';
@@ -51,6 +52,7 @@ import {
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { EmployeeAvatarField } from './employee-avatar-field';
 import { type Employee } from '@/server/db/schema/employees';
 import { employeeSchema } from '@/validators/employee';
 import { type z } from 'zod';
@@ -108,6 +110,24 @@ export function EmployeeFormDialog({
   const isEditing = !!editing;
   const [openCombobox, setOpenCombobox] = useState(false);
   const [tab, setTab] = useState<TabKey>('pessoais');
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  // Fotos enviadas nesta abertura do diálogo e ainda não salvas
+  const sessionUploads = useRef<string[]>([]);
+  const discardUpload = api.employee.discardUpload.useMutation();
+
+  const discard = (url: string) => {
+    sessionUploads.current = sessionUploads.current.filter((u) => u !== url);
+    discardUpload.mutate({ url });
+  };
+
+  const handleOpenChange = (next: boolean) => {
+    if (!next) {
+      // Fechou sem salvar: as fotos novas viram lixo no UploadThing
+      sessionUploads.current.forEach((url) => discardUpload.mutate({ url }));
+      sessionUploads.current = [];
+    }
+    onOpenChange(next);
+  };
 
   // Sempre abre na primeira aba (ajuste de estado durante o render)
   const [lastOpen, setLastOpen] = useState(open);
@@ -131,6 +151,7 @@ export function EmployeeFormDialog({
       rg: '',
       pixKey: '',
       address: '',
+      avatarUrl: null,
       sectorIds: [],
       shiftId: null,
       status: 'active',
@@ -149,6 +170,7 @@ export function EmployeeFormDialog({
         rg: editing.rg ?? '',
         pixKey: editing.pixKey ?? '',
         address: editing.address ?? '',
+        avatarUrl: editing.avatarUrl ?? null,
         sectorIds: editing.sectorIds ?? [],
         shiftId: editing.shiftId ?? null,
         status: editing.status,
@@ -169,6 +191,7 @@ export function EmployeeFormDialog({
         rg: '',
         pixKey: '',
         address: '',
+        avatarUrl: null,
         sectorIds: [],
         shiftId: null,
         shirtSize: 'M',
@@ -195,6 +218,8 @@ export function EmployeeFormDialog({
 
     try {
       await Promise.resolve().then(() => onSubmit(payload));
+      // Salvou: só a foto escolhida fica (as demais já foram descartadas)
+      sessionUploads.current = [];
       onOpenChange(false);
     } catch {
       // o aviso de erro já é exibido pelo toast da mutation
@@ -218,6 +243,7 @@ export function EmployeeFormDialog({
   const currentUniforms = watch('uniform');
   const currentShiftId = watch('shiftId');
   const currentStatus = watch('status');
+  const currentAvatar = watch('avatarUrl');
 
   const handleToggleSector = (sectorId: string) => {
     setValue(
@@ -252,7 +278,7 @@ export function EmployeeFormDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="flex max-h-[88vh] flex-col gap-0 overflow-hidden rounded-md p-0 sm:max-w-[620px]">
         <DialogHeader className="bg-background shrink-0 border-b px-6 py-4">
           <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
@@ -325,6 +351,23 @@ export function EmployeeFormDialog({
               className="m-0 min-h-0 min-w-0 flex-1 overflow-y-auto border-0 px-6 py-5"
             >
               <TabsContent value="pessoais" className="mt-0 space-y-4">
+                <EmployeeAvatarField
+                  value={currentAvatar}
+                  onChange={(url) => {
+                    // Foto enviada agora e substituída/removida antes de salvar: apaga
+                    if (
+                      currentAvatar &&
+                      currentAvatar !== url &&
+                      sessionUploads.current.includes(currentAvatar)
+                    ) {
+                      discard(currentAvatar);
+                    }
+                    if (url) sessionUploads.current.push(url);
+                    setValue('avatarUrl', url);
+                  }}
+                  onUploadingChange={setUploadingAvatar}
+                  disabled={readOnly}
+                />
                 <div className="grid grid-cols-12 gap-3">
                   <div className="col-span-12">
                     <Label htmlFor="emp-name" className="text-xs font-medium">
@@ -721,7 +764,7 @@ export function EmployeeFormDialog({
             <Button
               type="button"
               variant="ghost"
-              onClick={() => onOpenChange(false)}
+              onClick={() => handleOpenChange(false)}
               disabled={isSubmitting}
               className="hover:bg-destructive/10 hover:text-destructive rounded-md transition-colors"
             >
@@ -730,7 +773,7 @@ export function EmployeeFormDialog({
             {!readOnly && (
               <Button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || uploadingAvatar}
                 className="rounded-md"
               >
                 {isSubmitting && (

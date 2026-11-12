@@ -125,6 +125,7 @@ export const isLinkActive = (pathname: string, href: string) =>
 
 /** Trilha do breadcrumb para a rota atual, ex.: "/employees" -> ["Equipe e RH", "Funcionários"]. */
 export function getBreadcrumb(pathname: string): string[] {
+  if (pathname === '/profile') return ['Meu perfil'];
   for (const entry of NAVIGATION) {
     if (isSection(entry)) continue;
     if (isGroup(entry)) {

@@ -8,6 +8,7 @@ import { userRouter } from './routers/user';
 import { accessRouter } from './routers/access';
 import { auditRouter } from './routers/audit';
 import { passwordResetRouter } from './routers/password-reset';
+import { profileRouter } from './routers/profile';
 
 /**
  * This is the primary router for your server.
@@ -24,6 +25,7 @@ export const appRouter = createTRPCRouter({
   access: accessRouter,
   audit: auditRouter,
   passwordReset: passwordResetRouter,
+  profile: profileRouter,
 });
 
 // export type definition of API

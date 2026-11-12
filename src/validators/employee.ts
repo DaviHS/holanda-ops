@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { isValidCpf, onlyDigits } from '@/lib/formatters/cpf';
+import { isUploadThingUrl } from '@/lib/uploadthing-url';
 
 const uniformSchema = z.object({
   shirt: z.boolean(),
@@ -17,6 +18,12 @@ const employeeBase = z.object({
   rg: z.string().optional().nullable(),
   pixKey: z.string().optional().nullable(),
   address: z.string().optional().nullable(),
+  avatarUrl: z
+    .string()
+    .max(500)
+    .refine(isUploadThingUrl, 'Foto inválida')
+    .optional()
+    .nullable(),
   sectorIds: z.array(z.string().uuid()).min(1, 'Selecione ao menos um setor'),
   status: z.enum(['active', 'inactive', 'suspended', 'pending']),
   shirtSize: z.enum(['PP', 'P', 'M', 'G', 'GG', 'XGG']),

@@ -7,6 +7,8 @@ import { and, eq, isNull } from 'drizzle-orm';
 
 import { db } from '@/server/db';
 import { users } from '@/server/db/schema/users';
+import { recordAudit } from '@/server/audit';
+import { sweepOrphanUploads } from '@/server/uploads';
 import { authConfig } from './config';
 
 const credentialsSchema = z.object({
@@ -36,6 +38,15 @@ const {
         }
 
         const { email, password } = parsedCredentials.data;
+        const attempted = email.trim().toLowerCase();
+        // Só registramos falhas de contas que existem: e-mails inventados encheriam o histórico.
+        const refused = (userId: string, reason: string) =>
+          recordAudit({
+            userId,
+            userLabel: attempted,
+            action: 'auth.signInFailed',
+            input: { motivo: reason },
+          });
 
         const user = await db.query.users.findFirst({
           where: and(
@@ -52,12 +63,14 @@ const {
         }
 
         if (user.status !== 'active') {
+          await refused(user.id, 'conta inativa ou suspensa');
           throw new Error('Sua conta está inativa ou suspensa.');
         }
 
         const isValidPassword = await compare(password, user.passwordHash);
 
         if (!isValidPassword) {
+          await refused(user.id, 'senha incorreta');
           return null;
         }
 
@@ -65,6 +78,16 @@ const {
           .update(users)
           .set({ lastLoginAt: new Date() })
           .where(eq(users.id, user.id));
+
+        await recordAudit({
+          userId: user.id,
+          userLabel: user.employee?.name ?? user.email,
+          action: 'auth.signIn',
+          input: null,
+        });
+
+        // Limpeza de fotos sem vínculo: não atrasa nem derruba o login
+        void sweepOrphanUploads();
 
         return {
           id: user.id,

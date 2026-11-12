@@ -1,6 +1,7 @@
 'use client';
 
 import type { ElementType, ReactNode } from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { editableRowProps, stopRowEvent } from '@/components/row-actions';
 import { cn } from '@/lib/utils';
@@ -9,8 +10,12 @@ interface EntityCardProps {
   /** Ícone dentro do círculo (use `initials` para mostrar iniciais no lugar). */
   icon?: ElementType<{ className?: string }>;
   initials?: string;
+  /** Foto: quando existe, aparece no lugar do ícone (que continua como alternativa). */
+  imageUrl?: string | null;
   title: string;
   subtitle?: ReactNode;
+  /** Conteúdo antes do avatar (ex.: caixa de seleção). */
+  leading?: ReactNode;
   /** Clique no card (abre a edição). */
   onOpen?: () => void;
   /** Menu de ações (RowActions), opcionalmente com um selo antes. Fica sempre dentro do card. */
@@ -27,6 +32,8 @@ interface EntityCardProps {
 export function EntityCard({
   icon: Icon,
   initials,
+  imageUrl,
+  leading,
   title,
   subtitle,
   onOpen,
@@ -46,9 +53,21 @@ export function EntityCard({
       <CardContent className="min-w-0 px-3 py-2">
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
           <div className="flex min-w-0 items-center gap-3">
-            <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-bold">
-              {Icon ? <Icon className="size-4" /> : initials}
-            </div>
+            {leading && (
+              <div
+                className="relative z-10 shrink-0"
+                onClick={stopRowEvent}
+                onKeyDown={(event) => event.stopPropagation()}
+              >
+                {leading}
+              </div>
+            )}
+            <Avatar className="size-9">
+              {imageUrl && <AvatarImage src={imageUrl} alt="" />}
+              <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+                {Icon ? <Icon className="size-4" /> : initials}
+              </AvatarFallback>
+            </Avatar>
             <div className="min-w-0 flex-1">
               <p className="truncate font-semibold">{title}</p>
               {subtitle && (
