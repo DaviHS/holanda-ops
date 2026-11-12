@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { formatShiftTime } from '@/lib/formatters';
+import { formatCpf, formatShiftTime } from '@/lib/formatters';
+import { EMPLOYEE_STATUS, EMPLOYEE_STATUSES } from '@/lib/employee-status';
 import {
   Dialog,
   DialogContent,
@@ -72,8 +73,27 @@ type EmployeeFormDialogProps = {
     (Employee & { sectorIds?: string[]; shiftId?: string | null }) | null;
   sectors?: SectorItem[];
   shifts?: ShiftItem[];
-  onSubmit: (data: EmployeeFormValues) => void;
-  isSubmitting?: boolean;
+  onSubmit: (data: EmployeeFormValues) => void | Promise<void>;
+  /** Só consulta: campos desabilitados e sem botão de salvar. */
+  readOnly?: boolean;
+};
+
+type TabKey = 'pessoais' | 'operacional' | 'uniformes';
+
+/** Em qual aba cada campo fica (para levar o usuário até o erro). */
+const FIELD_TAB: Partial<Record<keyof EmployeeFormValues, TabKey>> = {
+  name: 'pessoais',
+  cpf: 'pessoais',
+  rg: 'pessoais',
+  pixKey: 'pessoais',
+  address: 'pessoais',
+  sectorIds: 'operacional',
+  shiftId: 'operacional',
+  status: 'operacional',
+  shirtSize: 'uniformes',
+  pantsSize: 'uniformes',
+  shoeSize: 'uniformes',
+  uniform: 'uniformes',
 };
 
 export function EmployeeFormDialog({
@@ -83,10 +103,18 @@ export function EmployeeFormDialog({
   sectors = [],
   shifts = [],
   onSubmit,
-  isSubmitting = false,
+  readOnly = false,
 }: EmployeeFormDialogProps) {
   const isEditing = !!editing;
   const [openCombobox, setOpenCombobox] = useState(false);
+  const [tab, setTab] = useState<TabKey>('pessoais');
+
+  // Sempre abre na primeira aba (ajuste de estado durante o render)
+  const [lastOpen, setLastOpen] = useState(open);
+  if (lastOpen !== open) {
+    setLastOpen(open);
+    if (open) setTab('pessoais');
+  }
 
   const {
     register,
@@ -94,7 +122,7 @@ export function EmployeeFormDialog({
     setValue,
     watch,
     reset,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<EmployeeFormValues>({
     resolver: zodResolver(employeeSchema) as Resolver<EmployeeFormValues>,
     defaultValues: {
@@ -117,7 +145,7 @@ export function EmployeeFormDialog({
     if (editing) {
       reset({
         name: editing.name,
-        cpf: editing.cpf,
+        cpf: formatCpf(editing.cpf),
         rg: editing.rg ?? '',
         pixKey: editing.pixKey ?? '',
         address: editing.address ?? '',
@@ -173,18 +201,32 @@ export function EmployeeFormDialog({
     }
   };
 
+  const tabHasError = (key: TabKey) =>
+    (Object.keys(errors) as (keyof EmployeeFormValues)[]).some(
+      (field) => FIELD_TAB[field] === key,
+    );
+
+  // Salvar com erro numa aba escondida: leva o usuário até a primeira aba com problema
+  const handleInvalid = (invalid: typeof errors) => {
+    const first = (Object.keys(invalid) as (keyof EmployeeFormValues)[])
+      .map((field) => FIELD_TAB[field])
+      .find(Boolean);
+    if (first) setTab(first);
+  };
+
   const selectedSectorIds = watch('sectorIds') ?? [];
   const currentUniforms = watch('uniform');
   const currentShiftId = watch('shiftId');
   const currentStatus = watch('status');
 
-  const handleSelectSector = (sectorId: string) => {
-    if (!selectedSectorIds.includes(sectorId)) {
-      setValue('sectorIds', [...selectedSectorIds, sectorId], {
-        shouldValidate: true,
-      });
-    }
-    setOpenCombobox(false);
+  const handleToggleSector = (sectorId: string) => {
+    setValue(
+      'sectorIds',
+      selectedSectorIds.includes(sectorId)
+        ? selectedSectorIds.filter((id) => id !== sectorId)
+        : [...selectedSectorIds, sectorId],
+      { shouldValidate: true },
+    );
   };
 
   const handleRemoveSector = (sectorId: string) => {
@@ -214,16 +256,21 @@ export function EmployeeFormDialog({
       <DialogContent className="flex max-h-[88vh] flex-col gap-0 overflow-hidden rounded-md p-0 sm:max-w-[620px]">
         <DialogHeader className="bg-background shrink-0 border-b px-6 py-4">
           <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
-            {isEditing ? 'Editar Colaborador' : 'Cadastrar Colaborador'}
+            {readOnly
+              ? 'Dados do Colaborador'
+              : isEditing
+                ? 'Editar Colaborador'
+                : 'Cadastrar Colaborador'}
           </DialogTitle>
         </DialogHeader>
 
         <form
-          onSubmit={handleSubmit((data) => handleFormSubmit(data))}
+          onSubmit={handleSubmit(handleFormSubmit, handleInvalid)}
           className="flex min-h-0 flex-1 flex-col overflow-hidden"
         >
           <Tabs
-            defaultValue="pessoais"
+            value={tab}
+            onValueChange={(value) => setTab(value as TabKey)}
             className="flex min-h-0 flex-1 flex-col overflow-hidden"
           >
             <div className="bg-muted/40 shrink-0 border-b px-6 py-3">
@@ -234,6 +281,13 @@ export function EmployeeFormDialog({
                 >
                   <User className="size-3.5 shrink-0" />
                   <span className="truncate">Pessoais</span>
+                  {tabHasError('pessoais') && (
+                    <span
+                      className="bg-destructive size-1.5 shrink-0 rounded-full"
+                      role="img"
+                      aria-label="Há campos com erro"
+                    />
+                  )}
                 </TabsTrigger>
                 <TabsTrigger
                   value="operacional"
@@ -241,6 +295,13 @@ export function EmployeeFormDialog({
                 >
                   <Briefcase className="size-3.5 shrink-0" />
                   <span className="truncate">Alocação</span>
+                  {tabHasError('operacional') && (
+                    <span
+                      className="bg-destructive size-1.5 shrink-0 rounded-full"
+                      role="img"
+                      aria-label="Há campos com erro"
+                    />
+                  )}
                 </TabsTrigger>
                 <TabsTrigger
                   value="uniformes"
@@ -248,16 +309,29 @@ export function EmployeeFormDialog({
                 >
                   <Shirt className="size-3.5 shrink-0" />
                   <span className="truncate">Uniformes</span>
+                  {tabHasError('uniformes') && (
+                    <span
+                      className="bg-destructive size-1.5 shrink-0 rounded-full"
+                      role="img"
+                      aria-label="Há campos com erro"
+                    />
+                  )}
                 </TabsTrigger>
               </TabsList>
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+            <fieldset
+              disabled={readOnly}
+              className="m-0 min-h-0 min-w-0 flex-1 overflow-y-auto border-0 px-6 py-5"
+            >
               <TabsContent value="pessoais" className="mt-0 space-y-4">
                 <div className="grid grid-cols-12 gap-3">
                   <div className="col-span-12">
-                    <Label className="text-xs font-medium">Nome Completo</Label>
+                    <Label htmlFor="emp-name" className="text-xs font-medium">
+                      Nome Completo
+                    </Label>
                     <Input
+                      id="emp-name"
                       {...register('name')}
                       placeholder="Ex: João da Silva"
                       className="mt-1 w-full rounded-md text-sm"
@@ -270,9 +344,20 @@ export function EmployeeFormDialog({
                   </div>
 
                   <div className="col-span-12 sm:col-span-6">
-                    <Label className="text-xs font-medium">CPF</Label>
+                    <Label htmlFor="emp-cpf" className="text-xs font-medium">
+                      CPF
+                    </Label>
                     <Input
-                      {...register('cpf')}
+                      id="emp-cpf"
+                      inputMode="numeric"
+                      maxLength={14}
+                      {...register('cpf', {
+                        onChange: (
+                          event: React.ChangeEvent<HTMLInputElement>,
+                        ) => {
+                          event.target.value = formatCpf(event.target.value);
+                        },
+                      })}
                       placeholder="000.000.000-00"
                       className="mt-1 w-full rounded-md font-mono text-sm"
                     />
@@ -284,8 +369,11 @@ export function EmployeeFormDialog({
                   </div>
 
                   <div className="col-span-12 sm:col-span-6">
-                    <Label className="text-xs font-medium">RG</Label>
+                    <Label htmlFor="emp-rg" className="text-xs font-medium">
+                      RG
+                    </Label>
                     <Input
+                      id="emp-rg"
                       {...register('rg')}
                       placeholder="00.000.000-0"
                       className="mt-1 w-full rounded-md font-mono text-sm"
@@ -293,8 +381,11 @@ export function EmployeeFormDialog({
                   </div>
 
                   <div className="col-span-12">
-                    <Label className="text-xs font-medium">Chave Pix</Label>
+                    <Label htmlFor="emp-pix" className="text-xs font-medium">
+                      Chave Pix
+                    </Label>
                     <Input
+                      id="emp-pix"
                       {...register('pixKey')}
                       placeholder="E-mail, CPF, telefone ou chave aleatória"
                       className="mt-1 w-full rounded-md text-sm"
@@ -302,10 +393,14 @@ export function EmployeeFormDialog({
                   </div>
 
                   <div className="col-span-12">
-                    <Label className="text-xs font-medium">
+                    <Label
+                      htmlFor="emp-address"
+                      className="text-xs font-medium"
+                    >
                       Endereço Residencial
                     </Label>
                     <Input
+                      id="emp-address"
                       {...register('address')}
                       placeholder="Rua, número, complemento e bairro"
                       className="mt-1 w-full rounded-md text-sm"
@@ -342,7 +437,11 @@ export function EmployeeFormDialog({
                             />
                           }
                         >
-                          <span>Pesquisar setor...</span>
+                          <span>
+                            {selectedSectorIds.length === 0
+                              ? 'Pesquisar setor...'
+                              : `${selectedSectorIds.length} setor(es) selecionado(s)`}
+                          </span>
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </PopoverTrigger>
 
@@ -366,7 +465,7 @@ export function EmployeeFormDialog({
                                       key={sec.id}
                                       value={sec.name}
                                       onSelect={() =>
-                                        handleSelectSector(sec.id)
+                                        handleToggleSector(sec.id)
                                       }
                                       className="rounded-none py-2 text-sm"
                                     >
@@ -395,29 +494,23 @@ export function EmployeeFormDialog({
                       </Label>
                       <Select
                         value={currentStatus || 'active'}
-                        onValueChange={(val) =>
-                          val &&
-                          setValue('status', val as 'active' | 'inactive')
-                        }
+                        onValueChange={(val) => val && setValue('status', val)}
                       >
                         <SelectTrigger className="mt-1 w-full rounded-md text-sm">
                           <SelectValue placeholder="Selecione">
-                            {currentStatus === 'inactive' ? 'Inativo' : 'Ativo'}
+                            {EMPLOYEE_STATUS[currentStatus ?? 'active'].label}
                           </SelectValue>
                         </SelectTrigger>
                         <SelectContent className="rounded-md">
-                          <SelectItem
-                            value="active"
-                            className="rounded-none py-2 text-sm"
-                          >
-                            Ativo
-                          </SelectItem>
-                          <SelectItem
-                            value="inactive"
-                            className="rounded-none py-2 text-sm"
-                          >
-                            Inativo
-                          </SelectItem>
+                          {EMPLOYEE_STATUSES.map((status) => (
+                            <SelectItem
+                              key={status}
+                              value={status}
+                              className="rounded-none py-2 text-sm"
+                            >
+                              {EMPLOYEE_STATUS[status].label}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
@@ -559,6 +652,8 @@ export function EmployeeFormDialog({
                       </Label>
                       <Input
                         type="number"
+                        min={15}
+                        max={60}
                         {...register('shoeSize', { valueAsNumber: true })}
                         placeholder="Ex: 40"
                         className="mt-1 w-full rounded-md font-mono text-sm"
@@ -591,7 +686,8 @@ export function EmployeeFormDialog({
                           type="button"
                           key={item.key}
                           onClick={() => toggleUniformItem(item.key)}
-                          className={`flex items-center justify-between rounded-md border px-3 text-left transition-all ${
+                          aria-pressed={!!isDelivered}
+                          className={`flex h-10 items-center justify-between gap-2 rounded-md border px-3 text-left transition-all sm:h-9 ${
                             isDelivered
                               ? 'bg-primary/10 border-primary/40 text-primary font-medium'
                               : 'bg-card border-border hover:border-muted-foreground/30 text-muted-foreground'
@@ -618,7 +714,7 @@ export function EmployeeFormDialog({
                   </div>
                 </div>
               </TabsContent>
-            </div>
+            </fieldset>
           </Tabs>
 
           <DialogFooter className="bg-muted/20 shrink-0 gap-2 border-t px-6 py-3">
@@ -629,16 +725,20 @@ export function EmployeeFormDialog({
               disabled={isSubmitting}
               className="hover:bg-destructive/10 hover:text-destructive rounded-md transition-colors"
             >
-              Cancelar
+              {readOnly ? 'Fechar' : 'Cancelar'}
             </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="rounded-md"
-            >
-              {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}
-              {isEditing ? 'Salvar Alterações' : 'Cadastrar'}
-            </Button>
+            {!readOnly && (
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="rounded-md"
+              >
+                {isSubmitting && (
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                )}
+                {isEditing ? 'Salvar Alterações' : 'Cadastrar'}
+              </Button>
+            )}
           </DialogFooter>
         </form>
       </DialogContent>

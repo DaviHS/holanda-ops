@@ -1,20 +1,15 @@
 import { Badge } from '@/components/ui/badge';
+import { EMPLOYEE_STATUS, type EmployeeStatus } from '@/lib/employee-status';
+import { cn } from '@/lib/utils';
 
-type StatusBadgeProps = {
-  status: 'active' | 'inactive' | 'suspended' | 'pending';
-};
-
-export function EmployeeStatusBadge({ status }: StatusBadgeProps) {
-  const isChecked = status === 'active';
-
+export function EmployeeStatusBadge({ status }: { status: EmployeeStatus }) {
+  const info = EMPLOYEE_STATUS[status];
   return (
     <Badge
-      variant={isChecked ? 'default' : 'destructive'}
-      className={
-        isChecked ? 'bg-emerald-600 text-white hover:bg-emerald-700' : ''
-      }
+      title={info.hint}
+      className={cn('border-transparent', info.className)}
     >
-      {isChecked ? 'Ativo' : 'Inativo'}
+      {info.label}
     </Badge>
   );
 }

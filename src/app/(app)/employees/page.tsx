@@ -20,6 +20,12 @@ import { useConfirm } from '@/components/confirm-dialog';
 import { useEntityDialog } from '@/hooks/use-entity-dialog';
 import { usePermissions } from '@/hooks/use-permissions';
 import { mutationFeedback } from '@/lib/mutation-feedback';
+import { onlyDigits } from '@/lib/formatters/cpf';
+import {
+  EMPLOYEE_STATUS,
+  EMPLOYEE_STATUSES,
+  type EmployeeStatus,
+} from '@/lib/employee-status';
 import { EmployeeCard } from './_components/employee-card';
 import {
   EmployeeFormDialog,
@@ -51,6 +57,7 @@ export default function EmployeesPage() {
   const editId = params.get('editar');
   const [shiftFilter, setShiftFilter] = useState(params.get('turno') ?? ALL);
   const [sectorFilter, setSectorFilter] = useState(params.get('setor') ?? ALL);
+  const [statusFilter, setStatusFilter] = useState(params.get('status') ?? ALL);
 
   const utils = api.useUtils();
   const { data: items = [], isLoading } = api.employee.list.useQuery();
@@ -87,9 +94,21 @@ export default function EmployeesPage() {
   );
 
   const query = plain(search.trim());
+  const digits = onlyDigits(search);
+  const statusCount = (status: EmployeeStatus) =>
+    items.filter((item) => item.status === status).length;
+  const shiftCount = (id: string) =>
+    items.filter((item) => (id === NONE ? !item.shiftId : item.shiftId === id))
+      .length;
+  const sectorCount = (id: string) =>
+    items.filter((item) =>
+      id === NONE ? item.sectorIds.length === 0 : item.sectorIds.includes(id),
+    ).length;
   const filtered = items.filter(
     (item) =>
-      (plain(item.name).includes(query) || item.cpf.includes(search.trim())) &&
+      (plain(item.name).includes(query) ||
+        (digits.length > 0 && onlyDigits(item.cpf).includes(digits))) &&
+      (statusFilter === ALL || item.status === statusFilter) &&
       (shiftFilter === ALL ||
         (shiftFilter === NONE
           ? !item.shiftId
@@ -125,10 +144,18 @@ export default function EmployeesPage() {
     }
   };
 
+  // Aprovar abre o cadastro já como ativo: falta escolher setor (e turno) antes de salvar.
+  const handleApprove = (item: Employee) =>
+    dialog.openEdit({ ...item, status: 'active' });
+
   const handleDelete = async (item: Employee) => {
     const confirmed = await confirm({
       title: 'Remover funcionário',
-      description: `Tem certeza de que deseja remover "${item.name}"? Esta ação não poderá ser desfeita.`,
+      description:
+        `Tem certeza de que deseja remover "${item.name}"? Esta ação não poderá ser desfeita.` +
+        (item.userId
+          ? ' A conta de acesso ao sistema vinculada a ele será desativada.'
+          : ''),
       confirmLabel: 'Remover',
       destructive: true,
     });
@@ -159,6 +186,26 @@ export default function EmployeesPage() {
           aria-label="Buscar por nome ou CPF"
         />
         <Select
+          value={statusFilter}
+          onValueChange={(value) => setStatusFilter(value ?? ALL)}
+        >
+          <SelectTrigger className="w-full sm:w-44" aria-label="Situação">
+            <SelectValue>
+              {statusFilter === ALL
+                ? 'Todas as situações'
+                : `${EMPLOYEE_STATUS[statusFilter as EmployeeStatus]?.label ?? 'Situação'} (${statusCount(statusFilter as EmployeeStatus)})`}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>Todas as situações</SelectItem>
+            {EMPLOYEE_STATUSES.map((status) => (
+              <SelectItem key={status} value={status}>
+                {EMPLOYEE_STATUS[status].label} ({statusCount(status)})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select
           value={shiftFilter}
           onValueChange={(value) => setShiftFilter(value ?? ALL)}
         >
@@ -166,18 +213,20 @@ export default function EmployeesPage() {
             <SelectValue>
               {shiftFilter === ALL
                 ? 'Todos os turnos'
-                : shiftFilter === NONE
-                  ? 'Sem turno'
-                  : (shifts.find((shift) => shift.id === shiftFilter)?.name ??
-                    'Turno')}
+                : `${
+                    shiftFilter === NONE
+                      ? 'Sem turno'
+                      : (shifts.find((shift) => shift.id === shiftFilter)
+                          ?.name ?? 'Turno')
+                  } (${shiftCount(shiftFilter)})`}
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={ALL}>Todos os turnos</SelectItem>
-            <SelectItem value={NONE}>Sem turno</SelectItem>
+            <SelectItem value={NONE}>Sem turno ({shiftCount(NONE)})</SelectItem>
             {shifts.map((shift) => (
               <SelectItem key={shift.id} value={shift.id}>
-                {shift.name}
+                {shift.name} ({shiftCount(shift.id)})
               </SelectItem>
             ))}
           </SelectContent>
@@ -190,23 +239,47 @@ export default function EmployeesPage() {
             <SelectValue>
               {sectorFilter === ALL
                 ? 'Todos os setores'
-                : sectorFilter === NONE
-                  ? 'Sem setor'
-                  : (sectors.find((sector) => sector.id === sectorFilter)
-                      ?.name ?? 'Setor')}
+                : `${
+                    sectorFilter === NONE
+                      ? 'Sem setor'
+                      : (sectors.find((sector) => sector.id === sectorFilter)
+                          ?.name ?? 'Setor')
+                  } (${sectorCount(sectorFilter)})`}
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={ALL}>Todos os setores</SelectItem>
-            <SelectItem value={NONE}>Sem setor</SelectItem>
+            <SelectItem value={NONE}>
+              Sem setor ({sectorCount(NONE)})
+            </SelectItem>
             {sectors.map((sector) => (
               <SelectItem key={sector.id} value={sector.id}>
-                {sector.name}
+                {sector.name} ({sectorCount(sector.id)})
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
+
+      {!isLoading && items.length > 0 && (
+        <p className="text-muted-foreground text-xs">
+          {filtered.length === items.length
+            ? `${items.length} funcionário(s)`
+            : `${filtered.length} de ${items.length} funcionário(s)`}
+          {statusCount('pending') > 0 && statusFilter !== 'pending' && (
+            <>
+              {' · '}
+              <button
+                type="button"
+                onClick={() => setStatusFilter('pending')}
+                className="text-primary underline-offset-2 hover:underline"
+              >
+                {statusCount('pending')} aguardando aprovação
+              </button>
+            </>
+          )}
+        </p>
+      )}
 
       {isLoading ? (
         <LoadingState />
@@ -223,22 +296,23 @@ export default function EmployeesPage() {
               key={item.id}
               employee={item}
               onEdit={canManage ? dialog.openEdit : undefined}
+              onView={canManage ? undefined : dialog.openEdit}
               onDelete={canManage ? handleDelete : undefined}
+              onApprove={canManage ? handleApprove : undefined}
             />
           ))}
         </div>
       )}
 
-      {canManage && (
-        <EmployeeFormDialog
-          open={dialogOpen}
-          onOpenChange={handleDialogChange}
-          editing={editingTarget}
-          sectors={sectors}
-          shifts={shifts}
-          onSubmit={handleSubmit}
-        />
-      )}
+      <EmployeeFormDialog
+        open={dialogOpen}
+        onOpenChange={handleDialogChange}
+        editing={editingTarget}
+        sectors={sectors}
+        shifts={shifts}
+        onSubmit={handleSubmit}
+        readOnly={!canManage}
+      />
     </PageContainer>
   );
 }

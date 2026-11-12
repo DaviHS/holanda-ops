@@ -41,6 +41,7 @@ import {
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { errorMessage, toastError } from '@/lib/toast';
+import { formatCpf } from '@/lib/formatters/cpf';
 import { api } from '@/trpc/react';
 import {
   publicEmployeeRegisterSchema,
@@ -139,7 +140,15 @@ export default function EmployeeRegisterPage() {
                     id="cpf"
                     placeholder="000.000.000-00"
                     className="w-full rounded-md pl-9 text-sm"
-                    {...register('cpf')}
+                    inputMode="numeric"
+                    maxLength={14}
+                    {...register('cpf', {
+                      onChange: (
+                        event: React.ChangeEvent<HTMLInputElement>,
+                      ) => {
+                        event.target.value = formatCpf(event.target.value);
+                      },
+                    })}
                   />
                 </div>
                 {errors.cpf && (

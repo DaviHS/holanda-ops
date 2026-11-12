@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { isValidCpf } from '@/lib/formatters/cpf';
 
 export const shirtSizes = ['PP', 'P', 'M', 'G', 'GG', 'XGG'] as const;
 
@@ -8,7 +9,8 @@ export const publicEmployeeRegisterSchema = z.object({
     .string()
     .min(11, 'CPF incompleto')
     .max(14, 'CPF inválido')
-    .transform((val) => val.replace(/\D/g, '')), // Remove caracteres não numéricos
+    .transform((val) => val.replace(/\D/g, '')) // Remove caracteres não numéricos
+    .refine(isValidCpf, 'CPF inválido'),
   rg: z.string().optional(),
   pixKey: z.string().optional(),
   address: z.string().optional(),

@@ -1,14 +1,54 @@
-import { and, count, eq, isNull, ne, sql } from 'drizzle-orm';
+import { and, count, eq, inArray, isNull, ne, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { can, createTRPCRouter, publicProcedure } from '@/server/api/trpc';
 
-import { employees, employeeSectors, users } from '@/server/db/schema';
+import {
+  employees,
+  employeeSectors,
+  sectors,
+  shifts,
+  users,
+} from '@/server/db/schema';
 import { employeeSchema, employeeUpdateSchema } from '@/validators/employee';
 import { TRPCError } from '@trpc/server';
 import { publicEmployeeRegisterSchema } from '@/validators/register';
 
 const viewEmployees = can('employees.view', 'employees.manage', 'users.manage');
 const manageEmployees = can('employees.manage');
+
+/** Os setores e o turno informados precisam existir (e não estar removidos). */
+async function assertRefsExist(
+  db: Pick<typeof import('@/server/db').db, 'select'>,
+  sectorIds: string[] | undefined,
+  shiftId: string | null | undefined,
+) {
+  const unique = [...new Set(sectorIds ?? [])];
+  if (unique.length > 0) {
+    const [found] = await db
+      .select({ value: count() })
+      .from(sectors)
+      .where(and(inArray(sectors.id, unique), isNull(sectors.deletedAt)));
+    if ((found?.value ?? 0) !== unique.length) {
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message:
+          'Um dos setores escolhidos não existe mais. Atualize a página.',
+      });
+    }
+  }
+  if (shiftId) {
+    const [found] = await db
+      .select({ value: count() })
+      .from(shifts)
+      .where(and(eq(shifts.id, shiftId), isNull(shifts.deletedAt)));
+    if (!found?.value) {
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message: 'O turno escolhido não existe mais. Atualize a página.',
+      });
+    }
+  }
+}
 
 export const employeeRouter = createTRPCRouter({
   /** Opcionalmente só os funcionários de um turno ou de um setor. */
@@ -34,6 +74,7 @@ export const employeeRouter = createTRPCRouter({
               )`
             : undefined,
         ),
+        orderBy: (employee, { asc }) => [asc(employee.name)],
         with: {
           shift: true,
           sectors: {
@@ -83,6 +124,7 @@ export const employeeRouter = createTRPCRouter({
     .input(employeeSchema)
     .mutation(async ({ ctx, input }) => {
       const { sectorIds, ...employeeData } = input;
+      await assertRefsExist(ctx.db, sectorIds, employeeData.shiftId);
 
       return await ctx.db.transaction(async (tx) => {
         const [newEmployee] = await tx
@@ -91,7 +133,10 @@ export const employeeRouter = createTRPCRouter({
           .returning();
 
         if (!newEmployee) {
-          throw new Error('Falha ao criar funcionário');
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'Falha ao criar funcionário.',
+          });
         }
 
         if (sectorIds && sectorIds.length > 0) {
@@ -111,6 +156,7 @@ export const employeeRouter = createTRPCRouter({
     .input(employeeUpdateSchema)
     .mutation(async ({ ctx, input }) => {
       const { id, sectorIds, ...employeeData } = input;
+      await assertRefsExist(ctx.db, sectorIds, employeeData.shiftId);
 
       return await ctx.db.transaction(async (tx) => {
         const [updatedEmployee] = await tx
@@ -120,7 +166,10 @@ export const employeeRouter = createTRPCRouter({
           .returning();
 
         if (!updatedEmployee) {
-          throw new Error('Funcionário não encontrado ou já removido');
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Funcionário não encontrado ou já removido.',
+          });
         }
 
         if (sectorIds) {
