@@ -84,6 +84,11 @@ export default function ShiftsPage() {
     }),
   );
 
+  const occupancyCount = (value: string) =>
+    items.filter((item) =>
+      value === WITH ? item.employeeCount > 0 : item.employeeCount === 0,
+    ).length;
+
   const query = plain(search.trim());
   const filtered = items.filter(
     (item) =>
@@ -146,12 +151,17 @@ export default function ShiftsPage() {
           onValueChange={(value) => setOccupancy(value ?? ALL)}
         >
           <SelectTrigger className="w-full sm:w-52" aria-label="Funcionários">
-            <SelectValue>{OCCUPANCY_LABELS[occupancy]}</SelectValue>
+            <SelectValue>
+              {occupancy === ALL
+                ? OCCUPANCY_LABELS[occupancy]
+                : `${OCCUPANCY_LABELS[occupancy]} (${occupancyCount(occupancy)})`}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             {Object.entries(OCCUPANCY_LABELS).map(([value, label]) => (
               <SelectItem key={value} value={value}>
                 {label}
+                {value !== ALL && ` (${occupancyCount(value)})`}
               </SelectItem>
             ))}
           </SelectContent>

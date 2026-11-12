@@ -90,6 +90,11 @@ export default function UsersPage() {
     }),
   );
 
+  const roleCount = (id: string) =>
+    items.filter((item) => item.roleId === id).length;
+  const statusCount = (status: string) =>
+    items.filter((item) => item.status === status).length;
+
   const query = plain(search.trim());
   const filtered = items.filter(
     (item) =>
@@ -163,15 +168,17 @@ export default function UsersPage() {
             <SelectValue>
               {roleFilter === ALL
                 ? 'Todos os cargos'
-                : (roles.find((role) => role.id === roleFilter)?.name ??
-                  'Cargo')}
+                : `${
+                    roles.find((role) => role.id === roleFilter)?.name ??
+                    'Cargo'
+                  } (${roleCount(roleFilter)})`}
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={ALL}>Todos os cargos</SelectItem>
             {roles.map((role) => (
               <SelectItem key={role.id} value={role.id}>
-                {role.name}
+                {role.name} ({roleCount(role.id)})
               </SelectItem>
             ))}
           </SelectContent>
@@ -184,14 +191,14 @@ export default function UsersPage() {
             <SelectValue>
               {statusFilter === ALL
                 ? 'Todos os status'
-                : userStatusLabel(statusFilter)}
+                : `${userStatusLabel(statusFilter)} (${statusCount(statusFilter)})`}
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={ALL}>Todos os status</SelectItem>
             {Object.entries(USER_STATUS).map(([status, { label }]) => (
               <SelectItem key={status} value={status}>
-                {label}
+                {label} ({statusCount(status)})
               </SelectItem>
             ))}
           </SelectContent>
