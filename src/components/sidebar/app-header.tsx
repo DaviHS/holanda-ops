@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-import { Home, LogOut, UserRound } from 'lucide-react';
+import { Home, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Separator } from '@/components/ui/separator';
@@ -29,9 +29,9 @@ export function AppHeader({
       <SidebarTrigger className="border-border bg-background text-muted-foreground hover:border-primary/50 hover:bg-primary/10 hover:text-primary flex size-9 shrink-0 items-center justify-center rounded-md border transition-colors [&_svg]:size-4" />
       <Separator orientation="vertical" className="mx-1 h-5! self-center!" />
 
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
+      <Breadcrumb className="min-w-0 flex-1">
+        <BreadcrumbList className="flex-nowrap">
+          <BreadcrumbItem className="shrink-0">
             <Link
               href={homeUrl}
               aria-label="Início"
@@ -43,13 +43,15 @@ export function AppHeader({
           {trail.map((label, index) => (
             <Fragment key={label}>
               <BreadcrumbSeparator />
-              <BreadcrumbItem>
+              <BreadcrumbItem className="min-w-0">
                 {index === trail.length - 1 ? (
-                  <BreadcrumbPage className="text-sm font-medium">
+                  <BreadcrumbPage className="block truncate text-sm font-medium">
                     {label}
                   </BreadcrumbPage>
                 ) : (
-                  <span className="text-muted-foreground text-sm">{label}</span>
+                  <span className="text-muted-foreground block truncate text-sm">
+                    {label}
+                  </span>
                 )}
               </BreadcrumbItem>
             </Fragment>
@@ -57,16 +59,7 @@ export function AppHeader({
         </BreadcrumbList>
       </Breadcrumb>
 
-      <div className="ml-auto flex items-center gap-2">
-        <Link
-          href="/profile"
-          aria-label="Meu perfil"
-          title="Meu perfil"
-          className="border-border bg-background text-muted-foreground hover:border-primary/50 hover:bg-primary/10 hover:text-primary flex size-9 shrink-0 items-center justify-center rounded-md border transition-colors [&_svg]:size-4"
-        >
-          <UserRound />
-        </Link>
-
+      <div className="ml-auto flex shrink-0 items-center gap-2">
         <ThemeToggle className="border-border bg-background text-muted-foreground hover:border-primary/50 hover:bg-primary/10 hover:text-primary flex size-9 shrink-0 items-center justify-center rounded-md border transition-colors [&_svg]:size-4" />
 
         <button

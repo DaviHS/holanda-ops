@@ -95,7 +95,7 @@ export default function EmployeeRegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-zinc-950/5 p-4">
+    <div className="flex min-h-screen w-full items-center justify-center bg-zinc-950/5 px-4 py-8">
       <Card className="border-border w-full max-w-lg shadow-lg">
         <CardHeader className="space-y-1 text-center">
           <div className="bg-primary/10 border-primary/20 mx-auto mb-2 flex size-12 items-center justify-center rounded-md border">
@@ -111,7 +111,7 @@ export default function EmployeeRegisterPage() {
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div className="space-y-1.5">
               <Label htmlFor="name" className="text-xs font-medium">
                 Nome Completo *
@@ -121,7 +121,7 @@ export default function EmployeeRegisterPage() {
                 <Input
                   id="name"
                   placeholder="Seu nome completo"
-                  className="rounded-md pl-9 text-sm"
+                  className="h-10 rounded-md pl-9 text-sm sm:h-9"
                   {...register('name')}
                 />
               </div>
@@ -132,7 +132,7 @@ export default function EmployeeRegisterPage() {
               )}
             </div>
 
-            <div className="grid w-full grid-cols-2 gap-3">
+            <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="min-w-0 space-y-1.5">
                 <Label htmlFor="cpf" className="text-xs font-medium">
                   CPF *
@@ -142,7 +142,7 @@ export default function EmployeeRegisterPage() {
                   <Input
                     id="cpf"
                     placeholder="000.000.000-00"
-                    className="w-full rounded-md pl-9 text-sm"
+                    className="h-10 w-full rounded-md pl-9 text-sm sm:h-9"
                     inputMode="numeric"
                     maxLength={14}
                     {...register('cpf', {
@@ -170,14 +170,14 @@ export default function EmployeeRegisterPage() {
                   <Input
                     id="rg"
                     placeholder="00.000.000-0"
-                    className="w-full rounded-md pl-9 text-sm"
+                    className="h-10 w-full rounded-md pl-9 text-sm sm:h-9"
                     {...register('rg')}
                   />
                 </div>
               </div>
             </div>
 
-            <div className="grid w-full grid-cols-2 gap-3">
+            <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="min-w-0 space-y-1.5">
                 <Label htmlFor="pixKey" className="text-xs font-medium">
                   Chave PIX
@@ -185,7 +185,7 @@ export default function EmployeeRegisterPage() {
                 <Input
                   id="pixKey"
                   placeholder="CPF, E-mail ou Telefone"
-                  className="w-full rounded-md text-sm"
+                  className="h-10 w-full rounded-md text-sm sm:h-9"
                   {...register('pixKey')}
                 />
               </div>
@@ -199,7 +199,7 @@ export default function EmployeeRegisterPage() {
                   <Input
                     id="address"
                     placeholder="Rua, Nº, Bairro"
-                    className="w-full rounded-md pl-9 text-sm"
+                    className="h-10 w-full rounded-md pl-9 text-sm sm:h-9"
                     {...register('address')}
                   />
                 </div>
@@ -211,7 +211,7 @@ export default function EmployeeRegisterPage() {
                 Tamanhos para Uniforme
               </Label>
 
-              <div className="grid w-full grid-cols-3 gap-3">
+              <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-3">
                 <div className="min-w-0 space-y-1.5">
                   <Label className="flex items-center gap-1 truncate text-xs font-medium">
                     <Shirt className="text-muted-foreground size-3.5 shrink-0" />
@@ -226,7 +226,7 @@ export default function EmployeeRegisterPage() {
                       )
                     }
                   >
-                    <SelectTrigger className="w-full rounded-md text-sm">
+                    <SelectTrigger className="h-10 w-full rounded-md text-sm sm:h-9">
                       <SelectValue placeholder="Tamanho" />
                     </SelectTrigger>
                     <SelectContent>
@@ -249,7 +249,7 @@ export default function EmployeeRegisterPage() {
                   <Input
                     id="pantsSize"
                     placeholder="Ex: 42"
-                    className="w-full rounded-md text-sm"
+                    className="h-10 w-full rounded-md text-sm sm:h-9"
                     {...register('pantsSize')}
                   />
                 </div>
@@ -266,7 +266,7 @@ export default function EmployeeRegisterPage() {
                     id="shoeSize"
                     type="number"
                     placeholder="Ex: 40"
-                    className="w-full rounded-md text-sm"
+                    className="h-10 w-full rounded-md text-sm sm:h-9"
                     {...register('shoeSize', {
                       setValueAs: (v: string) =>
                         v === '' ? undefined : Number(v),

@@ -9,6 +9,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import {
   DropdownMenu,
@@ -20,7 +21,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { ChevronsUpDown, LogOut } from 'lucide-react';
+import { ChevronsUpDown, LogOut, UserRound } from 'lucide-react';
+import Link from 'next/link';
 import { NavMain } from './nav-main';
 import { signOut, useSession } from 'next-auth/react';
 
@@ -35,6 +37,7 @@ interface CustomUser {
 
 export function AppSidebar() {
   const { data: session } = useSession();
+  const { setOpenMobile } = useSidebar();
 
   const user = session?.user as CustomUser | undefined;
 
@@ -144,6 +147,14 @@ export function AppSidebar() {
                   </DropdownMenuLabel>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  render={<Link href="/profile" />}
+                  onClick={() => setOpenMobile(false)}
+                  className="cursor-pointer rounded-md"
+                >
+                  <UserRound className="mr-2 size-4" />
+                  Meu perfil
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={handleLogout}
                   className="text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer rounded-md"
