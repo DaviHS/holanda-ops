@@ -341,6 +341,7 @@ export const employeeRouter = createTRPCRouter({
           rg: input.rg ? input.rg.trim() : null,
           pixKey: input.pixKey ? input.pixKey.trim() : null,
           address: input.address ? input.address.trim() : null,
+          avatarUrl: input.avatarUrl ?? null,
           shirtSize: input.shirtSize,
           pantsSize: input.pantsSize ? input.pantsSize.trim() : null,
           shoeSize: input.shoeSize ?? null,

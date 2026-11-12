@@ -43,6 +43,7 @@ import { toast } from 'sonner';
 import { errorMessage, toastError } from '@/lib/toast';
 import { formatCpf } from '@/lib/formatters/cpf';
 import { api } from '@/trpc/react';
+import { EmployeeAvatarField } from '@/app/(app)/employees/_components/employee-avatar-field';
 import {
   publicEmployeeRegisterSchema,
   type PublicEmployeeRegisterValues,
@@ -55,10 +56,13 @@ export default function EmployeeRegisterPage() {
 
   const [openedAt] = useState(() => Date.now());
 
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
   const {
     register,
     handleSubmit,
     setValue,
+    watch,
     reset,
     formState: { errors, isSubmitting },
   } = useForm<PublicEmployeeRegisterValues>({
@@ -69,6 +73,7 @@ export default function EmployeeRegisterPage() {
       rg: '',
       pixKey: '',
       address: '',
+      avatarUrl: null,
       shirtSize: 'M',
       pantsSize: '',
     },
@@ -112,6 +117,18 @@ export default function EmployeeRegisterPage() {
 
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            <div className="flex flex-col items-center gap-1">
+              <EmployeeAvatarField
+                endpoint="registerAvatar"
+                value={watch('avatarUrl')}
+                onChange={(url) => setValue('avatarUrl', url)}
+                onUploadingChange={setUploadingAvatar}
+              />
+              <p className="text-muted-foreground text-[11px]">
+                Foto do rosto (opcional)
+              </p>
+            </div>
+
             <div className="space-y-1.5">
               <Label htmlFor="name" className="text-xs font-medium">
                 Nome Completo *
@@ -287,7 +304,9 @@ export default function EmployeeRegisterPage() {
 
             <Button
               type="submit"
-              disabled={isSubmitting || registerMutation.isPending}
+              disabled={
+                isSubmitting || registerMutation.isPending || uploadingAvatar
+              }
               className="mt-4 w-full rounded-md text-sm font-medium"
             >
               {isSubmitting || registerMutation.isPending ? (

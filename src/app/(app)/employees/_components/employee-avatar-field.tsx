@@ -37,6 +37,7 @@ interface EmployeeAvatarFieldProps {
 
   onUploadingChange?: (uploading: boolean) => void;
   disabled?: boolean;
+  endpoint?: 'employeeAvatar' | 'registerAvatar';
 }
 
 export function EmployeeAvatarField({
@@ -44,6 +45,7 @@ export function EmployeeAvatarField({
   onChange,
   onUploadingChange,
   disabled,
+  endpoint = 'employeeAvatar',
 }: EmployeeAvatarFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
@@ -53,7 +55,7 @@ export function EmployeeAvatarField({
     onUploadingChange?.(uploading);
   };
 
-  const { startUpload } = useUploadThing('employeeAvatar', {
+  const { startUpload } = useUploadThing(endpoint, {
     onClientUploadComplete: (files) => {
       const uploaded = files[0];
       const url = uploaded?.serverData?.url ?? uploaded?.ufsUrl;

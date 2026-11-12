@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { isValidCpf } from '@/lib/formatters/cpf';
+import { isUploadThingUrl } from '@/lib/uploadthing-url';
 
 export const shirtSizes = ['PP', 'P', 'M', 'G', 'GG', 'XGG'] as const;
 
@@ -14,6 +15,12 @@ export const publicEmployeeRegisterSchema = z.object({
   rg: z.string().optional(),
   pixKey: z.string().optional(),
   address: z.string().optional(),
+  avatarUrl: z
+    .string()
+    .max(500)
+    .refine(isUploadThingUrl, 'Foto inválida')
+    .nullable()
+    .optional(),
   shirtSize: z.enum(shirtSizes, {
     error: 'Selecione o tamanho da camiseta',
   }),
