@@ -12,7 +12,7 @@ export function usePermissions() {
   return {
     isLoading: isPending,
     isAdmin: data?.isAdmin ?? false,
-    /** Verdadeiro se o usuário tem ao menos UMA das permissões (ou se nenhuma foi exigida). */
+
     can: (...permissions: Permission[]) =>
       permissions.length === 0 ||
       permissions.some((permission) => granted.has(permission)),

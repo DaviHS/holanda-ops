@@ -7,28 +7,23 @@ import { editableRowProps, stopRowEvent } from '@/components/row-actions';
 import { cn } from '@/lib/utils';
 
 interface EntityCardProps {
-  /** Ícone dentro do círculo (use `initials` para mostrar iniciais no lugar). */
   icon?: ElementType<{ className?: string }>;
   initials?: string;
-  /** Foto: quando existe, aparece no lugar do ícone (que continua como alternativa). */
+
   imageUrl?: string | null;
   title: string;
   subtitle?: ReactNode;
-  /** Conteúdo antes do avatar (ex.: caixa de seleção). */
+
   leading?: ReactNode;
-  /** Clique no card (abre a edição). */
+
   onOpen?: () => void;
-  /** Menu de ações (RowActions), opcionalmente com um selo antes. Fica sempre dentro do card. */
+
   actions?: ReactNode;
-  /** Linha extra abaixo (selos, descrição). Só aparece quando houver conteúdo. */
+
   children?: ReactNode;
   className?: string;
 }
 
-/**
- * Card das listas no celular: uma linha compacta (avatar, texto, ações). A grade
- * `minmax(0,1fr) auto` corta o texto longo em vez de empurrar as ações para fora.
- */
 export function EntityCard({
   icon: Icon,
   initials,

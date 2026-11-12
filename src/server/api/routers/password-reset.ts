@@ -14,7 +14,6 @@ import {
 } from '@/server/password-reset';
 
 export const passwordResetRouter = createTRPCRouter({
-  /** Sempre responde sucesso, para não revelar quais e-mails existem. */
   request: publicProcedure
     .input(
       z.object({ email: z.string().trim().toLowerCase().email().max(255) }),

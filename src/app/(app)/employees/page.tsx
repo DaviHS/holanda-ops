@@ -51,14 +51,14 @@ export default function EmployeesPage() {
   const confirm = useConfirm();
   const [search, setSearch] = useState('');
   const [exportOpen, setExportOpen] = useState(false);
-  // Seleção para exportar: continua valendo enquanto se busca e filtra.
+
   const [selectMode, setSelectMode] = useState(false);
   const [pickedIds, setPickedIds] = useState<Set<string>>(new Set());
-  // Vem preenchido quando se chega por um atalho, ex.: /employees?turno=<id> (tela de turnos).
+
   const params = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  // Atalho da tela de turnos: /employees?editar=<id> abre o cadastro daquele funcionário.
+
   const editId = params.get('editar');
   const [shiftFilter, setShiftFilter] = useState(params.get('turno') ?? ALL);
   const [sectorFilter, setSectorFilter] = useState(params.get('setor') ?? ALL);
@@ -69,7 +69,6 @@ export default function EmployeesPage() {
   const { data: sectors = [] } = api.sector.list.useQuery();
   const { data: shifts = [] } = api.shift.list.useQuery();
 
-  // Turnos mostram a contagem de funcionários, então também precisam ser recarregados.
   const refresh = () =>
     Promise.all([
       utils.employee.list.invalidate(),
@@ -173,7 +172,6 @@ export default function EmployeesPage() {
     }
   };
 
-  // Aprovar abre o cadastro já como ativo: falta escolher setor (e turno) antes de salvar.
   const handleApprove = (item: Employee) =>
     dialog.openEdit({ ...item, status: 'active' });
 

@@ -18,7 +18,6 @@ import { toast } from 'sonner';
 import { toastError } from '@/lib/toast';
 import { PasswordInput } from '@/components/password-input';
 
-/** Só aceita caminhos internos, para não redirecionar para outro site. */
 function destinationAfterLogin(): string {
   const target = new URLSearchParams(window.location.search).get('callbackUrl');
   return target?.startsWith('/') && !target.startsWith('//') ? target : '/';
@@ -39,7 +38,6 @@ export default function SignInPage() {
 
   const [authError, setAuthError] = useState<string | null>(null);
 
-  // Veio redirecionado porque a conta foi inativada ou removida: limpa o cookie antigo.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('session') !== 'ended') return;

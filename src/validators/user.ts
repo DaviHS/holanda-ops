@@ -4,7 +4,7 @@ export const userStatuses = ['active', 'inactive', 'suspended'] as const;
 
 export const userSchema = z.object({
   email: z.string().trim().toLowerCase().email('E-mail inválido').max(255),
-  /** Vazio na criação = o usuário recebe um link por e-mail para criar a própria senha. */
+
   password: z
     .string()
     .min(6, 'A senha deve ter no mínimo 6 caracteres')

@@ -76,13 +76,12 @@ type EmployeeFormDialogProps = {
   sectors?: SectorItem[];
   shifts?: ShiftItem[];
   onSubmit: (data: EmployeeFormValues) => void | Promise<void>;
-  /** Só consulta: campos desabilitados e sem botão de salvar. */
+
   readOnly?: boolean;
 };
 
 type TabKey = 'pessoais' | 'operacional' | 'uniformes';
 
-/** Em qual aba cada campo fica (para levar o usuário até o erro). */
 const FIELD_TAB: Partial<Record<keyof EmployeeFormValues, TabKey>> = {
   name: 'pessoais',
   cpf: 'pessoais',
@@ -111,7 +110,7 @@ export function EmployeeFormDialog({
   const [openCombobox, setOpenCombobox] = useState(false);
   const [tab, setTab] = useState<TabKey>('pessoais');
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  // Fotos enviadas nesta abertura do diálogo e ainda não salvas
+
   const sessionUploads = useRef<string[]>([]);
   const discardUpload = api.employee.discardUpload.useMutation();
 
@@ -122,14 +121,12 @@ export function EmployeeFormDialog({
 
   const handleOpenChange = (next: boolean) => {
     if (!next) {
-      // Fechou sem salvar: as fotos novas viram lixo no UploadThing
       sessionUploads.current.forEach((url) => discardUpload.mutate({ url }));
       sessionUploads.current = [];
     }
     onOpenChange(next);
   };
 
-  // Sempre abre na primeira aba (ajuste de estado durante o render)
   const [lastOpen, setLastOpen] = useState(open);
   if (lastOpen !== open) {
     setLastOpen(open);
@@ -218,12 +215,10 @@ export function EmployeeFormDialog({
 
     try {
       await Promise.resolve().then(() => onSubmit(payload));
-      // Salvou: só a foto escolhida fica (as demais já foram descartadas)
+
       sessionUploads.current = [];
       onOpenChange(false);
-    } catch {
-      // o aviso de erro já é exibido pelo toast da mutation
-    }
+    } catch {}
   };
 
   const tabHasError = (key: TabKey) =>
@@ -231,7 +226,6 @@ export function EmployeeFormDialog({
       (field) => FIELD_TAB[field] === key,
     );
 
-  // Salvar com erro numa aba escondida: leva o usuário até a primeira aba com problema
   const handleInvalid = (invalid: typeof errors) => {
     const first = (Object.keys(invalid) as (keyof EmployeeFormValues)[])
       .map((field) => FIELD_TAB[field])
@@ -354,7 +348,6 @@ export function EmployeeFormDialog({
                 <EmployeeAvatarField
                   value={currentAvatar}
                   onChange={(url) => {
-                    // Foto enviada agora e substituída/removida antes de salvar: apaga
                     if (
                       currentAvatar &&
                       currentAvatar !== url &&

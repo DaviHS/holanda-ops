@@ -10,7 +10,6 @@ const permissionList = z
   .array(z.string().refine(isPermission, 'Permissão inválida'))
   .default([]);
 
-/** Cargo + as permissões que ele concede (salvos juntos, numa transação). */
 export const roleSaveSchema = roleSchema.extend({
   permissions: permissionList,
 });

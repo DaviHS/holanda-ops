@@ -45,7 +45,7 @@ export default function UsersPage() {
   const dialog = useEntityDialog<User>({ fromUrl: true });
   const confirm = useConfirm();
   const [search, setSearch] = useState('');
-  // Atalho da tela de cargos: /users?cargo=<id> já abre filtrada pelo cargo.
+
   const params = useSearchParams();
   const [roleFilter, setRoleFilter] = useState(params.get('cargo') ?? ALL);
   const [statusFilter, setStatusFilter] = useState(ALL);

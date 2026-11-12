@@ -15,7 +15,7 @@ import {
 type AppHeaderProps = {
   onLogout: () => void;
   homeUrl?: string;
-  /** Itens depois do ícone de início, ex.: ["Equipe e RH", "Funcionários"]. */
+
   trail?: string[];
 };
 

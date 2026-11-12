@@ -8,7 +8,6 @@ export const changePasswordSchema = z.object({
     .max(100),
 });
 
-/** Formulário: acrescenta a confirmação (que não vai para o servidor). */
 export const changePasswordFormSchema = changePasswordSchema
   .extend({ confirmPassword: z.string().min(1, 'Confirme a nova senha') })
   .refine((data) => data.newPassword === data.confirmPassword, {

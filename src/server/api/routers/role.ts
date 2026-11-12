@@ -18,8 +18,7 @@ export const roleRouter = createTRPCRouter({
     return ctx.db
       .select({
         ...getTableColumns(roles),
-        // Colunas escritas por extenso: numa consulta de uma tabela só o Drizzle omite o nome
-        // da tabela, e o "id" acabaria sendo o de outra tabela (contagem sempre 0).
+
         userCount: sql<number>`(
           select count(*)::int from users u
           where u.role_id = "roles"."id" and u.deleted_at is null
@@ -34,7 +33,6 @@ export const roleRouter = createTRPCRouter({
       .orderBy(roles.name);
   }),
 
-  /** Cria o cargo já com as permissões, tudo numa transação. */
   create: manageRoles.input(roleSaveSchema).mutation(async ({ ctx, input }) => {
     assertGrantable(input.permissions, ctx.access);
 

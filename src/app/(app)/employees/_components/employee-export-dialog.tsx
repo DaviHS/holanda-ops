@@ -126,11 +126,11 @@ const DEFAULT_KEYS = ['name', 'cpf', 'sectors', 'shift', 'status'];
 interface EmployeeExportDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Funcionários que estão na lista agora (com busca e filtros aplicados). */
+
   filtered: Employee[];
-  /** Todos os funcionários. */
+
   all: Employee[];
-  /** Os que a pessoa marcou na lista (podem estar fora do filtro atual). */
+
   picked: Employee[];
 }
 
@@ -145,7 +145,7 @@ export function EmployeeExportDialog({
     () => new Set(DEFAULT_KEYS),
   );
   type Scope = 'picked' | 'filtered' | 'all';
-  // null = automático: usa os marcados quando houver, senão a lista atual
+
   const [chosen, setChosen] = useState<Scope | null>(null);
   const [lastOpen, setLastOpen] = useState(open);
   if (lastOpen !== open) {

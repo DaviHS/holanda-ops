@@ -39,7 +39,7 @@ const {
 
         const { email, password } = parsedCredentials.data;
         const attempted = email.trim().toLowerCase();
-        // Só registramos falhas de contas que existem: e-mails inventados encheriam o histórico.
+
         const refused = (userId: string, reason: string) =>
           recordAudit({
             userId,
@@ -86,7 +86,6 @@ const {
           input: null,
         });
 
-        // Limpeza de fotos sem vínculo: não atrasa nem derruba o login
         void sweepOrphanUploads();
 
         return {

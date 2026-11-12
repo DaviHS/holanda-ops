@@ -7,7 +7,7 @@ import { employeeSectors, employees, sectors } from '@/server/db/schema';
 import { sectorSchema, sectorUpdateSchema } from '@/validators/sector';
 
 const manageSectors = can('sectors.manage');
-/** Mudar o setor de um funcionário vale para quem gerencia setores OU funcionários. */
+
 const assignSector = can('sectors.manage', 'employees.manage');
 
 export const sectorRouter = createTRPCRouter({
@@ -15,15 +15,14 @@ export const sectorRouter = createTRPCRouter({
     return ctx.db
       .select({
         ...getTableColumns(sectors),
-        // Colunas escritas por extenso: numa consulta de uma tabela só o Drizzle omite o nome
-        // da tabela, e o "id" acabaria sendo o de outra tabela (contagem sempre 0).
+
         employeeCount: sql<number>`(
           select count(*)::int
           from employee_sectors es
           join employees e on e.id = es.employee_id
           where es.sector_id = "sectors"."id" and e.deleted_at is null
         )`,
-        // Funcionários que ficariam sem nenhum setor se este fosse removido.
+
         soleCount: sql<number>`(
           select count(*)::int
           from employee_sectors es
@@ -76,7 +75,6 @@ export const sectorRouter = createTRPCRouter({
       return updatedSector;
     }),
 
-  /** Coloca o funcionário no setor (assigned = true) ou tira (assigned = false). */
   setEmployeeSector: assignSector
     .input(
       z.object({
@@ -128,7 +126,6 @@ export const sectorRouter = createTRPCRouter({
           );
       }
 
-      // Quantos setores o funcionário ainda tem (para avisar quando ficar sem nenhum).
       const [remaining] = await ctx.db
         .select({
           value: sql<number>`count(*)::int`,

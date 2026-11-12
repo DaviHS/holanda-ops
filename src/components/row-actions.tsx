@@ -13,20 +13,15 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 interface RowActionsProps {
-  /** Nome do registro, usado no texto lido por leitor de tela. */
   label: string;
   onEdit?: () => void;
   onDelete?: () => void;
-  /** Itens extras do menu, entre "Editar" e "Excluir". */
+
   children?: ReactNode;
-  /** Botão menor (8), para cards no celular. */
+
   compact?: boolean;
 }
 
-/**
- * Menu "Ações" padrão das listas (tabela e card): Editar, itens extras e Excluir.
- * Não aparece se não houver nenhuma ação.
- */
 export function RowActions({
   label,
   onEdit,
@@ -86,7 +81,6 @@ export function RowActions({
   );
 }
 
-/** Props para uma linha/card clicável que também abre com Enter pelo teclado. */
 export function editableRowProps(onEdit?: () => void) {
   return {
     onClick: () => onEdit?.(),
@@ -98,5 +92,4 @@ export function editableRowProps(onEdit?: () => void) {
   };
 }
 
-/** Impede que clique dentro de uma área (ex.: o menu de ações) acione a linha ou o card. */
 export const stopRowEvent = (event: MouseEvent) => event.stopPropagation();

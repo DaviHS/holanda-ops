@@ -1,14 +1,5 @@
-/**
- * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially useful
- * for Docker builds.
- */
 import './src/env.js';
 
-/**
- * Cabeçalhos de segurança. A CSP aqui só trava o que não depende de scripts da página
- * (enquadramento, <base>, <object>, destino de formulários); restringir `script-src` exigiria
- * nonce por requisição, por causa dos scripts embutidos do Next e do tema.
- */
 const securityHeaders = [
   {
     key: 'Content-Security-Policy',

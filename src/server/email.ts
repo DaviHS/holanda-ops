@@ -14,7 +14,6 @@ export const escapeHtml = (value: string) =>
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 
-/** Envia pelo Resend. Retorna false (sem lançar) se não configurado ou se falhar. */
 export async function sendEmail(email: Email): Promise<boolean> {
   const apiKey = process.env.RESEND_API_KEY?.trim();
   const from = process.env.EMAIL_FROM?.trim();

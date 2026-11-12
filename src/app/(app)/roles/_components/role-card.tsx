@@ -12,7 +12,7 @@ interface RoleCardProps {
   role: Role;
   onEdit?: (role: Role) => void;
   onDelete?: (role: Role) => void;
-  /** Abre a lista de usuários que têm este cargo. */
+
   onViewUsers?: (role: Role) => void;
 }
 

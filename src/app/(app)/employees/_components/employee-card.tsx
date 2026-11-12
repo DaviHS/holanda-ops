@@ -15,11 +15,11 @@ interface EmployeeCardProps {
   employee: Employee;
   onEdit?: (employee: Employee) => void;
   onDelete?: (employee: Employee) => void;
-  /** Abre os dados só para consulta (quem não pode editar). */
+
   onView?: (employee: Employee) => void;
-  /** Aprova um pré-cadastro (passa o status para ativo). */
+
   onApprove?: (employee: Employee) => void;
-  /** Modo de seleção: mostra a caixa e o clique no card marca/desmarca. */
+
   selectable?: boolean;
   selected?: boolean;
   onSelectedChange?: (employee: Employee, selected: boolean) => void;

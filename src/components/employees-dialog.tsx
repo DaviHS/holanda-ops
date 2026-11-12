@@ -35,28 +35,24 @@ interface EmployeesDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
-  /** Linha abaixo do título (horário, quantidade...). */
+
   description?: ReactNode;
   members: EmployeeRow[];
   isLoading?: boolean;
-  /** Quem pode ser adicionado. Sem esta lista não há campo de adicionar. */
+
   candidates?: EmployeeCandidate[];
   onAdd?: (employeeId: string) => void;
-  /** Sem esta função não há botão de remover. */
+
   onRemove?: (employeeId: string) => void;
   removeLabel?: string;
   busy?: boolean;
-  /** Pode abrir o cadastro do funcionário. */
+
   canOpenEmployee?: boolean;
-  /** Link da lista de funcionários já filtrada. */
+
   listHref?: string;
   emptyText?: string;
 }
 
-/**
- * Janela padrão com os funcionários de um agrupamento (turno, setor...):
- * ver, adicionar, remover e abrir o cadastro.
- */
 export function EmployeesDialog({
   open,
   onOpenChange,

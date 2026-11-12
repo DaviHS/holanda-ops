@@ -42,7 +42,6 @@ interface StatCardProps {
   highlight?: boolean;
 }
 
-/** Indicador do topo: o cartão inteiro leva à lista correspondente (quando a pessoa pode vê-la). */
 function StatCard({
   title,
   value,

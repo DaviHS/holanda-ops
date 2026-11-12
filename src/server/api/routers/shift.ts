@@ -7,17 +7,15 @@ import { employees, shifts } from '@/server/db/schema';
 import { shiftSchema, shiftUpdateSchema } from '@/validators/shift';
 
 const manageShifts = can('shifts.manage');
-/** Mudar o turno de um funcionário vale para quem gerencia turnos OU funcionários. */
+
 const assignShift = can('shifts.manage', 'employees.manage');
 
 export const shiftRouter = createTRPCRouter({
-  /** Ordenados pelo horário de entrada (sem horário ficam no fim) e, depois, pelo nome. */
   list: protectedProcedure.query(async ({ ctx }) => {
     return ctx.db
       .select({
         ...getTableColumns(shifts),
-        // Colunas escritas por extenso: numa consulta de uma tabela só o Drizzle omite o nome da
-        // tabela, e o "id" acabaria sendo o do funcionário (contagem sempre 0).
+
         employeeCount: sql<number>`(
           select count(*)::int from employees e
           where e.shift_id = "shifts"."id" and e.deleted_at is null
@@ -67,7 +65,6 @@ export const shiftRouter = createTRPCRouter({
       return updatedShift;
     }),
 
-  /** Coloca o funcionário no turno (ou tira, com shiftId nulo). */
   setEmployeeShift: assignShift
     .input(
       z.object({
@@ -90,7 +87,6 @@ export const shiftRouter = createTRPCRouter({
         }
       }
 
-      // Turno em que o funcionário estava (para avisar quando ele é movido).
       const [before] = await ctx.db
         .select({ shiftId: employees.shiftId, shiftName: shifts.name })
         .from(employees)

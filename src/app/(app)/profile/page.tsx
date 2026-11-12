@@ -56,9 +56,9 @@ export default function ProfilePage() {
     currentPassword,
     newPassword,
   }: ChangePasswordFormValues) =>
-    changePassword.mutateAsync({ currentPassword, newPassword }).catch(() => {
-      // o aviso de erro já é exibido pelo toast da mutation
-    });
+    changePassword
+      .mutateAsync({ currentPassword, newPassword })
+      .catch(() => undefined);
 
   const errors = form.formState.errors;
 

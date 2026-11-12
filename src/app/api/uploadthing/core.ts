@@ -6,13 +6,12 @@ import { loadAccess } from '@/server/access';
 const f = createUploadthing();
 
 export const uploadRouter = {
-  /** Foto de funcionário: uma imagem de até 4 MB, só para quem gerencia funcionários. */
   employeeAvatar: f({
     image: { maxFileSize: '4MB', maxFileCount: 1 },
   })
     .middleware(async () => {
       const session = await auth();
-      // UploadThingError é o jeito documentado de recusar um envio
+
       // eslint-disable-next-line @typescript-eslint/only-throw-error
       if (!session?.user) throw new UploadThingError('Faça login para enviar.');
 

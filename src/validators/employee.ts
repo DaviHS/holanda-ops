@@ -9,7 +9,6 @@ const uniformSchema = z.object({
   jacket: z.boolean().optional(),
 });
 
-/** Campos sem valores padrão: a base da atualização parcial (padrão num `update` zeraria dados). */
 const employeeBase = z.object({
   userId: z.string().uuid().optional().nullable(),
   shiftId: z.string().uuid().optional().nullable(),

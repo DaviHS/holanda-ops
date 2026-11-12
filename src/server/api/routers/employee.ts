@@ -21,7 +21,6 @@ import {
 const viewEmployees = can('employees.view', 'employees.manage', 'users.manage');
 const manageEmployees = can('employees.manage');
 
-/** Os setores e o turno informados precisam existir (e não estar removidos). */
 async function assertRefsExist(
   db: Pick<typeof import('@/server/db').db, 'select'>,
   sectorIds: string[] | undefined,
@@ -56,7 +55,6 @@ async function assertRefsExist(
 }
 
 export const employeeRouter = createTRPCRouter({
-  /** Opcionalmente só os funcionários de um turno ou de um setor. */
   list: viewEmployees
     .input(
       z
@@ -163,7 +161,6 @@ export const employeeRouter = createTRPCRouter({
       const { id, sectorIds, ...employeeData } = input;
       await assertRefsExist(ctx.db, sectorIds, employeeData.shiftId);
 
-      // Estado anterior: para registrar a aprovação de um pré-cadastro e apagar a foto trocada.
       const [before] = await ctx.db
         .select({ status: employees.status, avatarUrl: employees.avatarUrl })
         .from(employees)
@@ -225,7 +222,6 @@ export const employeeRouter = createTRPCRouter({
       return saved;
     }),
 
-  /** Registra no histórico que alguém exportou ou copiou dados dos funcionários. */
   logExport: manageEmployees
     .input(
       z.object({
@@ -287,7 +283,6 @@ export const employeeRouter = createTRPCRouter({
       }
 
       const removed = await ctx.db.transaction(async (tx) => {
-        // Sem o funcionário, a conta de acesso dele deixa de valer.
         if (linked) {
           await tx
             .update(users)
@@ -309,16 +304,13 @@ export const employeeRouter = createTRPCRouter({
         return softDeletedEmployee ?? null;
       });
 
-      // A foto não serve mais: sai também do UploadThing.
       if (removed) await deleteUploadedFile(existing.avatarUrl);
       return removed;
     }),
 
-  /** Apaga do UploadThing uma foto enviada e não salva (cancelada ou trocada). */
   discardUpload: manageEmployees
     .input(z.object({ url: z.string().max(500) }))
     .mutation(async ({ ctx, input }) => {
-      // Só apaga se nenhum funcionário usa esse arquivo.
       const inUse = await ctx.db.query.employees.findFirst({
         where: eq(employees.avatarUrl, input.url),
         columns: { id: true },
@@ -330,21 +322,17 @@ export const employeeRouter = createTRPCRouter({
   publicRegister: publicProcedure
     .input(publicEmployeeRegisterSchema)
     .mutation(async ({ ctx, input }) => {
-      // Robôs: respondemos como se tivesse dado certo, sem gravar nada.
       const tooFast =
         typeof input.openedAt === 'number' &&
         Date.now() - input.openedAt < MIN_REGISTER_FILL_MS;
       if (input.website || tooFast) return { success: true as const };
 
-      // 1. Validar se o CPF já está cadastrado
       const existingEmployee = await ctx.db.query.employees.findFirst({
         where: and(eq(employees.cpf, input.cpf), isNull(employees.deletedAt)),
       });
 
-      // Mesma resposta de sucesso: a tela não pode servir para descobrir quais CPFs existem.
       if (existingEmployee) return { success: true as const };
 
-      // 2. Criar o funcionário no banco com status 'pending'
       const [newEmployee] = await ctx.db
         .insert(employees)
         .values({

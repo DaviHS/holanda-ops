@@ -17,7 +17,6 @@ export default async function AppLayoutWrapper({
     redirect('/sign-in');
   }
 
-  // O cookie de sessão dura 7 dias; aqui confirmamos que a conta ainda está ativa.
   const access = await loadAccess(session.user.id);
   if (!access.active) {
     redirect('/sign-in?session=ended');

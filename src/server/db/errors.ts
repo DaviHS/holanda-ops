@@ -1,4 +1,3 @@
-/** Mensagens para cada índice único do banco. */
 const UNIQUE_MESSAGES: Record<string, string> = {
   users_email_active_uniq: 'Este e-mail já está cadastrado no sistema.',
   employees_cpf_active_uniq:
@@ -16,7 +15,6 @@ interface PgError {
   cause?: unknown;
 }
 
-/** Se o erro (ou a causa dele) for violação de unicidade do Postgres, devolve a mensagem em português. */
 export function uniqueViolationMessage(error: unknown): string | null {
   let current: unknown = error;
   for (

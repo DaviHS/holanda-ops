@@ -96,9 +96,7 @@ export function ShiftFormDialog({
     try {
       await actionPromise;
       onOpenChange(false);
-    } catch {
-      // o aviso de erro já é exibido pelo toast da mutation
-    }
+    } catch {}
   };
 
   return (

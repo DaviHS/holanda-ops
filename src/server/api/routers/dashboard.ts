@@ -29,7 +29,6 @@ export const dashboardRouter = createTRPCRouter({
       .from(shifts)
       .where(isNull(shifts.deletedAt));
 
-    // Uniformes e turnos só consideram quem está em atividade.
     const shirtRows = await ctx.db
       .select({ size: employees.shirtSize, total: count() })
       .from(employees)
@@ -51,7 +50,6 @@ export const dashboardRouter = createTRPCRouter({
       .groupBy(shifts.name)
       .orderBy(desc(count()), shifts.name);
 
-    // Pré-cadastros aguardando aprovação (os mais antigos primeiro).
     const pendingEmployees = await ctx.db
       .select({
         id: employees.id,
@@ -63,7 +61,6 @@ export const dashboardRouter = createTRPCRouter({
       .orderBy(employees.createdAt)
       .limit(5);
 
-    // Colunas escritas por extenso: numa consulta de uma tabela só o Drizzle omite o nome da tabela.
     const recentEmployees = await ctx.db
       .select({
         id: employees.id,

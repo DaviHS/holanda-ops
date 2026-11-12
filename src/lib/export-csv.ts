@@ -1,12 +1,8 @@
-/** Evita que o Excel execute como fórmula um texto que começa com = + - @. */
 const safe = (value: string) =>
   /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
 
 const cell = (value: string) => `"${safe(value).replace(/"/g, '""')}"`;
 
-/**
- * CSV para o Excel em português: separador ";", UTF-8 com BOM (acentos certos) e quebra CRLF.
- */
 export function toCsv(headers: string[], rows: string[][]): string {
   const lines = [headers, ...rows].map((row) => row.map(cell).join(';'));
   return `﻿${lines.join('\r\n')}`;
@@ -25,10 +21,6 @@ export function downloadCsv(filename: string, content: string) {
   URL.revokeObjectURL(url);
 }
 
-/**
- * Texto para colar numa conversa: um bloco por pessoa, a primeira coluna como título e
- * "Rótulo: valor" nas demais (vazios são omitidos).
- */
 export function toReadableText(headers: string[], rows: string[][]): string {
   return rows
     .map((row) => {

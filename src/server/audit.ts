@@ -13,7 +13,7 @@ export const AUDIT_RETENTION_MONTHS = 24;
 const PURGE_CHANCE = 0.02;
 
 const SECRET_KEY = /password|senha|token|secret|hash/i;
-/** Dados pessoais: não ficam guardados no histórico. */
+
 const PERSONAL_KEY = /^(cpf|rg|pixKey|address)$/i;
 const MAX_STRING = 200;
 const MAX_ITEMS = 20;
@@ -70,10 +70,6 @@ export async function recordAudit(entry: {
   }
 }
 
-/**
- * Nome legível do registro afetado, buscado ANTES da ação (assim exclusões
- * também ficam identificadas). Devolve null se não achar.
- */
 export async function resolveAuditTarget(
   path: string,
   input: Record<string, unknown>,
@@ -82,7 +78,7 @@ export async function resolveAuditTarget(
   if (typeof direct === 'string') return direct;
 
   const area = path.split('.')[0];
-  // Ex.: shift.setEmployeeShift e sector.setEmployeeSector identificam o funcionário afetado.
+
   if (path.includes('.setEmployee') && typeof input.employeeId === 'string') {
     const [row] = await db
       .select({ v: employees.name })

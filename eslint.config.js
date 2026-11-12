@@ -30,7 +30,7 @@ export default tseslint.config(
         { argsIgnorePattern: '^_' },
       ],
       '@typescript-eslint/require-await': 'off',
-      // `||` em strings é intencional: "" deve cair no fallback (ex.: campos de formulário vazios)
+      
       '@typescript-eslint/prefer-nullish-coalescing': [
         'error',
         { ignorePrimitives: { string: true } },

@@ -7,7 +7,6 @@ import { users } from '@/server/db/schema';
 import { changePasswordSchema } from '@/validators/profile';
 
 export const profileRouter = createTRPCRouter({
-  /** Dados da própria conta (qualquer usuário logado). */
   get: protectedProcedure.query(async ({ ctx }) => {
     const user = await ctx.db.query.users.findFirst({
       where: and(eq(users.id, ctx.session.user.id), isNull(users.deletedAt)),
@@ -46,7 +45,7 @@ export const profileRouter = createTRPCRouter({
         .update(users)
         .set({
           passwordHash: await hash(input.newPassword, 10),
-          // um link de redefinição pendente deixa de valer
+
           resetToken: null,
           resetTokenExpires: null,
           updatedAt: new Date(),

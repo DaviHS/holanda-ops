@@ -9,13 +9,12 @@ type Sector = RouterOutputs['sector']['list'][number];
 interface SectorEmployeesDialogProps {
   sector: Sector | null;
   onOpenChange: (open: boolean) => void;
-  /** Pode colocar e tirar funcionários deste setor. */
+
   canAssign?: boolean;
-  /** Pode abrir a edição de um funcionário. */
+
   canOpenEmployee?: boolean;
 }
 
-/** Funcionários de um setor: ver, adicionar, remover e abrir o cadastro. */
 export function SectorEmployeesDialog({
   sector,
   onOpenChange,
@@ -24,12 +23,11 @@ export function SectorEmployeesDialog({
 }: SectorEmployeesDialogProps) {
   const utils = api.useUtils();
 
-  // Só os funcionários deste setor (o filtro é feito no servidor).
   const { data: members = [], isLoading } = api.employee.list.useQuery(
     { sectorId: sector?.id },
     { enabled: !!sector },
   );
-  // Candidatos a entrar no setor: só carrega para quem pode adicionar.
+
   const { data: everyone = [] } = api.employee.list.useQuery(undefined, {
     enabled: !!sector && canAssign,
   });

@@ -58,12 +58,12 @@ export function UserFormDialog({
   const isEditing = !!editing;
   const { data: session } = useSession();
   const { isAdmin: actorIsAdmin } = usePermissions();
-  // Na própria conta não dá para mudar status, cargo nem nível de administrador.
+
   const isSelf = !!editing && editing.id === session?.user?.id;
 
   const { data: roles = [] } = api.role.list.useQuery();
   const { data: allEmployees = [] } = api.employee.list.useQuery();
-  // Ao criar, só aparecem funcionários que ainda não têm acesso.
+
   const employees = allEmployees.filter(
     (emp) => !emp.userId || emp.id === editing?.employee?.id,
   );
@@ -112,9 +112,7 @@ export function UserFormDialog({
     try {
       await onSubmit(data);
       onOpenChange(false);
-    } catch {
-      // o aviso de erro já é exibido pelo toast da mutation
-    }
+    } catch {}
   };
 
   return (

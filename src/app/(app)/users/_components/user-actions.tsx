@@ -11,7 +11,7 @@ export interface UserActionHandlers {
   onEdit?: (user: User) => void;
   onSendReset?: (user: User) => void;
   onDelete?: (user: User) => void;
-  /** Id do usuário logado: a própria conta não pode ser excluída. */
+
   currentUserId?: string;
   compact?: boolean;
 }

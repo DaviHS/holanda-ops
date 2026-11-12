@@ -9,7 +9,6 @@ import { useUploadThing } from '@/lib/uploadthing';
 
 const MAX_SIDE = 1024;
 
-/** Reduz a foto (celulares tiram fotos de vários MB) e a converte em JPEG leve. */
 async function shrinkImage(file: File): Promise<File> {
   try {
     const bitmap = await createImageBitmap(file, {
@@ -35,7 +34,7 @@ async function shrinkImage(file: File): Promise<File> {
 interface EmployeeAvatarFieldProps {
   value: string | null | undefined;
   onChange: (url: string | null) => void;
-  /** Avisa se há envio em andamento (para segurar o botão de salvar). */
+
   onUploadingChange?: (uploading: boolean) => void;
   disabled?: boolean;
 }

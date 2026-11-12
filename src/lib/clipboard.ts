@@ -1,13 +1,10 @@
-/** Copia o texto. Usa a API moderna e, sem ela (http, navegador antigo), um campo temporário. */
 export async function copyText(text: string): Promise<boolean> {
   try {
     if (navigator.clipboard && window.isSecureContext) {
       await navigator.clipboard.writeText(text);
       return true;
     }
-  } catch {
-    // cai no método alternativo
-  }
+  } catch {}
   try {
     const area = document.createElement('textarea');
     area.value = text;

@@ -9,7 +9,6 @@ export function UserStatusBadge({ status }: { status: string }) {
 
 const ADMIN_ROLE_NAMES = new Set(['admin', 'administrador']);
 
-/** O selo some quando o próprio cargo já se chama admin/administrador (evita repetir). */
 export function UserAdminBadge({
   isAdmin,
   roleName,

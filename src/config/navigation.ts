@@ -16,7 +16,7 @@ export interface NavLink {
   title: string;
   href: string;
   icon: LucideIcon;
-  /** Aparece se o usuário tiver ao menos UMA destas permissões. Sem valor = livre. */
+
   permissions?: Permission[];
 }
 
@@ -95,7 +95,6 @@ type CanFn = (...permissions: Permission[]) => boolean;
 export const isLinkAllowed = (link: NavLink, can: CanFn) =>
   can(...(link.permissions ?? []));
 
-/** Remove links sem permissão e grupos/seções que ficaram vazios. */
 export function filterNavigation(entries: NavEntry[], can: CanFn): NavEntry[] {
   const allowed: NavEntry[] = [];
   for (const entry of entries) {
@@ -117,13 +116,11 @@ export function filterNavigation(entries: NavEntry[], can: CanFn): NavEntry[] {
   });
 }
 
-/** "/" só é ativo na raiz; os demais ativam também nas subrotas. */
 export const isLinkActive = (pathname: string, href: string) =>
   href === '/'
     ? pathname === '/'
     : pathname === href || pathname.startsWith(`${href}/`);
 
-/** Trilha do breadcrumb para a rota atual, ex.: "/employees" -> ["Equipe e RH", "Funcionários"]. */
 export function getBreadcrumb(pathname: string): string[] {
   if (pathname === '/profile') return ['Meu perfil'];
   for (const entry of NAVIGATION) {

@@ -12,7 +12,7 @@ interface SectorCardProps {
   sector: Sector;
   onEdit?: (sector: Sector) => void;
   onDelete?: (sector: Sector) => void;
-  /** Abre a janela com os funcionários do setor. */
+
   onViewEmployees?: (sector: Sector) => void;
 }
 

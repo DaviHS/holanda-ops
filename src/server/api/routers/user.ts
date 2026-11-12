@@ -17,7 +17,6 @@ import { employees } from '@/server/db/schema/employees';
 
 const manageUsers = can('users.manage');
 
-/** Nunca devolve o hash da senha nem o token de redefinição. */
 const SAFE_COLUMNS = {
   passwordHash: false,
   resetToken: false,
@@ -35,10 +34,6 @@ function assertCanTouch(target: { isAdmin: boolean }, actor: Access) {
   }
 }
 
-/**
- * O cargo precisa existir e, para quem não é administrador, não pode ter permissões
- * que o próprio usuário não tem (senão ele daria a outra pessoa mais poder do que possui).
- */
 async function assertCanAssignRole(roleId: string, actor: Access) {
   const [role] = await db
     .select({ id: roles.id })
@@ -68,7 +63,6 @@ async function assertCanAssignRole(roleId: string, actor: Access) {
   }
 }
 
-/** Garante que, depois da mudança, ainda reste outro administrador ativo. */
 async function assertAnotherActiveAdmin(excludeUserId: string) {
   const [row] = await db
     .select({ value: count() })
@@ -142,7 +136,6 @@ export const userRouter = createTRPCRouter({
       });
     }
 
-    // Sem senha informada: gera uma aleatória (ninguém conhece) e envia o link de criação.
     const sendLink = !input.password;
     const passwordHash = await hash(
       input.password || randomBytes(24).toString('base64url'),
@@ -309,7 +302,6 @@ export const userRouter = createTRPCRouter({
       });
     }),
 
-  /** Envia ao usuário um link para criar uma nova senha (o administrador nunca vê a senha). */
   sendPasswordReset: manageUsers
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {

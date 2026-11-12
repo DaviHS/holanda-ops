@@ -32,10 +32,6 @@ function resetEmail(link: string) {
   return { subject: 'Redefinição de senha', text, html };
 }
 
-/**
- * Gera um token novo (guardando só o hash), e envia o link por e-mail.
- * Devolve false se o e-mail não pôde ser enviado ou se a URL do app não está configurada.
- */
 export async function sendPasswordResetLink(user: {
   id: string;
   email: string;

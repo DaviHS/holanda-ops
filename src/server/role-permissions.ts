@@ -7,7 +7,6 @@ import { isPermission, type Permission } from '@/lib/permissions';
 
 type Writer = Pick<typeof db, 'delete' | 'insert'>;
 
-/** Quem não é administrador só concede permissões que ele mesmo possui. */
 export function assertGrantable(permissions: string[], actor: Access) {
   if (actor.isAdmin) return;
   const excess = permissions.some(
@@ -22,10 +21,6 @@ export function assertGrantable(permissions: string[], actor: Access) {
   }
 }
 
-/**
- * Evita que alguém (que não é administrador) se tranque para fora: no cargo do próprio
- * usuário não dá para retirar a permissão de gerenciar cargos.
- */
 export async function assertNoSelfLockout(
   roleId: string,
   permissions: string[],
@@ -47,7 +42,6 @@ export async function assertNoSelfLockout(
   }
 }
 
-/** Troca todas as permissões do cargo pelas informadas (use dentro de uma transação). */
 export async function replaceRolePermissions(
   tx: Writer,
   roleId: string,

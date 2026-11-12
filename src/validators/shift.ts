@@ -7,7 +7,6 @@ const shiftBase = z.object({
   description: z.string().optional().nullable(),
 });
 
-/** Entrada e saída vêm juntas ou nenhuma das duas. Turno que vira a noite (22:00–06:00) é válido. */
 const hasBothOrNone = (data: {
   startTime?: string | null;
   endTime?: string | null;

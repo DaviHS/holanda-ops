@@ -29,9 +29,9 @@ interface RoleFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   editing?: Role | null;
-  /** Permissões atuais do cargo em edição. */
+
   permissions?: Permission[];
-  /** As permissões do cargo já chegaram do servidor (sem isso, salvar apagaria tudo). */
+
   permissionsReady?: boolean;
   onSubmit: (data: RoleFormValues, permissions: Permission[]) => Promise<void>;
 }
@@ -49,7 +49,6 @@ export function RoleFormDialog({
     () => new Set(permissions),
   );
 
-  // Recarrega as permissões ao abrir o diálogo ou trocar o cargo (ajuste de estado durante o render)
   const permissionsKey = permissions.join(',');
   const [lastKey, setLastKey] = useState({ open, editing, permissionsKey });
   if (
@@ -98,9 +97,7 @@ export function RoleFormDialog({
     try {
       await onSubmit(payload, [...granted]);
       onOpenChange(false);
-    } catch {
-      // o aviso de erro já é exibido pelo toast da mutation
-    }
+    } catch {}
   };
 
   return (

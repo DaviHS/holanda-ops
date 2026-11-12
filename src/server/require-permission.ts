@@ -4,7 +4,6 @@ import { auth } from '@/server/auth';
 import { loadAccess } from '@/server/access';
 import type { Permission } from '@/lib/permissions';
 
-/** Verdadeiro se o usuário logado tem ao menos UMA das permissões informadas. */
 export async function hasPermission(
   ...permissions: [Permission, ...Permission[]]
 ) {

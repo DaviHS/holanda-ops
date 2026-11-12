@@ -1,7 +1,3 @@
-// Marca como já aplicadas, no controle do Drizzle, as migrações de drizzle/ em um banco que
-// já tem as tabelas (criadas antes por `db:push` e pelos SQLs de scripts/sql). Rode UMA vez:
-//   npm run db:baseline
-// Em um banco novo NÃO rode isto: use `npm run db:migrate`.
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import pg from 'pg';

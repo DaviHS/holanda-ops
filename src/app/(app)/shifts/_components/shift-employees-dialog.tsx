@@ -10,13 +10,12 @@ type Shift = RouterOutputs['shift']['list'][number];
 interface ShiftEmployeesDialogProps {
   shift: Shift | null;
   onOpenChange: (open: boolean) => void;
-  /** Pode colocar e tirar funcionários deste turno. */
+
   canAssign?: boolean;
-  /** Pode abrir a edição de um funcionário. */
+
   canOpenEmployee?: boolean;
 }
 
-/** Funcionários de um turno: ver, adicionar, remover e abrir o cadastro. */
 export function ShiftEmployeesDialog({
   shift,
   onOpenChange,
@@ -25,12 +24,11 @@ export function ShiftEmployeesDialog({
 }: ShiftEmployeesDialogProps) {
   const utils = api.useUtils();
 
-  // Só os funcionários deste turno (o filtro é feito no servidor).
   const { data: members = [], isLoading } = api.employee.list.useQuery(
     { shiftId: shift?.id },
     { enabled: !!shift },
   );
-  // Candidatos a entrar no turno: só carrega para quem pode adicionar.
+
   const { data: everyone = [] } = api.employee.list.useQuery(undefined, {
     enabled: !!shift && canAssign,
   });

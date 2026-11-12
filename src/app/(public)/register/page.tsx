@@ -52,7 +52,7 @@ import {
 export default function EmployeeRegisterPage() {
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
   const registerMutation = api.employee.publicRegister.useMutation();
-  // Anti-robô: momento em que a tela abriu (marcado ao montar)
+
   const [openedAt] = useState(() => Date.now());
 
   const {
@@ -112,7 +112,6 @@ export default function EmployeeRegisterPage() {
 
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* Nome Completo */}
             <div className="space-y-1.5">
               <Label htmlFor="name" className="text-xs font-medium">
                 Nome Completo *
@@ -133,7 +132,6 @@ export default function EmployeeRegisterPage() {
               )}
             </div>
 
-            {/* CPF e RG - 2 colunas de largura igual */}
             <div className="grid w-full grid-cols-2 gap-3">
               <div className="min-w-0 space-y-1.5">
                 <Label htmlFor="cpf" className="text-xs font-medium">
@@ -179,7 +177,6 @@ export default function EmployeeRegisterPage() {
               </div>
             </div>
 
-            {/* Chave PIX e Endereço - 2 colunas de largura igual */}
             <div className="grid w-full grid-cols-2 gap-3">
               <div className="min-w-0 space-y-1.5">
                 <Label htmlFor="pixKey" className="text-xs font-medium">
@@ -209,13 +206,11 @@ export default function EmployeeRegisterPage() {
               </div>
             </div>
 
-            {/* Informações de Roupa e Uniforme */}
             <div className="border-border space-y-3 border-t pt-2">
               <Label className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
                 Tamanhos para Uniforme
               </Label>
 
-              {/* 3 colunas dividindo o espaço igualmente (1/3 cada) */}
               <div className="grid w-full grid-cols-3 gap-3">
                 <div className="min-w-0 space-y-1.5">
                   <Label className="flex items-center gap-1 truncate text-xs font-medium">
@@ -281,7 +276,6 @@ export default function EmployeeRegisterPage() {
               </div>
             </div>
 
-            {/* Armadilha anti-robô: escondido de pessoas e do teclado */}
             <input
               type="text"
               tabIndex={-1}
@@ -309,7 +303,6 @@ export default function EmployeeRegisterPage() {
         </CardContent>
       </Card>
 
-      {/* Modal / Diálogo de Alerta de Sucesso */}
       <Dialog open={isSuccessOpen} onOpenChange={setIsSuccessOpen}>
         <DialogContent className="text-center sm:max-w-md">
           <DialogHeader className="flex flex-col items-center justify-center pt-4">

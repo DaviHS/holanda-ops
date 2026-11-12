@@ -3,10 +3,6 @@
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
-/**
- * O ícone troca só por CSS (classe `dark`), então o HTML do servidor e o do navegador
- * são idênticos e não há erro de hidratação.
- */
 export function ThemeToggle({ className }: { className?: string }) {
   const { resolvedTheme, setTheme } = useTheme();
 

@@ -72,7 +72,6 @@ const plain = (value: string) =>
     .replace(/\p{Diacritic}/gu, '')
     .toLowerCase();
 
-/** Ações cujo texto exibido (ou nome da área) contém o termo digitado. */
 export function actionsMatching(term: string): string[] {
   const needle = plain(term);
   if (!needle) return [];

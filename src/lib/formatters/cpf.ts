@@ -1,7 +1,5 @@
-/** Só os dígitos do CPF. */
 export const onlyDigits = (value: string) => value.replace(/\D/g, '');
 
-/** Máscara progressiva: 000.000.000-00 (aceita CPF incompleto enquanto se digita). */
 export function formatCpf(value: string | null | undefined): string {
   const digits = onlyDigits(value ?? '').slice(0, 11);
   return digits
@@ -10,7 +8,6 @@ export function formatCpf(value: string | null | undefined): string {
     .replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/, '$1.$2.$3-$4');
 }
 
-/** Confere o tamanho, os dígitos repetidos e os dois dígitos verificadores. */
 export function isValidCpf(value: string): boolean {
   const cpf = onlyDigits(value);
   if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;

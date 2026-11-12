@@ -10,7 +10,6 @@ function keyFromUrl(url: string) {
   return new URL(url).pathname.split('/').filter(Boolean).pop();
 }
 
-/** Apaga do UploadThing o arquivo de um endereço antigo. Falhar aqui nunca quebra a ação principal. */
 export async function deleteUploadedFile(url: string | null | undefined) {
   if (!url || !isUploadThingUrl(url)) return;
   const key = keyFromUrl(url);
@@ -22,16 +21,11 @@ export async function deleteUploadedFile(url: string | null | undefined) {
   }
 }
 
-// Arquivos recém-enviados ainda podem estar num cadastro aberto: só mexe nos mais antigos.
 const ORPHAN_MIN_AGE_MS = 60 * 60 * 1000;
-// Evita varrer o UploadThing a cada login quando várias pessoas entram juntas.
+
 const SWEEP_EVERY_MS = 10 * 60 * 1000;
 let lastSweep = 0;
 
-/**
- * Apaga do UploadThing as imagens que nenhum funcionário usa.
- * Chamada no login, sem esperar; qualquer falha é só registrada no log.
- */
 export async function sweepOrphanUploads() {
   const now = Date.now();
   if (now - lastSweep < SWEEP_EVERY_MS) return;

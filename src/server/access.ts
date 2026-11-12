@@ -4,7 +4,6 @@ import { rolePermissions, roles, users } from '@/server/db/schema';
 import { isPermission, PERMISSIONS, type Permission } from '@/lib/permissions';
 
 export interface Access {
-  /** Usuário existe, não foi removido e está com status ativo. */
   active: boolean;
   isAdmin: boolean;
   permissions: Set<Permission>;
