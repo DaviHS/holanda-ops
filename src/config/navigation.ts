@@ -132,7 +132,7 @@ export function getBreadcrumb(pathname: string): string[] {
         isLinkActive(pathname, link.href),
       );
       if (child) return [entry.title, child.title];
-    } else if (entry.href !== '/' && isLinkActive(pathname, entry.href)) {
+    } else if (isLinkActive(pathname, entry.href)) {
       return [entry.title];
     }
   }

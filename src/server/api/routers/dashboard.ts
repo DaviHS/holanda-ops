@@ -1,33 +1,44 @@
-import { and, count, desc, eq, isNull } from 'drizzle-orm';
+import { and, count, desc, eq, isNull, ne, sql } from 'drizzle-orm';
 import { can, createTRPCRouter } from '@/server/api/trpc';
 import { employees, sectors, shifts } from '@/server/db/schema';
 
 const viewDashboard = can('employees.view', 'employees.manage');
 
+const SHIRT_SIZES = ['PP', 'P', 'M', 'G', 'GG', 'XGG'] as const;
+
 export const dashboardRouter = createTRPCRouter({
   getStats: viewDashboard.query(async ({ ctx }) => {
-    const activeEmployeeFilter = isNull(employees.deletedAt);
+    const notDeleted = isNull(employees.deletedAt);
+    const isActive = and(notDeleted, eq(employees.status, 'active'));
 
-    const [totalEmployees] = await ctx.db
-      .select({ count: count() })
+    const byStatusRows = await ctx.db
+      .select({ status: employees.status, total: count() })
       .from(employees)
-      .where(activeEmployeeFilter);
-
-    const [activeEmployees] = await ctx.db
-      .select({ count: count() })
-      .from(employees)
-      .where(and(activeEmployeeFilter, eq(employees.status, 'active')));
+      .where(notDeleted)
+      .groupBy(employees.status);
+    const byStatus = { active: 0, pending: 0, suspended: 0, inactive: 0 };
+    for (const row of byStatusRows) byStatus[row.status] = row.total;
 
     const [totalSectors] = await ctx.db
       .select({ count: count() })
       .from(sectors)
       .where(isNull(sectors.deletedAt));
 
-    const shirtSizesDistribution = await ctx.db
+    const [totalShifts] = await ctx.db
+      .select({ count: count() })
+      .from(shifts)
+      .where(isNull(shifts.deletedAt));
+
+    // Uniformes e turnos só consideram quem está em atividade.
+    const shirtRows = await ctx.db
       .select({ size: employees.shirtSize, total: count() })
       .from(employees)
-      .where(activeEmployeeFilter)
+      .where(isActive)
       .groupBy(employees.shirtSize);
+    const shirtSizesDistribution = SHIRT_SIZES.map((size) => ({
+      size,
+      total: shirtRows.find((row) => row.size === size)?.total ?? 0,
+    }));
 
     const shiftDistribution = await ctx.db
       .select({ shift: shifts.name, total: count() })
@@ -36,29 +47,46 @@ export const dashboardRouter = createTRPCRouter({
         shifts,
         and(eq(employees.shiftId, shifts.id), isNull(shifts.deletedAt)),
       )
-      .where(activeEmployeeFilter)
+      .where(isActive)
       .groupBy(shifts.name)
       .orderBy(desc(count()), shifts.name);
 
+    // Pré-cadastros aguardando aprovação (os mais antigos primeiro).
+    const pendingEmployees = await ctx.db
+      .select({
+        id: employees.id,
+        name: employees.name,
+        createdAt: employees.createdAt,
+      })
+      .from(employees)
+      .where(and(notDeleted, eq(employees.status, 'pending')))
+      .orderBy(employees.createdAt)
+      .limit(5);
+
+    // Colunas escritas por extenso: numa consulta de uma tabela só o Drizzle omite o nome da tabela.
     const recentEmployees = await ctx.db
       .select({
         id: employees.id,
         name: employees.name,
-        cpf: employees.cpf,
         status: employees.status,
         createdAt: employees.createdAt,
+        sector: sql<
+          string | null
+        >`(select string_agg(s.name, ', ' order by s.name) from employee_sectors es join sectors s on s.id = es.sector_id where es.employee_id = "employees"."id" and s.deleted_at is null)`,
       })
       .from(employees)
-      .where(activeEmployeeFilter)
+      .where(and(notDeleted, ne(employees.status, 'pending')))
       .orderBy(desc(employees.createdAt))
       .limit(5);
 
     return {
-      totalEmployees: totalEmployees?.count ?? 0,
-      activeEmployees: activeEmployees?.count ?? 0,
+      byStatus,
+      totalEmployees: byStatusRows.reduce((sum, row) => sum + row.total, 0),
       totalSectors: totalSectors?.count ?? 0,
+      totalShifts: totalShifts?.count ?? 0,
       shirtSizesDistribution,
       shiftDistribution,
+      pendingEmployees,
       recentEmployees,
     };
   }),
